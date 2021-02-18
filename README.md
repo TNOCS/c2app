@@ -1,6 +1,11 @@
 # c2app
 A command and control application for Concept Development &amp; Experimentation.
 
+## Prerequisites for Traccar to work
+
+- Ports 8084 (TCP), 8083 (TCP), 5000-5150 (TCP & UDP) forwarded on the router
+- Firewall configured to allow incoming connections port 8084 (TCP), 8083 (TCP), 5000-5150 (TCP & UDP)
+
 ## Installation
 
 The application is a mono-repository, developed in TypeScript using [Nest.js](https://docs.nestjs.com) for the server, and [Mithril](https://mithril.js.org) for the GUI. It consists of the following packages:

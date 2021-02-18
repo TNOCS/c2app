@@ -18,7 +18,8 @@ This `docker-compose.yml` will start the following services:
 - SAS forwarder: A Python server that listens for GPS data forwarded by Traccar after which it transforms the data into a suitable format for SAS and Kafka.
 - [C2app][c2app-local]: A command and control application for First Responders
 
-# Starting the environment
+## Starting the environment
+
 For the forwarding to SAS to work the `sas_forwarder` service needs [externally defined environment variables][env-file] with the SAS credentials (`SAS_USERID` and `SAS_AUTHTOKEN`).
 If this file is missing everything else will work except for the SAS forwarding.
 
@@ -28,15 +29,14 @@ To start all the services in the background (`-d` flag) run the following comman
 docker-compose up -d
 ```
 
-# Inspecting the environment
+## Inspecting the environment
 
 If you have [nodejs](https://nodejs.org/en/) installed, you can try `dockly` (`npm i -g dockly`).  
-Alternatively, if the [Docker plugin](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) is installed in [VS code](https://code.visualstudio.com/), the logs can be shown by rightlicking on the running image and pressing "Logs".
-
+Alternatively, if the [Docker plugin](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) is installed in [VS code](https://code.visualstudio.com/), the logs can be shown by right clicking on the running image and pressing "Logs".
 
 [kafka-topics-ui]: http://localhost:3600
 [schema-registry-ui]: http://localhost:3601
-[traccar-local]: http://localhost:8084
+[traccar-local]: http://localhost:8083
 [traccar-website]: https://www.traccar.org/
 [env-file]: https://docs.docker.com/compose/environment-variables/#the-env-file
 [c2app-local]: http://localhost:3000
