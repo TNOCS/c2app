@@ -1,0 +1,27 @@
+{
+  "name": "c2app-gui",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "preinstall": "npx npm-force-resolutions",
+    "start": "parcel index.html",
+    "dev": "parcel index.html",
+    "clean": "rimraf ./.cache ./dist",
+    "cleanup": "npm run clean",
+    "build:domain": "npm run clean && parcel build --no-cache index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "mithril": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/mithril": "^2.0.6",
+    "parcel-bundler": "^1.12.4",
+    "rimraf": "^2.7.1",
+    "tslib": "^2.1.0",
+    "typescript": "^4.1.5"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "c2app-models-utils",
+  "version": "0.0.1",
+  "description": "Models and utils for the C2 application.",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "cleanup": "npm run clean",
+    "dev": "tsc -w",
+    "start": "tsc -w",
+    "build:domain": "tsc -b"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TNOCS/c2app.git"
+  },
+  "keywords": [
+    "SPA",
+    "mithril"
+  ],
+  "author": "Timo van der Kuil <timo_kuil@hotmail.com> (http://www.tno.nl)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TNOCS/c2app/issues"
+  },
+  "homepage": "https://github.com/TNOCS/c2app#readme",
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.1.3"
+  }
+}
