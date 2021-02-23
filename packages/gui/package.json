@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "parcel index.html",
-    "dev": "parcel index.html",
+    "dev": "set SERVER=http://localhost:3000 && parcel index.html",
     "clean": "rimraf ./.cache ./dist",
     "cleanup": "npm run clean",
     "build:domain": "npm run clean && parcel build --no-cache index.html"
@@ -15,7 +15,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "mithril": "^2.0.4"
+    "leaflet": "^1.7.1",
+    "material-icons": "^0.5.3",
+    "materialize-css": "^1.0.0",
+    "mithril": "^2.0.4",
+    "mithril-leaflet": "^0.4.3",
+    "mithril-materialized": "^0.17.1"
   },
   "devDependencies": {
     "@types/mithril": "^2.0.6",
