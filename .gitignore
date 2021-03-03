@@ -8,3 +8,6 @@ tsconfig.tsbuildinfo
 # schemas
 docker/traccar/logs/*.log*
 docker/traccar/data/*.db
+
+#simulation files
+docker/simulation

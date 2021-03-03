@@ -1,18 +1,18 @@
 import m, { ComponentTypes, RouteDefs } from 'mithril';
-import { Dashboard } from '../components/dashboard/Dashboard';
+import { Leaflet } from '../components/leaflet/Leaflet';
 import { Layout } from '../components/Layout';
-import { Settings } from '../components/settings/Settings';
+import { Mapbox } from '../components/mapbox/Mapbox';
 import { IPage } from '../models/Page';
-//import { actions, states } from './';
+import { actions, states } from './';
 
 export const enum Pages {
-  HOME = 'HOME',
-  SETTINGS = 'SETTINGS',
+  LEAFLET = 'LEAFLET',
+  MAPBOX = 'MAPBOX',
 }
 
 class RoutingService {
-  //private actions = actions;
-  //private states = states;
+  private actions = actions;
+  private states = states;
   private pages!: ReadonlyArray<IPage>;
 
   constructor(private layout: ComponentTypes, pages: IPage[]) {
@@ -53,16 +53,13 @@ class RoutingService {
         p.hasNavBar === false
           ? {
               render: () =>
-                m(p.component/*, { state: this.states(), actions: this.actions }*/),
+                m(p.component, { state: this.states(), actions: this.actions }),
             }
           : {
               render: () =>
                 m(
                   this.layout,
-                  m(p.component/*, {
-                    state: this.states(),
-                    actions: this.actions,
-                  }*/)
+                  m(p.component, { state: this.states(), actions: this.actions })
                 ),
             };
       return r;
@@ -72,19 +69,19 @@ class RoutingService {
 
 export const routingSvc: RoutingService = new RoutingService(Layout, [
   {
-    id: Pages.HOME,
-    title: 'Home',
-    icon: 'home',
-    route: '/',
+    id: Pages.LEAFLET,
+    title: 'Leaflet',
+    icon: 'leaflet',
+    route: '/leaflet',
     visible: true,
-    component: Dashboard,
+    component: Leaflet,
   },
   {
-    id: Pages.SETTINGS,
-    title: 'Settings',
-    icon: 'settings',
-    route: '/settings',
+    id: Pages.MAPBOX,
+    title: 'Mapbox',
+    icon: 'mapbox',
+    route: '/mapbox',
     visible: true,
-    component: Settings,
+    component: Mapbox,
   },
 ]);

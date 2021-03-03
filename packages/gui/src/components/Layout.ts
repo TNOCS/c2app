@@ -64,13 +64,7 @@ export const Layout = () => ({
                       m.route.Link,
                       { href: p.route },
                       m(
-                        'span',
-                        p.icon
-                          ? m(
-                            'i.material-icons.white-text',
-                            typeof p.icon === 'string' ? p.icon : p.icon()
-                          )
-                          : p.title
+                        'span', p.title
                       )
                     )
                   )
