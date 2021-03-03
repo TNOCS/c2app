@@ -29,6 +29,15 @@ To start all the services in the background (`-d` flag) run the following comman
 docker-compose up -d
 ```
 
+## Starting the simulation
+
+1. Setup OSRM, the Open Source routing machine. See the readme in `docker/simulation/osrm-services`. Note that you do not need to run it from there, as OSRM is started as part of the `docker-compose.yml` file in `docker/simulation`.
+2. Start `docker/docker-compose.yml` by running `docker-compose up -d`
+3. Start `docker/simulation/docker-compose.yml` by running `docker-compose up -d`
+4. Start Agent Smith Simulator. You can use VSCode's `run` tab, and run `launch simulation` (make sure to run `npm install` and `npm run build` in `docker/simulation/ass` before running the ASS)
+
+You can now open the [C2app][c2app-local] and see simulated FRs
+
 ## Inspecting the environment
 
 If you have [nodejs](https://nodejs.org/en/) installed, you can try `dockly` (`npm i -g dockly`).  

@@ -97,7 +97,6 @@ services:
       - ./schemas:/app/src/schemas
     restart: on-failure 
     
-#
 #  meteoservice:
 #    image: tnocs/meteoservice:0.1.1
 #    ports:
@@ -162,7 +161,7 @@ services:
 #      KAFKA_HOST: broker:9092
 #      SCHEMA_REGISTRY: http://schema_registry:3502
 #      KAFKA_CLIENT_ID: TRACCAR_FORWARDER
-#  
+  
   c2app:
     image: timovdk/c2app:0.1.0
     depends_on:
