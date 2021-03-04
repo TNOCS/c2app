@@ -7,6 +7,7 @@ import {
     ProduceRequest
 } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from "../gateway/defaultWebSocket.gateway";
+import { FeatureCollection } from 'geojson'
 
 interface ISendResponse {
     [topic: string]: {
@@ -19,7 +20,7 @@ const log = Logger.instance;
 
 @Injectable()
 export class KafkaService {
-    
+
     public adapter: TestBedAdapter;
     public messageQueue: IAdapterMessage[] = [];
     public busy = false;
@@ -65,19 +66,26 @@ export class KafkaService {
     }
 
     private async handleMessage() {
-        if(this.messageQueue.length > 0 && !this.busy) {
+        if (this.messageQueue.length > 0 && !this.busy) {
             this.busy = true;
-            let message = this.messageQueue.shift();
+            const message = this.messageQueue.shift();
 
-            switch(message.topic) {
+            switch (message.topic) {
                 case SimEntityFeatureCollectionTopic:
-                    this.socket.server.emit('positions', message);
+                    this.socket.server.emit('positions', this.prepareGeoJSONLayer(message.value as FeatureCollection));
                     break;
                 default:
                     log.warn('Unknown topic')
                     break;
             }
         }
-        this.busy = false;        
+        this.busy = false;
+    }
+
+    private prepareGeoJSONLayer(collection: FeatureCollection) {
+        for (const feature of collection.features) {
+            feature.geometry = feature.geometry['eu.driver.model.sim.support.geojson.geometry.Point'];
+        }
+        return collection as FeatureCollection;
     }
 }
