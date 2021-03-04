@@ -1,4 +1,4 @@
-# C2App: docker deployment
+# C2App: docker deployment - SIMULATION
 
 This docker compose file is based on the example of running the Table-Top Infrastructure.
 
@@ -18,7 +18,7 @@ This `docker-compose.yml` will start the following services:
 - SAS forwarder: A Python server that listens for GPS data forwarded by Traccar after which it transforms the data into a suitable format for SAS and Kafka.
 - [C2app][c2app-local]: A command and control application for First Responders
 
-## Starting the environment
+## Starting the simulation
 
 For the forwarding to SAS to work the `sas_forwarder` service needs [externally defined environment variables][env-file] with the SAS credentials (`SAS_USERID` and `SAS_AUTHTOKEN`).
 If this file is missing everything else will work except for the SAS forwarding.
@@ -29,9 +29,7 @@ To start all the services in the background (`-d` flag) run the following comman
 docker-compose up -d
 ```
 
-## Starting the simulation
-
-Go to `docker/simulation` folder and follow the instructions in the `readme.md` in that folder.
+Then, start Agent Smith Simulator. You can use VSCode's `run` tab, and run `launch simulation` (make sure to run `npm install` and `npm run build` in `docker/simulation/ass` before running the ASS)
 
 ## Inspecting the environment
 
