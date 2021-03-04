@@ -9,4 +9,16 @@ import 'mapbox-gl-style-switcher/styles.css'
 import './styles.css';
 import { routingSvc } from './services/RoutingService';
 
+import L from 'leaflet';
+
+declare var require: any;
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
 m.route(document.body, routingSvc.defaultRoute, routingSvc.routingTable());

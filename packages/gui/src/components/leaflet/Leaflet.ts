@@ -1,4 +1,4 @@
-import m, { FactoryComponent }  from 'mithril'
+import m, { FactoryComponent } from 'mithril'
 import L from 'leaflet';
 import 'leaflet-draw';
 import { IActions, IAppModel } from '../../services';
@@ -16,15 +16,9 @@ export const Leaflet: FactoryComponent<{
                 })
             ])
         },
-        oncreate: ({attrs: { state, actions } }) => {        
+        oncreate: ({ attrs: { state, actions } }) => {
             const { app } = state;
-            
-            // Set socket listeners
-            app.socket?.removeAllListeners();
-            app.socket?.on('positions', (data) => {
-                console.log(data)
-            })
-            
+
             // Set tile layers
             const mb = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ', {
                 id: 'mb', tileSize: 256, attribution: 'mapboxAttribution'
@@ -42,6 +36,8 @@ export const Leaflet: FactoryComponent<{
                 zoom: 10,
                 layers: [mb, osm, hr]
             });
+
+            let geojson = L.geoJSON()
 
             const baseMaps = {
                 "<span style='color: gray'>Here</span>": hr,
@@ -66,6 +62,20 @@ export const Leaflet: FactoryComponent<{
                 let layer = e.layer;
                 drawLayer.addLayer(layer);
             });
+
+            // Set socket listeners
+            app.socket?.removeAllListeners();
+            app.socket?.on('positions', (data) => {
+                lmap.removeLayer(geojson);
+                geojson = L.geoJSON(data, {
+                    style: {
+                        "color": "#ff7800",
+                        "weight": 5,
+                        "opacity": 0.65
+                    }
+                });
+                lmap.addLayer(geojson);
+            })
         }
     }
 }

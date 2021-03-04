@@ -52,16 +52,16 @@ class RoutingService {
       r[p.route] =
         p.hasNavBar === false
           ? {
-              render: () =>
-                m(p.component, { state: this.states(), actions: this.actions }),
-            }
+            render: () =>
+              m(p.component, { state: this.states(), actions: this.actions }),
+          }
           : {
-              render: () =>
-                m(
-                  this.layout,
-                  m(p.component, { state: this.states(), actions: this.actions })
-                ),
-            };
+            render: () =>
+              m(
+                this.layout,
+                m(p.component, { state: this.states(), actions: this.actions })
+              ),
+          };
       return r;
     }, {} as RouteDefs);
   }

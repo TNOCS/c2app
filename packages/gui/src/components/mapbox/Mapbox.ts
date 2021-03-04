@@ -17,14 +17,8 @@ export const Mapbox: FactoryComponent<{
                 })
             ])
         },
-        oncreate: ({attrs: { state, actions } }) => {        
+        oncreate: ({ attrs: { state, actions } }) => {
             const { app } = state;
-            
-            // Set socket listeners
-            app.socket?.removeAllListeners();
-            app.socket?.on('positions', (data) => {
-                console.log(data)
-            })
 
             // Create map
             mapboxgl.accessToken = 'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ'
@@ -55,6 +49,31 @@ export const Mapbox: FactoryComponent<{
                 displayControlsDefault: true
             });
             map.addControl(draw);
+
+            // Set socket listeners
+            app.socket?.removeAllListeners();
+            app.socket?.on('positions', (data) => {
+                if (!map.getSource('areas')) {
+                    map.addSource('areas', {
+                        type: 'geojson',
+                        data: data
+                    })
+
+                    map.addLayer({
+                        'id': 'park-volcanoes',
+                        'type': 'circle',
+                        'source': 'areas',
+                        'paint': {
+                            'circle-radius': 6,
+                            'circle-color': '#B42222'
+                        },
+                        'filter': ['==', '$type', 'Point']
+                    });
+                }
+                else {
+                    map.getSource('areas').setData(data);
+                }
+            })
         }
     }
 }

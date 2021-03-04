@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "parcel index.html",
-    "dev": "parcel index.html",
+    "dev": "set SERVER=http://localhost:3000 && parcel index.html",
     "clean": "rimraf ./.cache ./dist",
     "cleanup": "npm run clean",
     "build:domain": "npm run clean && parcel build --no-cache index.html"
@@ -35,6 +35,7 @@
     "@types/mapbox-gl": "^2.1.0",
     "@types/mergerino": "^0.4.0",
     "@types/mithril": "^2.0.6",
+    "@types/node": "^14.14.31",
     "@types/socket.io-client": "^1.4.35",
     "parcel-bundler": "^1.12.4",
     "rimraf": "^2.7.1",
