@@ -12,7 +12,7 @@ export const Leaflet: FactoryComponent<{
             return m('.row', [
                 m(`div`, {
                     id: "leafletMap",
-                    style: `position: absolute; top: 64px; height: ${window.innerHeight}; left: 0px; width: ${window.innerWidth};`
+                    style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: 0px; width: ${window.innerWidth};`
                 })
             ])
         },
