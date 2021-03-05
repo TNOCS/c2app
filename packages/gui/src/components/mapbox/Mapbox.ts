@@ -3,6 +3,8 @@ import mapboxgl from 'mapbox-gl'
 import MapboxDraw from '@mapbox/mapbox-gl-draw'
 import { MapboxStyleDefinition, MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher'
 import { IActions, IAppModel } from '../../services';
+import bbox from '@turf/bbox'
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 export const Mapbox: FactoryComponent<{
     state: IAppModel;
@@ -13,7 +15,7 @@ export const Mapbox: FactoryComponent<{
             return m('.row', [
                 m(`div`, {
                     id: "mapboxMap",
-                    style: `position: absolute; top: 64px; height: ${window.innerHeight}; left: 0px; width: ${window.innerWidth};`
+                    style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: 0px; width: ${window.innerWidth};`
                 })
             ])
         },
@@ -41,38 +43,96 @@ export const Mapbox: FactoryComponent<{
                 }
             ];
 
-            // Add switcher
+            // Add nav control
+            map.addControl(new mapboxgl.NavigationControl());
+
+            // Add switch control
             map.addControl(new MapboxStyleSwitcherControl(styles, 'Mapbox'))
 
-            // Draw code
+            // Add draw control
             const draw = new MapboxDraw({
-                displayControlsDefault: true
+                displayControlsDefault: false,
+                controls: {
+                    polygon: true,
+                    trash: true
+                }
             });
             map.addControl(draw);
 
-            // Set socket listeners
-            app.socket?.removeAllListeners();
-            app.socket?.on('positions', (data) => {
-                if (!map.getSource('areas')) {
-                    map.addSource('areas', {
-                        type: 'geojson',
-                        data: data
-                    })
 
-                    map.addLayer({
-                        'id': 'park-volcanoes',
-                        'type': 'circle',
-                        'source': 'areas',
-                        'paint': {
-                            'circle-radius': 6,
-                            'circle-color': '#B42222'
-                        },
-                        'filter': ['==', '$type', 'Point']
-                    });
-                }
-                else {
-                    map.getSource('areas').setData(data);
-                }
+            // Application code (after map loads)
+            map.on('load', () => {
+                // Set socket listeners
+                app.socket?.removeAllListeners();
+                app.socket?.on('positions', (data) => {
+                    // if no source, add it and its layer, else update source's data
+                    if (!map.getSource('positions')) {
+                        map.addSource('positions', {
+                            type: 'geojson',
+                            data: data
+                        })
+
+                        map.addLayer({
+                            'id': 'geojson_fr',
+                            'type': 'circle',
+                            'source': 'positions',
+                            'paint': {
+                                'circle-radius': 6,
+                                'circle-color': '#B42222'
+                            },
+                            'filter': ['==', '$type', 'Point']
+                        });
+                    }
+                    else {
+                        map.getSource('positions').setData(data);
+                    }
+                });
+
+                // On creation of polygon
+                map.on('draw.create', (e) => {
+                    if (map.getLayer('geojson_fr')) {
+                        const bounding = bbox(e.features[0])
+                        let bboxFeatures = map.queryRenderedFeatures([map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])], { layers: ['geojson_fr'] });
+                        const polyFeatures = bboxFeatures.filter((element) => {
+                            return booleanPointInPolygon([element.geometry.coordinates[0], element.geometry.coordinates[1]], e.features[0])
+                        });
+                        console.log(polyFeatures)
+                    }
+                });
+
+                // On update of polygon
+                map.on('draw.update', (e) => {
+                    if (map.getLayer('geojson_fr')) {
+                        const bounding = bbox(e.features[0])
+                        let bboxFeatures = map.queryRenderedFeatures([map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])], { layers: ['geojson_fr'] });
+                        const polyFeatures = bboxFeatures.filter((element) => {
+                            return booleanPointInPolygon([element.geometry.coordinates[0], element.geometry.coordinates[1]], e.features[0])
+                        });
+                        console.log(polyFeatures)
+                    }
+                })
+
+                // Popup on click on geojson_fr layer
+                map.on('click', 'geojson_fr', function (e) {
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const props = e.features[0].properties
+                    const description = `<strong>${props.type}</strong><p>${props.tags + props.id}</p>`;
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(description)
+                        .addTo(map);
+                });
+
+                // Change the cursor to a pointer when the mouse is over the places layer.
+                map.on('mouseenter', 'geojson_fr', function () {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                // Change it back to a pointer when it leaves.
+                map.on('mouseleave', 'geojson_fr', function () {
+                    map.getCanvas().style.cursor = '';
+                });
             })
         }
     }
