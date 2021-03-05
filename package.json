@@ -1,0 +1,28 @@
+{
+    "name": "c2app",
+    "version": "0.1.0",
+    "description": "GUI for visualizing chemical hazards and FR positions.",
+    "scripts": {
+      "clean": "pnpm recursive run cleanup",
+      "start": "pnpm recursive run dev",
+      "build:domain": "pnpm run build:domain",
+      "docker:build": "docker build -t c2app .",
+      "docker:tag": "docker tag c2app timovdk/c2app:0.1.0",
+      "docker:publish": "docker push timovdk/c2app:0.1.0",
+      "docker:local": "npm run docker:build && npm run docker:tag"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/TNOCS/c2app.git"
+    },
+    "keywords": [
+      "mithril",
+      "c2"
+    ],
+    "author": "Timo van der Kuil <timo_kuil@hotmail.com> (http://www.tno.nl)",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/TNOCS/c2app/issues"
+    },
+    "homepage": "https://github.com/TNOCS/c2app#readme"
+}
