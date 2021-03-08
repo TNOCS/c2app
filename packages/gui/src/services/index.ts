@@ -1,2 +1,2 @@
-export * from './RoutingService';
+export * from './routing-service';
 export * from './meiosis';
