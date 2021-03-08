@@ -39,7 +39,7 @@ export const simController = async (
         },
       };
       tb.send(payload, (error) => error && log(error));
-      console.log('send')
+      console.log('send');
     };
 
     services.locations = {
@@ -101,7 +101,7 @@ export const simController = async (
       );
       updateTime();
       await sleep(1);
-      i % 5  === 0 && notifyOthers();
+      i % 5 === 0 && notifyOthers();
       i++;
     }
   });
