@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { TestBedAdapter, Logger, LogLevel, IAdapterMessage, ProduceRequest } from 'node-test-bed-adapter';
-import { DefaultWebSocketGateway } from '../gateway/defaultWebSocket.gateway';
+import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
 
 interface ISendResponse {
