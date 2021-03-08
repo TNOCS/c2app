@@ -72,6 +72,7 @@ services:
     environment:
       KAFKA_REST_PROXY_URL: 'http://kafka_rest:8082'
       PROXY: 'true'
+      MAX_BYTES: 10485760
 
   kafka_schema_registry_ui:
     image: landoop/schema-registry-ui:latest
