@@ -1,8 +1,7 @@
-
 /** Remove empty and undefined properties, returning a new copy. */
 export const removeEmptyKeys = <T extends { [key: string]: any }>(obj: T): T =>
   Object.keys(obj)
-    .filter(f => obj[f] != null)
+    .filter((f) => obj[f] != null)
     .reduce(
       (r, i) =>
         typeof obj[i] === 'object'
@@ -17,7 +16,7 @@ export const removeEmptyKeys = <T extends { [key: string]: any }>(obj: T): T =>
 
 /** Remove empty properties by mutating the original object. */
 export const removeEmpty = <T>(obj: { [key: string]: any }): T => {
-  Object.keys(obj).forEach(key => {
+  Object.keys(obj).forEach((key) => {
     if (obj[key] && typeof obj[key] === 'object') {
       removeEmpty(obj[key]);
     } else if (obj[key] === '' || obj[key] === undefined) {

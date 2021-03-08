@@ -7,12 +7,9 @@ import { AppModule } from './app.module';
 const port = process.env.PORT || 3000;
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(
-    AppModule,
-    { cors: true }
-  );
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
 
-  app.use(express.static(path.join(process.cwd(), 'public'))); 
+  app.use(express.static(path.join(process.cwd(), 'public')));
   await app.listen(port);
 }
 bootstrap();
