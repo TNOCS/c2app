@@ -24,6 +24,7 @@ export interface IAppModel {
 export interface IActions {}
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
+
 export type UpdateStream = Stream<ModelUpdateFunction>;
 
 const app = {
