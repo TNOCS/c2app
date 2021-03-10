@@ -9,8 +9,6 @@ export const enum Pages {
 }
 
 class RoutingService {
-  private actions = actions;
-  private states = states;
   private pages!: ReadonlyArray<IPage>;
 
   constructor(private layout: ComponentTypes, pages: IPage[]) {
@@ -47,10 +45,10 @@ class RoutingService {
       r[p.route] =
         p.hasNavBar === false
           ? {
-              render: () => m(p.component, { state: this.states(), actions: this.actions }),
+              render: () => m(p.component, { state: states(), actions: actions }),
             }
           : {
-              render: () => m(this.layout, m(p.component, { state: this.states(), actions: this.actions })),
+              render: () => m(this.layout, m(p.component, { state: states(), actions: actions })),
             };
       return r;
     }, {} as RouteDefs);
