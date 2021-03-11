@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { Point, Feature, Polygon } from 'geojson';
+import { IActions } from '../services';
 
 // Mapbox settings
 export const mapConfig = {
@@ -33,26 +34,23 @@ export const drawConfig = {
   },
 };
 
-export const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature<Polygon>[]) => {
-  if (map.getLayer('geojson_fr')) {
-    const bounding = bbox(features[0]);
-    let bboxFeatures = map.queryRenderedFeatures(
-      [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-      { layers: ['geojson_fr'] }
-    );
-    const polyFeatures = bboxFeatures.filter((element) =>
-      booleanPointInPolygon(
-        [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
-        features[0]
-      )
-    );
-    console.log(polyFeatures);
-  }
+export const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature<Polygon>[], actions: IActions) => {
+  if (!map.getLayer('geojson_fr')) return;
+  
+  const bounding = bbox(features[0]);
+  let bboxFeatures = map.queryRenderedFeatures(
+    [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
+    { layers: ['geojson_fr'] }
+  );
+  const polyFeatures = bboxFeatures.filter((element) =>
+    booleanPointInPolygon(
+      [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
+      features[0]
+    )
+  );
+  actions.updateSelectedFeatures(polyFeatures);
 };
 
-export const displayPopup = (map: mapboxgl.Map, features: Feature[]) => {
-  const coordinates = (features[0].geometry as Point).coordinates.slice() as [number, number];
-  const props = features[0].properties;
-  const description = `<strong>${props?.type}</strong><p>${props?.tags + props?.id}</p>`;
-  new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
+export const displayPopup = (features: Feature[], actions: IActions) => {
+  actions.updateClickedFeature(features[0]);
 };

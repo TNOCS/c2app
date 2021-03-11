@@ -3,6 +3,7 @@ import { Layout } from '../components/layout';
 import { Mapbox } from '../components/mapbox/mapbox';
 import { IPage } from '../models/page';
 import { actions, states } from '.';
+import { sideBar } from '../components/mapbox/sidebar';
 
 export const enum Pages {
   MAPBOX = 'MAPBOX',
@@ -43,9 +44,13 @@ class RoutingService {
   public routingTable() {
     return this.pages.reduce((r, p) => {
       r[p.route] =
-        p.hasNavBar === false
+        p.title === 'Mapbox'
           ? {
-              render: () => m(p.component, { state: states(), actions: actions }),
+              render: () =>
+                m(this.layout, [
+                  m(p.component, { state: states(), actions: actions }),
+                  m(sideBar, { state: states(), actions: actions }),
+                ]),
             }
           : {
               render: () => m(this.layout, m(p.component, { state: states(), actions: actions })),

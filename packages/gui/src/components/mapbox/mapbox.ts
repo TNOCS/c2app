@@ -19,7 +19,7 @@ export const Mapbox: FactoryComponent<{
         m(`div`, {
           id: 'mapboxMap',
           style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: 0px; width: ${
-            window.innerWidth
+            window.innerWidth - 250
           };`,
         }),
       ]);
@@ -36,9 +36,9 @@ export const Mapbox: FactoryComponent<{
 
       // Add map listeners and socket listener
       map.on('load', () => {
-        map.on('draw.create', ({ features }) => MapUtils.getFeaturesInPolygon(map, features));
-        map.on('draw.update', ({ features }) => MapUtils.getFeaturesInPolygon(map, features));
-        map.on('click', 'geojson_fr', ({ features }) => MapUtils.displayPopup(map, features as Feature[]));
+        map.on('draw.create', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
+        map.on('draw.update', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
+        map.on('click', 'geojson_fr', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
         map.on('mouseenter', 'geojson_fr', () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', 'geojson_fr', () => (map.getCanvas().style.cursor = ''));
 
