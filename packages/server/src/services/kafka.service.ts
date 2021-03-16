@@ -10,6 +10,7 @@ interface ISendResponse {
 }
 
 const SimEntityFeatureCollectionTopic = 'simulation_entity_featurecollection';
+const ChemicalHazard = 'chemical_hazard';
 const log = Logger.instance;
 
 @Injectable()
@@ -27,7 +28,7 @@ export class KafkaService {
       //autoRegisterSchemas: true,
       //schemaFolder: path.resolve(`../../docker/schemas`),
       //produce: ['chemical_hazard', 'cbrn_geojson'],
-      consume: [{ topic: SimEntityFeatureCollectionTopic }],
+      consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: ChemicalHazard }],
       logging: {
         logToConsole: LogLevel.Info,
         logToKafka: LogLevel.Warn,
@@ -62,6 +63,14 @@ export class KafkaService {
         case SimEntityFeatureCollectionTopic:
           this.socket.server.emit('positions', this.prepareGeoJSONLayer(message.value as FeatureCollection));
           break;
+        case ChemicalHazard:
+          console.log('ChemicalHazard');
+          console.log(message.value);
+          this.socket.server.emit(
+            'chemical-hazard',
+            this.prepareChemicalHazard(message.value as FeatureCollection)
+          );
+          break;
         default:
           log.warn('Unknown topic');
           break;
@@ -74,6 +83,11 @@ export class KafkaService {
     for (const feature of collection.features) {
       feature.geometry = feature.geometry['eu.driver.model.sim.support.geojson.geometry.Point'];
     }
+    return collection as FeatureCollection;
+  }
+
+  private prepareChemicalHazard(collection: FeatureCollection) {
+    // specific code for chemical hazard areas
     return collection as FeatureCollection;
   }
 }

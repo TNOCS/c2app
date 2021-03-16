@@ -29,16 +29,29 @@ export const sideBar: FactoryComponent<{
           ),
           m('span', JSON.stringify(vnode.attrs.state.app.clickedFeature)),
           m('h2', 'Selected Features'),
-          m(
-            'button.button[type=button]',
-            {
-              onclick: () => {
-                vnode.attrs.actions.resetSelectedFeatures();
+          [
+            m(
+              'button.button[type=button]',
+              {
+                onclick: () => {
+                  vnode.attrs.actions.resetSelectedFeatures();
+                },
               },
-            },
-            'Reset selected features'
-          ),
+              'Reset selected features'
+            ),
+            m(
+              'button.button[type=button]',
+              {
+                onclick: () => {
+                  vnode.attrs.actions.groupSelectedFeatures();
+                },
+              },
+              'Group selected features'
+            ),
+          ],
           m('span', JSON.stringify(vnode.attrs.state.app.selectedFeatures)),
+          m('h2', 'Selected Features'),
+          m('span', JSON.stringify(vnode.attrs.state.app.groups)),
         ]
       );
     },

@@ -1,13 +1,15 @@
 import m from 'mithril';
 import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
-import io from 'socket.io-client';
 import { Feature, FeatureCollection } from 'geojson';
+import { Socket } from './socket';
 
 export interface IAppModel {
   app: {
-    socket: SocketIOClient.Socket;
+    socket: Socket;
     positionSource: FeatureCollection;
+    chemicalHazardSource: FeatureCollection;
+    groups: IGroup[];
     clickedFeature?: Feature;
     selectedFeatures?: Feature[];
     alerts?: string;
@@ -15,28 +17,32 @@ export interface IAppModel {
 }
 
 export interface IActions {
-  setPositionListener: () => void;
   updateClickedFeature: (feature: Feature) => void;
   updateSelectedFeatures: (features: Feature[]) => void;
   resetClickedFeature: () => void;
   resetSelectedFeatures: () => void;
+  groupSelectedFeatures: () => void;
 }
+
+export interface IGroup {
+  id: number;
+  data: Feature[];
+}
+
+const update = Stream<ModelUpdateFunction>();
 
 /** Application state */
 export const appStateMgmt = {
   initial: {
     app: {
-      socket: io(process.env.SERVER || 'http://localhost:3000'),
-      positionSource: { type: 'FeatureCollection', features: [] } as FeatureCollection,
+      socket: new Socket(update),
+      positionSource: {} as FeatureCollection,
+      chemicalHazardSource: {} as FeatureCollection,
+      groups: [{} as IGroup],
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
     return {
-      setPositionListener: () => {
-        states()['app'].socket?.on('positions', (data: FeatureCollection) => {
-          us({ app: { positionSource: data } });
-        });
-      },
       updateClickedFeature: (feature: Feature) => {
         us({ app: { clickedFeature: feature } });
       },
@@ -48,6 +54,16 @@ export const appStateMgmt = {
       },
       resetSelectedFeatures: () => {
         us({ app: { selectedFeatures: undefined } });
+      },
+      groupSelectedFeatures: () => {
+        us({
+          app: {
+            groups: (groups: IGroup[]) => {
+              if (states()['app'].selectedFeatures) groups.push({ data: states()['app'].selectedFeatures as Feature[], id: 12345 });
+              return groups;
+            },
+          },
+        });
       },
     };
   },
@@ -64,10 +80,9 @@ const app = {
     Object.assign({}, appStateMgmt.actions(us, states)) as IActions,
 };
 
-const update = Stream<ModelUpdateFunction>();
 export const states = Stream.scan(merge, app.initial, update);
 export const actions = app.actions(update, states);
 
-states.map((state) => {
+states.map((_state) => {
   m.redraw();
 });

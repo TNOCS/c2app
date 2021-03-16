@@ -41,8 +41,6 @@ export const Mapbox: FactoryComponent<{
         map.on('click', 'geojson_fr', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
         map.on('mouseenter', 'geojson_fr', () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', 'geojson_fr', () => (map.getCanvas().style.cursor = ''));
-
-        actions.setPositionListener();
       });
     },
     // Executes on every redraw
@@ -69,6 +67,26 @@ export const Mapbox: FactoryComponent<{
           },
           filter: ['==', '$type', 'Point'],
         });
+
+        if (map.getSource('chemical-hazards')) {
+          (map.getSource('chemical-hazards') as GeoJSONSource).setData(state.app.chemicalHazardSource);
+        } else {
+          map.addSource('chemical-hazards', {
+            type: 'geojson',
+            data: state.app.chemicalHazardSource,
+          });
+
+          map.addLayer({
+            id: 'chemical-hazard',
+            type: 'circle',
+            source: 'chemical-hazards',
+            paint: {
+              'circle-radius': 6,
+              'circle-color': '#B42222',
+            },
+            filter: ['==', '$type', 'Point'],
+          });
+        }
       }
     },
   };
