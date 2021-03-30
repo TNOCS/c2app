@@ -64,12 +64,7 @@ export class KafkaService {
           this.socket.server.emit('positions', this.prepareGeoJSONLayer(message.value as FeatureCollection));
           break;
         case ChemicalHazard:
-          console.log('ChemicalHazard');
-          console.log(message.value);
-          this.socket.server.emit(
-            'chemical-hazard',
-            this.prepareChemicalHazard(message.value as FeatureCollection)
-          );
+          this.socket.server.emit('chemical-hazard', this.prepareChemicalHazard(message.value as FeatureCollection));
           break;
         default:
           log.warn('Unknown topic');

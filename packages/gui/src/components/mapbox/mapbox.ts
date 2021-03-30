@@ -4,7 +4,10 @@ import * as MapUtils from '../../models/map';
 import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
+import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
+import car from '../../assets/Car.png';
+import fireman from '../../assets/Firemen unit.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -15,14 +18,7 @@ export const Mapbox: FactoryComponent<{
 
   return {
     view: () => {
-      return m('.row', [
-        m(`div`, {
-          id: 'mapboxMap',
-          style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: 0px; width: ${
-            window.innerWidth - 250
-          };`,
-        }),
-      ]);
+      return m('div.col.s12.l9.right', { id: 'mapboxMap' });
     },
     // Executes once on creation
     oncreate: (vnode) => {
@@ -30,9 +26,10 @@ export const Mapbox: FactoryComponent<{
 
       // Create map and add controls
       map = new mapboxgl.Map(MapUtils.mapConfig);
-      map.addControl(new mapboxgl.NavigationControl());
-      map.addControl(new MapboxStyleSwitcherControl(MapUtils.mapStyles, 'Mapbox'));
-      map.addControl(new MapboxDraw(MapUtils.drawConfig));
+      map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+      map.addControl(new MapboxStyleSwitcherControl(MapUtils.mapStyles, 'Mapbox'), 'top-left');
+      map.addControl(new MapboxDraw(MapUtils.drawConfig), 'top-left');
+      map.addControl(new RulerControl, 'top-left')
 
       // Add map listeners and socket listener
       map.on('load', () => {
@@ -46,47 +43,50 @@ export const Mapbox: FactoryComponent<{
     // Executes on every redraw
     onupdate: (vnode) => {
       if (!map.loaded()) return;
-
       const { state } = vnode.attrs;
 
       if (map.getSource('positions')) {
         (map.getSource('positions') as GeoJSONSource).setData(state.app.positionSource);
-      } else {
+      } else if (state.app.positionSource?.type) {
+        console.log(state.app.positionSource.features);
         map.addSource('positions', {
           type: 'geojson',
           data: state.app.positionSource,
         });
 
-        map.addLayer({
-          id: 'geojson_fr',
-          type: 'circle',
-          source: 'positions',
-          paint: {
-            'circle-radius': 6,
-            'circle-color': '#B42222',
-          },
-          filter: ['==', '$type', 'Point'],
-        });
-
-        if (map.getSource('chemical-hazards')) {
-          (map.getSource('chemical-hazards') as GeoJSONSource).setData(state.app.chemicalHazardSource);
-        } else {
-          map.addSource('chemical-hazards', {
-            type: 'geojson',
-            data: state.app.chemicalHazardSource,
-          });
+        map.loadImage(fireman, function (error, image) {
+          if (error) throw error;
+          map.addImage('fireman', image);
 
           map.addLayer({
-            id: 'chemical-hazard',
-            type: 'circle',
-            source: 'chemical-hazards',
-            paint: {
-              'circle-radius': 6,
-              'circle-color': '#B42222',
+            id: 'geojson_fr',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'fireman',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
             },
-            filter: ['==', '$type', 'Point'],
+            filter: ['==', 'type', 'man'],
           });
-        }
+        });
+
+        map.loadImage(car, function (error, image) {
+          if (error) throw error;
+          map.addImage('car', image);
+
+          map.addLayer({
+            id: 'geojson_fr2',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'car',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
+            },
+            filter: ['==', 'type', 'car'],
+          });
+        });
       }
     },
   };

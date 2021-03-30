@@ -9,8 +9,8 @@ import { IActions } from '../services';
 export const mapConfig = {
   container: 'mapboxMap',
   style: 'mapbox://styles/mapbox/streets-v11',
-  center: [4.48, 51.9] as [number, number],
-  zoom: 9,
+  center: [5.48, 51.44] as [number, number],
+  zoom: 12,
 };
 
 // Define styles

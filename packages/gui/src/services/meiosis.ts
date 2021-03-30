@@ -3,6 +3,7 @@ import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
 import { Feature, FeatureCollection } from 'geojson';
 import { Socket } from './socket';
+import { uuid4 } from '../utils/index';
 
 export interface IAppModel {
   app: {
@@ -11,9 +12,14 @@ export interface IAppModel {
     chemicalHazardSource: FeatureCollection;
     groups: IGroup[];
     clickedFeature?: Feature;
-    selectedFeatures?: Feature[];
+    selectedFeatures?: FeatureCollection;
     alerts?: string;
   };
+}
+
+export interface IGroup {
+  data: FeatureCollection;
+  id: string;
 }
 
 export interface IActions {
@@ -22,11 +28,8 @@ export interface IActions {
   resetClickedFeature: () => void;
   resetSelectedFeatures: () => void;
   groupSelectedFeatures: () => void;
-}
-
-export interface IGroup {
-  id: number;
-  data: Feature[];
+  updateGroup: (group: IGroup) => void;
+  removeGroup: (group: IGroup) => void;
 }
 
 const update = Stream<ModelUpdateFunction>();
@@ -38,7 +41,7 @@ export const appStateMgmt = {
       socket: new Socket(update),
       positionSource: {} as FeatureCollection,
       chemicalHazardSource: {} as FeatureCollection,
-      groups: [{} as IGroup],
+      groups: [] as IGroup[]
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -47,7 +50,7 @@ export const appStateMgmt = {
         us({ app: { clickedFeature: feature } });
       },
       updateSelectedFeatures: (features: Feature[]) => {
-        us({ app: { selectedFeatures: features } });
+        us({ app: { selectedFeatures: {type: 'FeatureCollection', features: features} } });
       },
       resetClickedFeature: () => {
         us({ app: { clickedFeature: undefined } });
@@ -59,7 +62,34 @@ export const appStateMgmt = {
         us({
           app: {
             groups: (groups: IGroup[]) => {
-              if (states()['app'].selectedFeatures) groups.push({ data: states()['app'].selectedFeatures as Feature[], id: 12345 });
+              if (states()['app'].selectedFeatures)
+                groups.push({data: states()['app'].selectedFeatures as FeatureCollection, id: uuid4()});
+              return groups;
+            },
+          },
+        });
+      },
+      updateGroup: (group: IGroup) => {
+        us({
+          app: {
+            groups: (groups: IGroup[]) => {
+              const id = groups.findIndex((element: IGroup) => {
+                return element.id == group.id;
+              });
+              if(id > -1) groups[id].data = states()['app'].selectedFeatures as FeatureCollection;
+              return groups;
+            },
+          },
+        });
+      },
+      removeGroup: (group: IGroup) => {
+        us({
+          app: {
+            groups: (groups: IGroup[]) => {
+              const id = groups.findIndex((element: IGroup) => {
+                return element.id == group.id;
+              });
+              if(id > -1) groups.splice(id, 1);
               return groups;
             },
           },

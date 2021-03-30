@@ -1,5 +1,6 @@
+import { Feature } from 'geojson';
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../services';
+import { IActions, IAppModel, IGroup } from '../../services';
 
 export const sideBar: FactoryComponent<{
   state: IAppModel;
@@ -8,16 +9,17 @@ export const sideBar: FactoryComponent<{
   return {
     view: (vnode) => {
       return m(
-        'div',
+        'div.col.l3.m4#slide-out.sidenav.sidenav-fixed',
         {
-          style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: ${
-            window.innerWidth - 250
-          }; width: 250px;`,
+          oncreate: ({ dom }) => {
+            M.Sidenav.init(dom);
+          },
+          style: 'top: 64px',
         },
         [
-          m('h2', 'Alerts'),
-          m('span', vnode.attrs.state.app.alerts),
-          m('h2', 'Clicked Feature'),
+          m('h5', 'Alerts'),
+          m('p', vnode.attrs.state.app.alerts),
+          m('h5', 'Clicked Feature'),
           m(
             'button.button[type=button]',
             {
@@ -27,8 +29,8 @@ export const sideBar: FactoryComponent<{
             },
             'Reset clicked features'
           ),
-          m('span', JSON.stringify(vnode.attrs.state.app.clickedFeature)),
-          m('h2', 'Selected Features'),
+          m('p', JSON.stringify(vnode.attrs.state.app.clickedFeature?.type)),
+          m('h5', 'Selected Features'),
           [
             m(
               'button.button[type=button]',
@@ -49,9 +51,40 @@ export const sideBar: FactoryComponent<{
               'Group selected features'
             ),
           ],
-          m('span', JSON.stringify(vnode.attrs.state.app.selectedFeatures)),
-          m('h2', 'Selected Features'),
-          m('span', JSON.stringify(vnode.attrs.state.app.groups)),
+          m(
+            'p',
+            vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
+              return m('span', JSON.stringify(feature.type));
+            })
+          ),
+          m('h5', 'Selected Features'),
+          m(
+            'p',
+            vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
+              return m('p', [
+                m('p', 'ID: ' + index + ' Members: ' + group.data.features.length, [
+                  m(
+                    'button.button[type=button]',
+                    {
+                      onclick: () => {
+                        vnode.attrs.actions.updateGroup(group);
+                      },
+                    },
+                    'updateGroup'
+                  ),
+                  m(
+                    'button.button[type=button]',
+                    {
+                      onclick: () => {
+                        vnode.attrs.actions.removeGroup(group);
+                      },
+                    },
+                    'removeGroup'
+                  ),
+                ]),
+              ]);
+            })
+          ),
         ]
       );
     },

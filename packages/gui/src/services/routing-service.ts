@@ -43,18 +43,13 @@ class RoutingService {
 
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] =
-        p.title === 'Mapbox'
-          ? {
-              render: () =>
-                m(this.layout, [
-                  m(p.component, { state: states(), actions: actions }),
-                  m(sideBar, { state: states(), actions: actions }),
-                ]),
-            }
-          : {
-              render: () => m(this.layout, m(p.component, { state: states(), actions: actions })),
-            };
+      r[p.route] = {
+        render: () =>
+          m(this.layout, [
+            m(p.sidebar, { state: states(), actions: actions }),
+            m(p.component, { state: states(), actions: actions }),
+          ]),
+      };
       return r;
     }, {} as RouteDefs);
   }
@@ -68,5 +63,6 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/mapbox',
     visible: true,
     component: Mapbox,
+    sidebar: sideBar,
   },
 ]);
