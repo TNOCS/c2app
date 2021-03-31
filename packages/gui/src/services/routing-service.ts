@@ -3,14 +3,13 @@ import { Layout } from '../components/layout';
 import { Mapbox } from '../components/mapbox/mapbox';
 import { IPage } from '../models/page';
 import { actions, states } from '.';
+import { sideBar } from '../components/mapbox/sidebar';
 
 export const enum Pages {
   MAPBOX = 'MAPBOX',
 }
 
 class RoutingService {
-  private actions = actions;
-  private states = states;
   private pages!: ReadonlyArray<IPage>;
 
   constructor(private layout: ComponentTypes, pages: IPage[]) {
@@ -44,14 +43,13 @@ class RoutingService {
 
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] =
-        p.hasNavBar === false
-          ? {
-              render: () => m(p.component, { state: this.states(), actions: this.actions }),
-            }
-          : {
-              render: () => m(this.layout, m(p.component, { state: this.states(), actions: this.actions })),
-            };
+      r[p.route] = {
+        render: () =>
+          m(this.layout, [
+            m(p.sidebar, { state: states(), actions: actions }),
+            m(p.component, { state: states(), actions: actions }),
+          ]),
+      };
       return r;
     }, {} as RouteDefs);
   }
@@ -65,5 +63,6 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/mapbox',
     visible: true,
     component: Mapbox,
+    sidebar: sideBar,
   },
 ]);

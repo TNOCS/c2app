@@ -8,3 +8,4 @@ tsconfig.tsbuildinfo
 # schemas
 docker/traccar/logs/*.log*
 docker/traccar/data/*.db
+packages/gui/src/assets/indigo

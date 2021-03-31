@@ -1,155 +1,93 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../services';
-
-// mapbox
+import * as MapUtils from '../../models/map';
 import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { MapboxStyleDefinition, MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
-
-// utils
-import bbox from '@turf/bbox';
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { FeatureCollection, Point, Feature } from 'geojson';
+import { MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
+import RulerControl from 'mapbox-gl-controls/lib/ruler';
+import { Feature } from 'geojson';
+import car from '../../assets/Car.png';
+import fireman from '../../assets/Firemen unit.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
+  mapboxgl.accessToken = 'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ';
+  let map: mapboxgl.Map;
+
   return {
     view: () => {
-      return m('.row', [
-        m(`div`, {
-          id: 'mapboxMap',
-          style: `position: absolute; top: 64px; height: ${window.innerHeight - 64}; left: 0px; width: ${
-            window.innerWidth
-          };`,
-        }),
-      ]);
+      return m('div.col.s12.l9.right', { id: 'mapboxMap' });
     },
-    oncreate: ({ attrs: { state } }) => {
-      const { app } = state;
+    // Executes once on creation
+    oncreate: (vnode) => {
+      const { actions } = vnode.attrs;
 
-      // Create map
-      mapboxgl.accessToken =
-        'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ';
-      const map = new mapboxgl.Map({
-        container: 'mapboxMap',
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [4.48, 51.9],
-        zoom: 9,
-      });
+      // Create map and add controls
+      map = new mapboxgl.Map(MapUtils.mapConfig);
+      map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+      map.addControl(new MapboxStyleSwitcherControl(MapUtils.mapStyles, 'Mapbox'), 'top-left');
+      map.addControl(new MapboxDraw(MapUtils.drawConfig), 'top-left');
+      map.addControl(new RulerControl, 'top-left')
 
-      // Define styles (layers)
-      const styles: MapboxStyleDefinition[] = [
-        {
-          title: 'Mapbox',
-          uri: 'mapbox://styles/mapbox/streets-v11',
-        },
-        {
-          title: 'Here',
-          uri:
-            'https://assets.vector.hereapi.com/styles/berlin/base/mapbox/tilezen?apikey=931nNYHFAJN7xzv38O3wmat3R0fZ8XEVMFp9iiYb6Xs',
-        },
-      ];
-
-      // Add nav control
-      map.addControl(new mapboxgl.NavigationControl());
-
-      // Add switch control
-      map.addControl(new MapboxStyleSwitcherControl(styles, 'Mapbox'));
-
-      // Add draw control
-      const draw = new MapboxDraw({
-        displayControlsDefault: false,
-        controls: {
-          polygon: true,
-          trash: true,
-        },
-      });
-      map.addControl(draw);
-
-      // Application code (after map loads)
+      // Add map listeners and socket listener
       map.on('load', () => {
-        // Set socket listeners
-        app.socket?.removeAllListeners();
-        app.socket?.on('positions', (data: FeatureCollection) => {
-          // if no source, add it and its layer, else update source's data
-          if (!map.getSource('positions')) {
-            map.addSource('positions', {
-              type: 'geojson',
-              data,
-            });
-
-            map.addLayer({
-              id: 'geojson_fr',
-              type: 'circle',
-              source: 'positions',
-              paint: {
-                'circle-radius': 6,
-                'circle-color': '#B42222',
-              },
-              filter: ['==', '$type', 'Point'],
-            });
-          } else {
-            (map.getSource('positions') as GeoJSONSource).setData(data);
-          }
-        });
-
-        // On creation of polygon
-        map.on('draw.create', (e) => {
-          if (map.getLayer('geojson_fr')) {
-            const bounding = bbox(e.features[0]);
-            let bboxFeatures = map.queryRenderedFeatures(
-              [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-              { layers: ['geojson_fr'] }
-            );
-            const polyFeatures = bboxFeatures.filter((element) =>
-              booleanPointInPolygon(
-                [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
-                e.features[0]
-              )
-            );
-            console.log(polyFeatures);
-          }
-        });
-
-        // On update of polygon
-        map.on('draw.update', (e) => {
-          if (map.getLayer('geojson_fr')) {
-            const bounding = bbox(e.features[0]);
-            let bboxFeatures = map.queryRenderedFeatures(
-              [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-              { layers: ['geojson_fr'] }
-            );
-            const polyFeatures = bboxFeatures.filter((element) =>
-              booleanPointInPolygon(
-                [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
-                e.features[0]
-              )
-            );
-            console.log(polyFeatures);
-          }
-        });
-
-        // Popup on click on geojson_fr layer
-        map.on('click', 'geojson_fr', (e) => {
-          const features = e.features as Feature[];
-          const coordinates = (features[0].geometry as Point).coordinates.slice() as [number, number];
-          const props = features[0].properties;
-          const description = `<strong>${props?.type}</strong><p>${props?.tags + props?.id}</p>`;
-          new mapboxgl.Popup().setLngLat(coordinates).setHTML(description).addTo(map);
-        });
-
-        // Change the cursor to a pointer when the mouse is over the places layer.
-        map.on('mouseenter', 'geojson_fr', function () {
-          map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change it back to a pointer when it leaves.
-        map.on('mouseleave', 'geojson_fr', function () {
-          map.getCanvas().style.cursor = '';
-        });
+        map.on('draw.create', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
+        map.on('draw.update', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
+        map.on('click', 'geojson_fr', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
+        map.on('mouseenter', 'geojson_fr', () => (map.getCanvas().style.cursor = 'pointer'));
+        map.on('mouseleave', 'geojson_fr', () => (map.getCanvas().style.cursor = ''));
       });
+    },
+    // Executes on every redraw
+    onupdate: (vnode) => {
+      if (!map.loaded()) return;
+      const { state } = vnode.attrs;
+
+      if (map.getSource('positions')) {
+        (map.getSource('positions') as GeoJSONSource).setData(state.app.positionSource);
+      } else if (state.app.positionSource?.type) {
+        console.log(state.app.positionSource.features);
+        map.addSource('positions', {
+          type: 'geojson',
+          data: state.app.positionSource,
+        });
+
+        map.loadImage(fireman, function (error, image) {
+          if (error) throw error;
+          map.addImage('fireman', image);
+
+          map.addLayer({
+            id: 'geojson_fr',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'fireman',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
+            },
+            filter: ['==', 'type', 'man'],
+          });
+        });
+
+        map.loadImage(car, function (error, image) {
+          if (error) throw error;
+          map.addImage('car', image);
+
+          map.addLayer({
+            id: 'geojson_fr2',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'car',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
+            },
+            filter: ['==', 'type', 'car'],
+          });
+        });
+      }
     },
   };
 };
