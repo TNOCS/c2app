@@ -20,29 +20,36 @@ export class KafkaService {
   public busy = false;
 
   constructor(@Inject('DefaultWebSocketGateway') private readonly socket: DefaultWebSocketGateway) {
-    log.info('Init KafkaService');
-    this.adapter = new TestBedAdapter({
-      clientId: 'c2app-server',
-      kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
-      schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-      //autoRegisterSchemas: true,
-      //schemaFolder: path.resolve(`../../docker/schemas`),
-      //produce: ['chemical_hazard', 'cbrn_geojson'],
-      consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: ChemicalHazard }],
-      logging: {
-        logToConsole: LogLevel.Info,
-        logToKafka: LogLevel.Warn,
-      },
+    this.createAdapter().catch((e) => {log.error(e)});
+  }
+
+  public createAdapter(): Promise<TestBedAdapter> {
+    return new Promise(async (resolve) => {
+      log.info('Init KafkaService');
+      this.adapter = new TestBedAdapter({
+        clientId: 'c2app-server',
+        kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
+        schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
+        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: ChemicalHazard }],
+        logging: {
+          logToConsole: LogLevel.Info,
+          logToKafka: LogLevel.Warn,
+        },
+      });
+      this.adapter.on('error', (e) => {
+        // On error, try to connect again
+        this.adapter.connect().catch((e) => {log.error(e)})
+      });
+      this.adapter.on('message', (message: IAdapterMessage) => {
+        this.messageQueue.push(message);
+        this.handleMessage();
+      });
+      this.adapter.on('ready', () => {
+        log.info('Kafka is connected');
+        resolve(this.adapter);
+      });
+      this.adapter.connect().catch((e) => {log.error(e)})
     });
-    this.adapter.on('error', (e) => console.error(e));
-    this.adapter.on('message', (message: IAdapterMessage) => {
-      this.messageQueue.push(message);
-      this.handleMessage();
-    });
-    this.adapter.on('ready', () => {
-      log.info('Kafka is connected');
-    });
-    this.adapter.connect();
   }
 
   public send(payloads: ProduceRequest | ProduceRequest[], cb: (error?: any, data?: ISendResponse) => any): any {
