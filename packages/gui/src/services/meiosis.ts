@@ -32,6 +32,8 @@ export interface IActions {
   removeGroup: (group: IGroup) => void;
 }
 
+export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
+export type UpdateStream = Stream<Partial<ModelUpdateFunction>>;
 const update = Stream<ModelUpdateFunction>();
 
 /** Application state */
@@ -41,7 +43,7 @@ export const appStateMgmt = {
       socket: new Socket(update),
       positionSource: {} as FeatureCollection,
       chemicalHazardSource: {} as FeatureCollection,
-      groups: [] as IGroup[]
+      groups: [] as IGroup[],
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -50,7 +52,7 @@ export const appStateMgmt = {
         us({ app: { clickedFeature: feature } });
       },
       updateSelectedFeatures: (features: Feature[]) => {
-        us({ app: { selectedFeatures: {type: 'FeatureCollection', features: features} } });
+        us({ app: { selectedFeatures: { type: 'FeatureCollection', features: features } } });
       },
       resetClickedFeature: () => {
         us({ app: { clickedFeature: undefined } });
@@ -63,7 +65,7 @@ export const appStateMgmt = {
           app: {
             groups: (groups: IGroup[]) => {
               if (states()['app'].selectedFeatures)
-                groups.push({data: states()['app'].selectedFeatures as FeatureCollection, id: uuid4()});
+                groups.push({ data: states()['app'].selectedFeatures as FeatureCollection, id: uuid4() });
               return groups;
             },
           },
@@ -76,7 +78,7 @@ export const appStateMgmt = {
               const id = groups.findIndex((element: IGroup) => {
                 return element.id == group.id;
               });
-              if(id > -1) groups[id].data = states()['app'].selectedFeatures as FeatureCollection;
+              if (id > -1) groups[id].data = states()['app'].selectedFeatures as FeatureCollection;
               return groups;
             },
           },
@@ -89,7 +91,7 @@ export const appStateMgmt = {
               const id = groups.findIndex((element: IGroup) => {
                 return element.id == group.id;
               });
-              if(id > -1) groups.splice(id, 1);
+              if (id > -1) groups.splice(id, 1);
               return groups;
             },
           },
@@ -97,22 +99,31 @@ export const appStateMgmt = {
       },
     };
   },
-  effects: {},
 };
-
-export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
-
-export type UpdateStream = Stream<Partial<ModelUpdateFunction>>;
 
 const app = {
+  // Initial state of the appState
   initial: Object.assign({}, appStateMgmt.initial) as IAppModel,
+  // Actions that can be called to update the state
   actions: (us: UpdateStream, states: Stream<IAppModel>) =>
     Object.assign({}, appStateMgmt.actions(us, states)) as IActions,
+  // Services that run everytime the state is updated
+  services: [(s) => console.log(s.app.socket.connected())] as Array<(s: IAppModel) => Partial<IAppModel> | void>,
+  // Effects run from state update until some condition is met (can cause infinite loop)
+  effects: (_update: UpdateStream, _actions: IActions) => [] as Array<(state: IAppModel) => Promise<void>>,
 };
 
-export const states = Stream.scan(merge, app.initial, update);
-export const actions = app.actions(update, states);
+const runServices = (startingState: IAppModel) =>
+  app.services.reduce(
+    (state: IAppModel, service: (s: IAppModel) => Partial<IAppModel> | void) => merge(state, service(state)),
+    startingState
+  );
 
-states.map((_state) => {
+export const states = Stream.scan((state, patch) => runServices(merge(state, patch)), app.initial, update);
+export const actions = app.actions(update, states);
+const effects = app.effects(update, actions);
+
+states.map((state) => {
+  effects.forEach((effect) => effect(state));
   m.redraw();
 });

@@ -15,4 +15,7 @@ export class Socket {
       us({ app: { chemicalHazardSource: data } });
     });
   }
+  connected(){
+    return this.socket.connected;
+  }
 }
