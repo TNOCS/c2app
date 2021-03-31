@@ -1,5 +1,5 @@
 import { FeatureCollection } from 'geojson';
-import { UpdateStream } from './meiosis';
+import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
 
 export class Socket {
@@ -15,7 +15,7 @@ export class Socket {
       us({ app: { chemicalHazardSource: data } });
     });
   }
-  connected(){
-    return this.socket.connected;
+  updateServer(s: IAppModel) {
+    this.socket.emit('client-update', s.app.groups, (result: String) => console.log(result))
   }
 }

@@ -107,10 +107,10 @@ const app = {
   // Actions that can be called to update the state
   actions: (us: UpdateStream, states: Stream<IAppModel>) =>
     Object.assign({}, appStateMgmt.actions(us, states)) as IActions,
-  // Services that run everytime the state is updated
-  services: [(s) => console.log(s.app.socket.connected())] as Array<(s: IAppModel) => Partial<IAppModel> | void>,
+  // Services that run everytime the state is updated (so after the action is done)
+  services: [(s) => s.app.socket.updateServer(s)] as Array<(s: IAppModel) => Partial<IAppModel> | void>,
   // Effects run from state update until some condition is met (can cause infinite loop)
-  effects: (_update: UpdateStream, _actions: IActions) => [] as Array<(state: IAppModel) => Promise<void>>,
+  effects: (_update: UpdateStream, _actions: IActions) => [] as Array<(state: IAppModel) => Promise<void> | void>,
 };
 
 const runServices = (startingState: IAppModel) =>

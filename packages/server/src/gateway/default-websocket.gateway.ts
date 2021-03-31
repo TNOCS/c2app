@@ -5,6 +5,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 
 @WebSocketGateway()
@@ -24,10 +25,9 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     console.log('Disconnect, client count: ' + this.clients);
   }
 
-  @SubscribeMessage('request')
-  handleEvent(@MessageBody() data: string): string {
-    // Code to send latest positions for example
-    // Simpy switch case and put the json data in the return statement
+  @SubscribeMessage('client-update')
+  handleEvent(@MessageBody() data: string, @ConnectedSocket() socket): string {
+    console.log(socket.id);
     return data;
   }
 }
