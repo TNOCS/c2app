@@ -70,6 +70,7 @@ export const appStateMgmt = {
             },
           },
         });
+        states()['app'].socket.queueServerUpdate();
       },
       updateGroup: (group: IGroup) => {
         us({
@@ -83,6 +84,7 @@ export const appStateMgmt = {
             },
           },
         });
+        states()['app'].socket.queueServerUpdate();
       },
       removeGroup: (group: IGroup) => {
         us({
@@ -96,6 +98,7 @@ export const appStateMgmt = {
             },
           },
         });
+        states()['app'].socket.queueServerUpdate();
       },
     };
   },

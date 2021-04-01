@@ -7,11 +7,18 @@ import {
   MessageBody,
   ConnectedSocket,
 } from '@nestjs/websockets';
+import { FeatureCollection } from 'geojson';
+
+export interface IGroup {
+  data: FeatureCollection;
+  id: string;
+}
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server;
   clients: number = 0;
+  groups: {[key: string]: IGroup[]} = {};
 
   // A client has connected
   async handleConnection(socket) {
@@ -26,8 +33,8 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-update')
-  handleEvent(@MessageBody() data: string, @ConnectedSocket() socket): string {
-    console.log(socket.id);
-    return data;
+  handleEvent(@MessageBody() data: IGroup[], @ConnectedSocket() socket): string {
+    this.groups[socket.id] = data;
+    return "success";
   }
 }
