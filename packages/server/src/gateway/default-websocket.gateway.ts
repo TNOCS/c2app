@@ -14,6 +14,15 @@ export interface IGroup {
   id: string;
 }
 
+export interface IGroupsUpdate {
+  clientId: string;
+  groups: IGroup[]
+}
+
+export interface IGroupsRequest{
+  clientId: string;
+}
+
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server;
@@ -33,8 +42,14 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-update')
-  handleEvent(@MessageBody() data: IGroup[], @ConnectedSocket() socket): string {
-    this.groups[socket.id] = data;
+  handleClientUpdate(@MessageBody() data: IGroupsUpdate): string {
+    this.groups[data.clientId] = data.groups;
     return "success";
+  }
+
+  @SubscribeMessage('groups')
+  handleGroups(@MessageBody() data: IGroupsRequest): string {
+    console.log(this.groups[data.clientId])
+    return JSON.stringify(this.groups[data.clientId]);
   }
 }
