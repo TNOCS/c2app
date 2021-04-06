@@ -1,18 +1,21 @@
-import m, { ComponentTypes, RouteDefs } from 'mithril';
+import m, { FactoryComponent, RouteDefs } from 'mithril';
 import { Layout } from '../components/layout';
 import { Mapbox } from '../components/mapbox/mapbox';
 import { IPage } from '../models/page';
 import { actions, states } from '.';
 import { sideBar } from '../components/mapbox/sidebar';
+import { profileSelector } from '../components/profile-selector';
+import { IAppModel } from '../services';
 
-export const enum Pages {
+export enum Pages {
+  PROFILE = 'PROFILE',
   MAPBOX = 'MAPBOX',
 }
 
 class RoutingService {
   private pages!: ReadonlyArray<IPage>;
 
-  constructor(private layout: ComponentTypes, pages: IPage[]) {
+  constructor(private layout: FactoryComponent<{ state: IAppModel }>, pages: IPage[]) {
     this.setList(pages);
   }
 
@@ -43,19 +46,44 @@ class RoutingService {
 
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] = {
-        render: () =>
-          m(this.layout, [
-            m(p.sidebar, { state: states(), actions: actions }),
-            m(p.component, { state: states(), actions: actions }),
-          ]),
-      };
+      r[p.route] =
+        p.sidebar !== undefined
+          ? {
+              onmatch:
+                p.id === Pages.PROFILE
+                  ? undefined
+                  : () => {
+                      if (states().app.profile === '') m.route.set('/');
+                    },
+              render: () =>
+                m(this.layout, { state: states() }, [
+                  m(p.sidebar, { state: states(), actions: actions }),
+                  m(p.component, { state: states(), actions: actions }),
+                ]),
+            }
+          : {
+              onmatch:
+                p.id === Pages.PROFILE
+                  ? undefined
+                  : () => {
+                      if (states().app.profile === '') m.route.set('/');
+                    },
+              render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
+            };
       return r;
     }, {} as RouteDefs);
   }
 }
 
 export const routingSvc: RoutingService = new RoutingService(Layout, [
+  {
+    id: Pages.PROFILE,
+    title: 'Profile',
+    icon: 'profile',
+    route: '/',
+    visible: true,
+    component: profileSelector,
+  },
   {
     id: Pages.MAPBOX,
     title: 'Mapbox',

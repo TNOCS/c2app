@@ -14,5 +14,5 @@ export interface IPage {
   route: string;
   visible: boolean;
   component: ComponentTypes<any, any>;
-  sidebar: ComponentTypes<any, any>;
+  sidebar?: ComponentTypes<any, any>;
 }
