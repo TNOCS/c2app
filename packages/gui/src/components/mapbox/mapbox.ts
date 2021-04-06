@@ -48,7 +48,6 @@ export const Mapbox: FactoryComponent<{
       if (map.getSource('positions')) {
         (map.getSource('positions') as GeoJSONSource).setData(state.app.positionSource);
       } else if (state.app.positionSource?.type) {
-        console.log(state.app.positionSource.features);
         map.addSource('positions', {
           type: 'geojson',
           data: state.app.positionSource,
@@ -56,7 +55,7 @@ export const Mapbox: FactoryComponent<{
 
         map.loadImage(fireman, function (error, image) {
           if (error) throw error;
-          map.addImage('fireman', image);
+          map.addImage('fireman', image as ImageBitmap);
 
           map.addLayer({
             id: 'geojson_fr',
@@ -73,7 +72,7 @@ export const Mapbox: FactoryComponent<{
 
         map.loadImage(car, function (error, image) {
           if (error) throw error;
-          map.addImage('car', image);
+          map.addImage('car', image as ImageBitmap);
 
           map.addLayer({
             id: 'geojson_fr2',

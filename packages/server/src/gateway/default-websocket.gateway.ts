@@ -5,12 +5,29 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
+import { FeatureCollection } from 'geojson';
+
+export interface IGroup {
+  data: FeatureCollection;
+  id: string;
+}
+
+export interface IGroupsUpdate {
+  clientId: string;
+  groups: IGroup[]
+}
+
+export interface IGroupsRequest{
+  clientId: string;
+}
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server;
   clients: number = 0;
+  groups: {[key: string]: IGroup[]} = {};
 
   // A client has connected
   async handleConnection(socket) {
@@ -24,10 +41,15 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     console.log('Disconnect, client count: ' + this.clients);
   }
 
-  @SubscribeMessage('request')
-  handleEvent(@MessageBody() data: string): string {
-    // Code to send latest positions for example
-    // Simpy switch case and put the json data in the return statement
-    return data;
+  @SubscribeMessage('client-update')
+  handleClientUpdate(@MessageBody() data: IGroupsUpdate): string {
+    this.groups[data.clientId] = data.groups;
+    return "success";
+  }
+
+  @SubscribeMessage('groups')
+  handleGroups(@MessageBody() data: IGroupsRequest): string {
+    console.log(this.groups[data.clientId])
+    return JSON.stringify(this.groups[data.clientId]);
   }
 }
