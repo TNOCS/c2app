@@ -1,4 +1,4 @@
-import m, { Vnode, FactoryComponent } from 'mithril';
+import m, { FactoryComponent } from 'mithril';
 import { IAppModel } from '../services';
 import logo from 'url:../assets/explosion.svg';
 import { Icon } from 'mithril-materialized';
@@ -7,7 +7,7 @@ export const Layout: FactoryComponent<{
   state: IAppModel;
 }> = () => {
   return {
-    view: (vnode: Vnode) => {
+    view: (vnode) => {
       return m('.main', [
         m(
           '.navbar',
@@ -48,11 +48,17 @@ export const Layout: FactoryComponent<{
                 })
               ),
               m(
-                'h4.right',
+                'div',
                 {
-                  style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
+                  style: 'margin-top: 0px; position: absolute; top: 16px; right: 50px; width: 400px;',
                 },
-                vnode.attrs.state.app.profile
+                m(
+                  'h4.center.hide-on-med-and-down',
+                  {
+                    style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
+                  },
+                  vnode.attrs.state.app.profile
+                )
               ),
             ])
           )

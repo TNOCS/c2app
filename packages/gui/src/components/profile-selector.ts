@@ -1,4 +1,4 @@
-import m, { Vnode, FactoryComponent } from 'mithril';
+import m, { FactoryComponent } from 'mithril';
 import { actions, IActions, IAppModel } from '../services';
 import { Button, Dropdown } from 'mithril-materialized';
 
@@ -7,9 +7,10 @@ export const profileSelector: FactoryComponent<{
   actions: IActions;
 }> = () => {
   return {
-    view: (vnode: Vnode) => {
+    view: (vnode) => {
       return m('div.col.s12', [
         m(Dropdown, {
+          class: `green col s12`,
           items: [
             {
               label: 'commander',
@@ -24,9 +25,10 @@ export const profileSelector: FactoryComponent<{
           },
         }),
         m(Button, {
+          class: `green col s12`,
           label: 'Submit',
           onclick: () => {
-            m.route.set('/mapbox')
+            m.route.set('/mapbox');
           },
         }),
       ]);
