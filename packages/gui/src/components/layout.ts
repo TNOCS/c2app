@@ -1,15 +1,20 @@
-import m, { Vnode } from 'mithril';
-import logo from '../assets/explosion.svg';
+import m, { FactoryComponent } from 'mithril';
+import { IAppModel } from '../services';
+import logo from 'url:../assets/explosion.svg';
 import { Icon } from 'mithril-materialized';
 
-export const Layout = () => ({
-    view: (vnode: Vnode) => {
+export const Layout: FactoryComponent<{
+  state: IAppModel;
+}> = () => {
+  return {
+    view: (vnode) => {
       return m('.main', [
         m(
           '.navbar',
           { style: 'z-index: 1001; height: 64px' },
           m(
-            'nav', {style: 'height:64px'},
+            'nav',
+            { style: 'height:64px' },
             m('.nav-wrapper', [
               m('a.brand-logo[href=#]', [
                 m(`img[width=100][height=45][src=${logo}]`, {
@@ -42,10 +47,24 @@ export const Layout = () => ({
                   style: 'margin-left: 5px;',
                 })
               ),
+              m(
+                'div',
+                {
+                  style: 'margin-top: 0px; position: absolute; top: 16px; right: 50px; width: 400px;',
+                },
+                m(
+                  'h4.center.hide-on-med-and-down',
+                  {
+                    style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
+                  },
+                  vnode.attrs.state.app.profile
+                )
+              ),
             ])
           )
         ),
         m('.row', vnode.children),
       ]);
     },
-  });
+  };
+};

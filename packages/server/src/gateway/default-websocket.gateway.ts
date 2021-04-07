@@ -49,7 +49,6 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
   @SubscribeMessage('groups')
   handleGroups(@MessageBody() data: IGroupsRequest): string {
-    console.log(this.groups[data.clientId])
     return JSON.stringify(this.groups[data.clientId]);
   }
 }

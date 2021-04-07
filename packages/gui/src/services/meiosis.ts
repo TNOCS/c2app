@@ -11,6 +11,7 @@ export interface IAppModel {
     positionSource: FeatureCollection;
     chemicalHazardSource: FeatureCollection;
     groups: IGroup[];
+    profile: '' | 'commander' | 'firefighter';
     clickedFeature?: Feature;
     selectedFeatures?: FeatureCollection;
     alerts?: string;
@@ -30,6 +31,7 @@ export interface IActions {
   groupSelectedFeatures: () => void;
   updateGroup: (group: IGroup) => void;
   removeGroup: (group: IGroup) => void;
+  updateProfile: (data: string) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -40,6 +42,7 @@ const update = Stream<ModelUpdateFunction>();
 export const appStateMgmt = {
   initial: {
     app: {
+      profile: '',
       socket: new Socket(update),
       positionSource: {} as FeatureCollection,
       chemicalHazardSource: {} as FeatureCollection,
@@ -99,6 +102,9 @@ export const appStateMgmt = {
           },
         });
         states()['app'].socket.queueServerUpdate();
+      },
+      updateProfile: (data: string) => {
+        us({ app: { profile: () => { return data } } });
       },
     };
   },
