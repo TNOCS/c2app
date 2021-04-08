@@ -4,10 +4,9 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { FeatureCollection } from 'geojson';
+import { Server, Socket } from 'socket.io';
 
 export interface IGroup {
   data: FeatureCollection;
@@ -16,39 +15,40 @@ export interface IGroup {
 
 export interface IGroupsUpdate {
   clientId: string;
-  groups: IGroup[]
+  groups: IGroup[];
 }
 
-export interface IGroupsRequest{
+export interface IGroupsRequest {
   clientId: string;
 }
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server;
+  @WebSocketServer() server: Server;
   clients: number = 0;
-  groups: {[key: string]: IGroup[]} = {};
+  groups: { [key: string]: IGroup[] } = {};
 
   // A client has connected
-  async handleConnection(socket) {
+  async handleConnection(client: Socket) {
     this.clients++;
-    console.log(socket.id + ' Client count: ' + this.clients);
+    console.log('Connected: ' + client.id + ' Client count: ' + this.clients);
   }
 
   // A client has disconnected
-  async handleDisconnect() {
+  async handleDisconnect(client: Socket) {
     this.clients--;
-    console.log('Disconnect, client count: ' + this.clients);
+    console.log('Disconnected: ' + client.id + ' Client count: ' + this.clients);
   }
 
   @SubscribeMessage('client-update')
-  handleClientUpdate(@MessageBody() data: IGroupsUpdate): string {
+  handleClientUpdate(client: Socket, data: IGroupsUpdate): string {
     this.groups[data.clientId] = data.groups;
-    return "success";
+    console.log(this.groups);
+    return 'success';
   }
 
   @SubscribeMessage('groups')
-  handleGroups(@MessageBody() data: IGroupsRequest): string {
+  handleGroups(client: Socket, data: IGroupsRequest): string {
     return JSON.stringify(this.groups[data.clientId]);
   }
 }

@@ -10,14 +10,14 @@ export class Socket {
   constructor(us: UpdateStream) {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
     this.socket.on('connect', () => {
-      if(!window.localStorage.getItem('socketId')) window.localStorage.setItem('socketId', this.socket.id);
+      if (!window.localStorage.getItem('socketId')) window.localStorage.setItem('socketId', this.socket.id);
       this.clientId = window.localStorage.getItem('socketId');
 
-      this.socket.emit('groups', {clientId: this.clientId}, (result: string) => {
+      this.socket.emit('groups', { clientId: this.clientId }, (result: string) => {
         const data = JSON.parse(result);
-        us({ app: { groups: () => data}});
-      })
-    })
+        us({ app: { groups: () => data } });
+      });
+    });
 
     this.socket.on('positions', (data: FeatureCollection) => {
       us({ app: { positionSource: data } });
@@ -31,7 +31,10 @@ export class Socket {
   }
 
   updateServer(s: IAppModel) {
-    if (this.update) this.socket.emit('client-update', {clientId: this.clientId, groups: s.app.groups}, (result: String) => console.log(result));
+    if (this.update)
+      this.socket.emit('client-update', { clientId: this.clientId, groups: s.app.groups }, (result: string) =>
+        console.log(result)
+      );
     this.update = false;
   }
 }
