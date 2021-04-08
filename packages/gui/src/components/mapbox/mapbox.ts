@@ -6,8 +6,8 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
 import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
-import car from 'url:../../assets/car.png';
-import fireman from 'url:../../assets/firemen.png';
+import car from 'url:../../assets/car_icon.png';
+import fireman from 'url:../../assets/fireman_icon.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
