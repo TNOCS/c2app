@@ -1,5 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
-import { actions, IActions, IAppModel } from '../services';
+import { actions, IActions, IAppModel } from '../services/meiosis';
 import { Button, Dropdown } from 'mithril-materialized';
 
 export const profileSelector: FactoryComponent<{

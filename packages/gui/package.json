@@ -2,14 +2,13 @@
   "name": "c2app-gui",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
     "start": "parcel index.html",
     "dev": "set SERVER=http://localhost:3000 && parcel index.html",
-    "clean": "rimraf ./.cache ./dist",
+    "clean": "rimraf ./.parcel-cache ./.cache ./dist",
     "cleanup": "npm run clean",
-    "build:domain": "npm run clean && parcel build --no-cache index.html"
+    "build:domain": "npm run clean && parcel build --no-cache --no-scope-hoist index.html"
   },
   "keywords": [],
   "author": "",
@@ -35,7 +34,6 @@
     "@types/mithril": "^2.0.7",
     "@types/node": "^14.14.37",
     "@types/socket.io-client": "^1.4.36",
-    "meiosis-tracer": "^4.0.0",
     "parcel": "next",
     "rimraf": "^3.0.2",
     "tslib": "^2.2.0",

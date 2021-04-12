@@ -2,10 +2,10 @@ import m, { FactoryComponent, RouteDefs } from 'mithril';
 import { Layout } from '../components/layout';
 import { Mapbox } from '../components/mapbox/mapbox';
 import { IPage } from '../models/page';
-import { actions, states } from '.';
+import { actions, states } from './meiosis';
 import { sideBar } from '../components/mapbox/sidebar';
 import { profileSelector } from '../components/profile-selector';
-import { IAppModel } from '../services';
+import { IAppModel } from '../services/meiosis';
 
 export enum Pages {
   PROFILE = 'PROFILE',
@@ -47,7 +47,7 @@ class RoutingService {
   public routingTable() {
     return this.pages.reduce((r, p) => {
       r[p.route] =
-        p.sidebar !== undefined
+        p.hasSidebar 
           ? {
               onmatch:
                 p.id === Pages.PROFILE
@@ -83,6 +83,8 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/',
     visible: true,
     component: profileSelector,
+    sidebar: sideBar,
+    hasSidebar: false,
   },
   {
     id: Pages.MAPBOX,
@@ -92,5 +94,6 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     visible: true,
     component: Mapbox,
     sidebar: sideBar,
+    hasSidebar: true,
   },
 ]);
