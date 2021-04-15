@@ -1,6 +1,6 @@
 import m, { FactoryComponent } from 'mithril';
 import { actions, IActions, IAppModel } from '../services/meiosis';
-import { Button, Dropdown } from 'mithril-materialized';
+import { Button, Dropdown, TextInput } from 'mithril-materialized';
 
 export const profileSelector: FactoryComponent<{
   state: IAppModel;
@@ -9,6 +9,13 @@ export const profileSelector: FactoryComponent<{
   return {
     view: (vnode) => {
       return m('div.col.s12', [
+        m(TextInput, {
+          label: 'Callsign',
+          required: true,
+          onchange: (v: string) => {
+            actions.updateCallsign(v);
+          },
+        }),
         m(Dropdown, {
           class: `green col s12`,
           items: [

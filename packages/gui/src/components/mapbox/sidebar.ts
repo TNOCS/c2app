@@ -51,7 +51,7 @@ export const sideBar: FactoryComponent<{
                         'button.button[type=button]',
                         {
                           onclick: () => {
-                            vnode.attrs.actions.groupSelectedFeatures();
+                            vnode.attrs.actions.createGroup();
                           },
                         },
                         'Group selected features'
@@ -68,7 +68,7 @@ export const sideBar: FactoryComponent<{
                       'p',
                       vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
                         return m('p', [
-                          m('p', 'ID: ' + index + ' Members: ' + group.data.features.length, [
+                          m('p', 'ID: ' + index + ' Members: ' + group.callsigns.length, [
                             m(
                               'button.button[type=button]',
                               {
@@ -82,7 +82,7 @@ export const sideBar: FactoryComponent<{
                               'button.button[type=button]',
                               {
                                 onclick: () => {
-                                  vnode.attrs.actions.removeGroup(group);
+                                  vnode.attrs.actions.deleteGroup(group);
                                 },
                               },
                               'removeGroup'

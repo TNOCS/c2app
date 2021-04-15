@@ -57,7 +57,7 @@ export const Layout: FactoryComponent<{
                   {
                     style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
                   },
-                  vnode.attrs.state.app.profile
+                  `${vnode.attrs.state.app.callsign ? vnode.attrs.state.app.profile + ' ' + vnode.attrs.state.app.callsign : ''}`
                 )
               ),
             ])
