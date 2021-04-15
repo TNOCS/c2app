@@ -1,6 +1,6 @@
 import { Feature } from 'geojson';
-import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel, IGroup } from '../../services';
+import m, { FactoryComponent, route } from 'mithril';
+import { IActions, IAppModel, IGroup } from '../services/meiosis';
 
 export const sideBar: FactoryComponent<{
   state: IAppModel;
@@ -9,9 +9,9 @@ export const sideBar: FactoryComponent<{
   return {
     view: (vnode) => {
       return m(
-        'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed.top:64px',
+        'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed',
         {
-          style: 'top: 64px',
+          style: 'top: 64px; overflow-y: auto',
         },
         [
           m('h5', 'Messages'),
@@ -21,11 +21,14 @@ export const sideBar: FactoryComponent<{
             m(
               'ul.collapsible.collapsible-accordion',
               m('li', [
-                m('a.collapsible-header', 'Groups', m('i.material-icons', 'arrow_drop_down')),
+                m('a.collapsible-header', 'POIs', [
+                  m('i.material-icons', 'arrow_drop_down'),
+                  m('i.material-icons', 'add_location'),
+                ]),
                 m(
                   'div.collapsible-body',
                   m('div', [
-                    m('h5', 'Clicked Feature'),
+                    m('h5', 'Clicked POI'),
                     m(
                       'button.button[type=button]',
                       {
@@ -33,10 +36,37 @@ export const sideBar: FactoryComponent<{
                           vnode.attrs.actions.resetClickedFeature();
                         },
                       },
-                      'Reset clicked features'
+                      'Clear clicked POI'
                     ),
-                    m('p', JSON.stringify(vnode.attrs.state.app.clickedFeature?.type)),
-                    m('h5', 'Selected Features'),
+                    m(
+                      'p',
+                      `${
+                        vnode.attrs.state.app.clickedFeature
+                          ? 'Type: ' +
+                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties.type) +
+                            ' Callsign: ' +
+                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties.callsign)
+                          : ''
+                      }`
+                    ),
+                  ])
+                ),
+              ])
+            )
+          ),
+          m(
+            'li.no-padding',
+            m(
+              'ul.collapsible.collapsible-accordion',
+              m('li', [
+                m('a.collapsible-header', 'Groups', [
+                  m('i.material-icons', 'arrow_drop_down'),
+                  m('i.material-icons', 'group'),
+                ]),
+                m(
+                  'div.collapsible-body',
+                  m('div', [
+                    m('h5', 'Selected FRs'),
                     [
                       m(
                         'button.button[type=button]',
@@ -45,7 +75,7 @@ export const sideBar: FactoryComponent<{
                             vnode.attrs.actions.resetSelectedFeatures();
                           },
                         },
-                        'Reset selected features'
+                        'Clear selected FRs'
                       ),
                       m(
                         'button.button[type=button]',
@@ -54,7 +84,7 @@ export const sideBar: FactoryComponent<{
                             vnode.attrs.actions.createGroup();
                           },
                         },
-                        'Group selected features'
+                        'Group selected FRs'
                       ),
                     ],
                     m(
@@ -63,7 +93,7 @@ export const sideBar: FactoryComponent<{
                         return m('span', JSON.stringify(feature.type));
                       })
                     ),
-                    m('h5', 'Selected Features'),
+                    m('h5', 'Groups'),
                     m(
                       'p',
                       vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
@@ -76,7 +106,7 @@ export const sideBar: FactoryComponent<{
                                   vnode.attrs.actions.updateGroup(group);
                                 },
                               },
-                              'updateGroup'
+                              'Update'
                             ),
                             m(
                               'button.button[type=button]',
@@ -85,7 +115,7 @@ export const sideBar: FactoryComponent<{
                                   vnode.attrs.actions.deleteGroup(group);
                                 },
                               },
-                              'removeGroup'
+                              'Delete'
                             ),
                           ]),
                         ]);
@@ -101,13 +131,56 @@ export const sideBar: FactoryComponent<{
             m(
               'ul.collapsible.collapsible-accordion',
               m('li', [
-                m('a.collapsible-header', 'Layers', m('i.material-icons', 'arrow_drop_down')),
+                m('a.collapsible-header', 'Layers', [
+                  m('i.material-icons', 'arrow_drop_down'),
+                  m('i.material-icons', 'layers'),
+                ]),
                 m('div.collapsible-body', m('div', [])),
               ])
             )
           ),
           m('div.divider'),
-          m('li', m('a.waves-effect', 'Chat', m('i.material-icons', 'chat'))),
+          m(
+            'li',
+            m(
+              'a.waves-effect',
+              {
+                text: 'Map',
+                onclick: () => {
+                  route.set('/mapbox');
+                },
+              },
+              m('i.material-icons', 'map')
+            )
+          ),
+          m(
+            'li',
+            m(
+              'a.waves-effect',
+              {
+                text: 'Chat',
+                onclick: () => {
+                  route.set('/chat');
+                },
+              },
+              m('i.material-icons', 'chat')
+            )
+          ),
+          m(
+            'li',
+            m(
+              'a.waves-effect',
+              {
+                text: 'Settings',
+                onclick: () => {
+                  route.set('/settings');
+                },
+              },
+              m('i.material-icons', 'settings')
+            )
+          ),
+          // Fix the weird scroll clipping caused by
+          m('div', {style: 'margin: 128px'})
         ]
       );
     },

@@ -2,6 +2,12 @@ import { FeatureCollection } from 'geojson';
 import { IAppModel, UpdateStream, IGroup } from './meiosis';
 import io from 'socket.io-client';
 
+export interface IMessage {
+  id: string;
+  callsign: string;
+  message: string;
+}
+
 export class Socket {
   private socket: SocketIOClient.Socket;
 
@@ -13,6 +19,10 @@ export class Socket {
     });
     this.socket.on('chemical-hazard', (data: FeatureCollection) => {
       us({ app: { chemicalHazardSource: data } });
+    });
+    this.socket.on('server-message', (data: string) => {
+      const message = JSON.parse(data) as IMessage;
+      console.log(message);
     });
   }
 
@@ -52,5 +62,13 @@ export class Socket {
         resolve(JSON.parse(result));
       });
     });
+  }
+
+  serverSend(s: IAppModel, group: IGroup, message: string) {
+    this.socket.emit(
+      'client-message',
+      { id: group.id, callsign: s.app.callsign, message: message },
+      (result: string) => {}
+    );
   }
 }

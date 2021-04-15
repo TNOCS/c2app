@@ -41,12 +41,72 @@ export interface IGroupDelete {
   id: string;
 }
 
+export interface IMessage {
+  id: string;
+  callsign: string;
+  message: string;
+}
+
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private clients: number = 0;
   private groups: Map<string, IGroup> = new Map<string, IGroup>();
+  private callsignToSocketId: Map<string, string> = new Map<string, string>();
 
+  /** Handlers */
+  async handleConnection(client: Socket) {
+    this.clients++;
+    console.log('Connected: ' + client.id + ' Client count: ' + this.clients);
+  }
+
+  async handleDisconnect(client: Socket) {
+    this.clients--;
+    console.log('Disconnected: ' + client.id + ' Client count: ' + this.clients);
+  }
+
+  @SubscribeMessage('client-init')
+  handleClientInit(client: Socket, data: IGroupsInit): string {
+    this.callsignToSocketId.set(data.callsign, client.id);
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-create')
+  handleClientCreate(client: Socket, data: IGroupCreate): string {
+    this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group });
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-update')
+  handleClientUpdate(client: Socket, data: IGroupUpdate): string {
+    this.setGroupForId(data);
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-delete')
+  handleClientDelete(client: Socket, data: IGroupDelete): string {
+    this.groups.delete(data.id);
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-message')
+  handleMessage(client: Socket, data: IMessage): string {
+    const group = this.groups.get(data.id);
+
+    group.callsigns.forEach((callsign: string) => {
+      this.server
+        .to(this.callsignToSocketId.get(callsign))
+        .emit('server-message', JSON.stringify({ message: data.message, id: data.id, sender: data.callsign }));
+    });
+
+    return data.message;
+  }
+
+  /** Helper Funcs */
   getGroupIdsForCallsign(callsign: string): string {
     let returnArray: Array<IReturnGroup> = new Array<IReturnGroup>();
 
@@ -67,40 +127,5 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     });
 
     this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign });
-  }
-
-  // A client has connected
-  async handleConnection(client: Socket) {
-    this.clients++;
-    console.log('Connected: ' + client.id + ' Client count: ' + this.clients);
-  }
-
-  // A client has disconnected
-  async handleDisconnect(client: Socket) {
-    this.clients--;
-    console.log('Disconnected: ' + client.id + ' Client count: ' + this.clients);
-  }
-
-  @SubscribeMessage('client-init')
-  handleClientInit(client: Socket, data: IGroupsInit): string {
-    return this.getGroupIdsForCallsign(data.callsign);
-  }
-
-  @SubscribeMessage('client-create')
-  handleClientCreate(client: Socket, data: IGroupCreate): string {
-    this.setGroupForId({id: uuid4(), callsign: data.callsign, group: data.group})
-    return this.getGroupIdsForCallsign(data.callsign);
-  }
-
-  @SubscribeMessage('client-update')
-  handleClientUpdate(client: Socket, data: IGroupUpdate): string { 
-    this.setGroupForId(data);
-    return this.getGroupIdsForCallsign(data.callsign);
-  }
-
-  @SubscribeMessage('client-delete')
-  handleClientDelete(client: Socket, data: IGroupDelete): string { 
-    this.groups.delete(data.id);
-    return this.getGroupIdsForCallsign(data.callsign);
   }
 }

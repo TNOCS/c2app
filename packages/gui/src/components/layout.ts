@@ -1,7 +1,7 @@
-import m, { FactoryComponent } from 'mithril';
-import { IAppModel } from '../services';
-import logo from 'url:../assets/explosion.svg';
+import m, { FactoryComponent, route } from 'mithril';
 import { Icon } from 'mithril-materialized';
+import { IAppModel } from '../services/meiosis';
+import logo from 'url:../assets/explosion.svg';
 
 export const Layout: FactoryComponent<{
   state: IAppModel;
@@ -16,7 +16,7 @@ export const Layout: FactoryComponent<{
             'nav',
             { style: 'height:64px' },
             m('.nav-wrapper', [
-              m('a.brand-logo[href=#]', [
+              m('a.brand-logo', {onclick: () => {route.set('/mapbox')}}, [
                 m(`img[width=100][height=45][src=${logo}]`, {
                   style: 'margin: 7px 0 0 5px;',
                 }),

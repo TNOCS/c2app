@@ -15,6 +15,7 @@ export interface IAppModel {
     clickedFeature?: Feature;
     selectedFeatures?: FeatureCollection;
     alerts?: string;
+    chat?: IGroup;
   };
 }
 
@@ -37,6 +38,10 @@ export interface IActions {
 
   updateProfile: (data: string) => void;
   updateCallsign: (data: string) => void;
+
+  openChat: (group: IGroup) => void;
+  closeChat: () => void;
+  sendChat: (group: IGroup, message: string) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -56,7 +61,7 @@ export const appStateMgmt = {
             type: 'Feature',
             properties: {
               callsign: '123',
-              type: 'man',
+              type: 'firefighter',
             },
             geometry: {
               type: 'Point',
@@ -67,7 +72,7 @@ export const appStateMgmt = {
             type: 'Feature',
             properties: {
               callsign: '111',
-              type: 'man',
+              type: 'firefighter',
             },
             geometry: {
               type: 'Point',
@@ -151,6 +156,25 @@ export const appStateMgmt = {
             },
           },
         });
+      },
+      openChat: (group: IGroup) => {
+        us({
+          app: {
+            chat: () => {
+              return group;
+            },
+          },
+        });
+      },
+      closeChat: () => {
+        us({
+          app: {
+            chat: undefined,
+          },
+        });
+      },
+      sendChat: (group: IGroup, message: string) => {
+        states()['app'].socket.serverSend(states(), group, message);
       },
     };
   },

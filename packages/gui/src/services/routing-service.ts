@@ -1,15 +1,18 @@
 import m, { FactoryComponent, RouteDefs } from 'mithril';
-import { Layout } from '../components/layout';
-import { Mapbox } from '../components/mapbox/mapbox';
+import { actions, states, IAppModel } from './meiosis';
 import { IPage } from '../models/page';
-import { actions, states } from './meiosis';
-import { sideBar } from '../components/mapbox/sidebar';
+import { Layout } from '../components/layout';
+import { Mapbox } from '../components/mapbox';
+import { sideBar } from '../components/sidebar';
 import { profileSelector } from '../components/profile-selector';
-import { IAppModel } from '../services/meiosis';
+import { Chat } from '../components/chat';
+import { Settings } from '../components/settings';
 
 export enum Pages {
   PROFILE = 'PROFILE',
   MAPBOX = 'MAPBOX',
+  CHAT = 'CHAT',
+  SETTINGS = 'SETTINGS',
 }
 
 class RoutingService {
@@ -46,30 +49,29 @@ class RoutingService {
 
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] =
-        p.hasSidebar 
-          ? {
-              onmatch:
-                p.id === Pages.PROFILE
-                  ? undefined
-                  : () => {
-                      if (states().app.profile === '') m.route.set('/');
-                    },
-              render: () =>
-                m(this.layout, { state: states() }, [
-                  m(p.sidebar, { state: states(), actions: actions }),
-                  m(p.component, { state: states(), actions: actions }),
-                ]),
-            }
-          : {
-              onmatch:
-                p.id === Pages.PROFILE
-                  ? undefined
-                  : () => {
-                      if (states().app.profile === '') m.route.set('/');
-                    },
-              render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
-            };
+      r[p.route] = p.hasSidebar
+        ? {
+            onmatch:
+              p.id === Pages.PROFILE
+                ? undefined
+                : () => {
+                    if (states().app.profile === '') m.route.set('/');
+                  },
+            render: () =>
+              m(this.layout, { state: states() }, [
+                m(p.sidebar, { state: states(), actions: actions }),
+                m(p.component, { state: states(), actions: actions }),
+              ]),
+          }
+        : {
+            onmatch:
+              p.id === Pages.PROFILE
+                ? undefined
+                : () => {
+                    if (states().app.profile === '') m.route.set('/');
+                  },
+            render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
+          };
       return r;
     }, {} as RouteDefs);
   }
@@ -93,6 +95,26 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/mapbox',
     visible: true,
     component: Mapbox,
+    sidebar: sideBar,
+    hasSidebar: true,
+  },
+  {
+    id: Pages.CHAT,
+    title: 'Chat',
+    icon: 'chat',
+    route: '/chat',
+    visible: true,
+    component: Chat,
+    sidebar: sideBar,
+    hasSidebar: true,
+  },
+  {
+    id: Pages.SETTINGS,
+    title: 'Settings',
+    icon: 'settings',
+    route: '/settings',
+    visible: true,
+    component: Settings,
     sidebar: sideBar,
     hasSidebar: true,
   },
