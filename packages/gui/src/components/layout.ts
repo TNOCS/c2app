@@ -1,5 +1,4 @@
 import m, { FactoryComponent, route } from 'mithril';
-import { Icon } from 'mithril-materialized';
 import { IAppModel } from '../services/meiosis';
 import logo from 'url:../assets/explosion.svg';
 
@@ -41,11 +40,7 @@ export const Layout: FactoryComponent<{
                   'data-target': 'slide-out',
                   href: m.route.get(),
                 },
-                m(Icon, {
-                  iconName: 'menu',
-                  className: '.hide-on-med-and-up',
-                  style: 'margin-left: 5px;',
-                })
+                m('i.material-icons.hide-on-med-and-up', 'menu')
               ),
               m(
                 'div',

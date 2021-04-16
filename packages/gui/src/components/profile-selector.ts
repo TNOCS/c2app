@@ -1,5 +1,6 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
+import M from 'materialize-css'
 
 export const profileSelector: FactoryComponent<{
   state: IAppModel;
@@ -8,15 +9,11 @@ export const profileSelector: FactoryComponent<{
   let callsign: string;
   let profile: string;
   return {
-    oncreate: () => {
-      const elemSelect = document.querySelectorAll('select');
-      M.FormSelect.init(elemSelect);
-    },
     view: (vnode) => {
       return m(
         'div.col.s12',
         m('form.row', [
-          m('div.input-field.col.s12.m4', [
+          m('div.input-field.col.s4', [
             m('input', {
               id: 'callsign',
               type: 'text',
@@ -34,7 +31,7 @@ export const profileSelector: FactoryComponent<{
               'Callsign'
             ),
           ]),
-          m('div.input-field.col.s12.m4', [
+          m('div.input-field.col.s4', [
             m(
               'select',
               {
@@ -43,12 +40,16 @@ export const profileSelector: FactoryComponent<{
                   profile = target.value;
                 },
               },
-              [m('option', {value: '', disabled: true, selected: true}, 'Choose your profile'), m('option', { value: 'commander' }, 'commander'), m('option', { value: 'firefighter' }, 'firefighter')]
+              [
+                m('option', { value: '', disabled: true, selected: true }, 'Choose your profile'),
+                m('option', { value: 'commander' }, 'commander'),
+                m('option', { value: 'firefighter' }, 'firefighter'),
+              ]
             ),
             m('label', 'Profile'),
           ]),
           m(
-            'button.btn.waves-effect.waves-light.col.s12.m4',
+            'button.btn.waves-effect.waves-light.col.s4',
             {
               onclick: () => {
                 vnode.attrs.actions.updateCallsign(callsign);
@@ -62,5 +63,10 @@ export const profileSelector: FactoryComponent<{
         ])
       );
     },
+    oncreate: () => {
+      const elemSelect = document.querySelectorAll('select');
+      M.FormSelect.init(elemSelect);
+    },
   };
+  
 };

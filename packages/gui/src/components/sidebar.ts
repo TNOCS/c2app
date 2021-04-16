@@ -1,6 +1,7 @@
 import { Feature } from 'geojson';
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel, IGroup } from '../services/meiosis';
+import M from 'materialize-css'
 
 export const sideBar: FactoryComponent<{
   state: IAppModel;
