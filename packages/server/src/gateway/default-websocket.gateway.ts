@@ -6,7 +6,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { FeatureCollection, Feature } from 'geojson';
-import { uuid4 } from '../../../shared/src/utils/index';
+import { uuid4 } from '../utils/index';
 import { Server, Socket } from 'socket.io';
 
 export interface IGroup {
