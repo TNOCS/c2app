@@ -102,6 +102,11 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
         .to(this.callsignToSocketId.get(callsign))
         .emit('server-message', JSON.stringify({ message: data.message, id: data.id, sender: data.callsign }));
     });
+    if (!group.callsigns.includes(group.owner)) {
+      this.server
+        .to(this.callsignToSocketId.get(group.owner))
+        .emit('server-message', JSON.stringify({ message: data.message, id: data.id, sender: data.callsign }));
+    }
 
     return data.message;
   }

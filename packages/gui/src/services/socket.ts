@@ -1,12 +1,6 @@
 import { FeatureCollection } from 'geojson';
-import { IAppModel, UpdateStream, IGroup } from './meiosis';
+import { IAppModel, UpdateStream, IGroup, IMessage } from './meiosis';
 import io from 'socket.io-client';
-
-export interface IMessage {
-  id: string;
-  callsign: string;
-  message: string;
-}
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -22,7 +16,17 @@ export class Socket {
     });
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
-      console.log(message);
+      us({
+        app: {
+          messages: (messages: Map<string, Array<IMessage>>) => {
+            let messageList = messages.get(message.id) as Array<IMessage>;
+            if(!messageList) messageList = new Array<IMessage>();
+            messageList.push(message);
+            messages.set(message.id, messageList);
+            return messages;
+          },
+        },
+      });
     });
   }
 

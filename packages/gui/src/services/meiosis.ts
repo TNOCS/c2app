@@ -16,7 +16,14 @@ export interface IAppModel {
     selectedFeatures?: FeatureCollection;
     alerts?: string;
     chat?: IGroup;
+    messages: Map<string, Array<IMessage>>
   };
+}
+
+export interface IMessage {
+  id: string;
+  sender: string;
+  message: string;
 }
 
 export interface IGroup {
@@ -83,6 +90,7 @@ export const appStateMgmt = {
       } as FeatureCollection,
       chemicalHazardSource: {} as FeatureCollection,
       groups: Array<IGroup>(),
+      messages: new Map<string, Array<IMessage>>(),
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
