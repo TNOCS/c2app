@@ -74,7 +74,13 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
   @SubscribeMessage('client-create')
   handleClientCreate(client: Socket, data: IGroupCreate): string {
-    this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group });
+    const group = this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group });
+
+    group.callsigns.forEach((callsign: string) => {
+      this.server
+        .to(this.callsignToSocketId.get(callsign))
+        .emit('server-notification', this.getGroupIdsForCallsign(callsign));
+    });
 
     return this.getGroupIdsForCallsign(data.callsign);
   }
@@ -124,7 +130,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     return JSON.stringify(returnArray);
   }
 
-  setGroupForId(update: IGroupUpdate) {
+  setGroupForId(update: IGroupUpdate): IGroup {
     const featureCollection = update.group as FeatureCollection;
 
     const callsigns = featureCollection.features.map((feature: Feature) => {
@@ -132,5 +138,6 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     });
 
     this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign });
+    return this.groups.get(update.id);
   }
 }

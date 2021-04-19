@@ -20,10 +20,20 @@ export class Socket {
         app: {
           messages: (messages: Map<string, Array<IMessage>>) => {
             let messageList = messages.get(message.id) as Array<IMessage>;
-            if(!messageList) messageList = new Array<IMessage>();
+            if (!messageList) messageList = new Array<IMessage>();
             messageList.push(message);
             messages.set(message.id, messageList);
             return messages;
+          },
+        },
+      });
+    });
+    this.socket.on('server-notification', (data: string) => {
+      const result = JSON.parse(data) as Array<IGroup>;
+      us({
+        app: {
+          groups: () => {
+            return result;
           },
         },
       });

@@ -118,6 +118,7 @@ export const appStateMgmt = {
         });
       },
       createGroup: async () => {
+        if(!states()['app'].selectedFeatures) return;
         const result = await states()['app'].socket.serverCreate(states());
         us({
           app: {
@@ -128,6 +129,7 @@ export const appStateMgmt = {
         });
       },
       updateGroup: async (group: IGroup) => {
+        if(!states()['app'].selectedFeatures) return;
         const result = await states()['app'].socket.serverUpdate(states(), group.id);
         us({
           app: {

@@ -40,7 +40,7 @@ export const Layout: FactoryComponent<{
                   'data-target': 'slide-out',
                   href: m.route.get(),
                 },
-                m('i.material-icons.hide-on-med-and-up', 'menu')
+                m('i.material-icons.hide-on-large-only', 'menu')
               ),
               m(
                 'div',

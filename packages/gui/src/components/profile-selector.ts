@@ -13,7 +13,7 @@ export const profileSelector: FactoryComponent<{
       return m(
         'div.col.s12',
         m('form.row', [
-          m('div.input-field.col.s4', [
+          m('div.input-field.col.s12.m4', [
             m('input', {
               id: 'callsign',
               type: 'text',
@@ -31,7 +31,7 @@ export const profileSelector: FactoryComponent<{
               'Callsign'
             ),
           ]),
-          m('div.input-field.col.s4', [
+          m('div.input-field.col.s12.m4', [
             m(
               'select',
               {
@@ -49,7 +49,7 @@ export const profileSelector: FactoryComponent<{
             m('label', 'Profile'),
           ]),
           m(
-            'button.btn.waves-effect.waves-light.col.s4',
+            'button.btn.waves-effect.waves-light.col.s12.m4',
             {
               onclick: () => {
                 vnode.attrs.actions.updateCallsign(callsign);
