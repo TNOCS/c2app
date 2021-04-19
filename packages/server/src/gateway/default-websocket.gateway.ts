@@ -133,9 +133,13 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   setGroupForId(update: IGroupUpdate): IGroup {
     const featureCollection = update.group as FeatureCollection;
 
-    const callsigns = featureCollection.features.map((feature: Feature) => {
-      return feature.properties.callsign;
-    });
+    const callsigns = [
+      ...new Set(
+        featureCollection.features.map((feature: Feature) => {
+          return feature.properties.name;
+        })
+      ),
+    ];
 
     this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign });
     return this.groups.get(update.id);

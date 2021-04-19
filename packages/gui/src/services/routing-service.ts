@@ -2,11 +2,12 @@ import m, { FactoryComponent, RouteDefs } from 'mithril';
 import { actions, states, IAppModel } from './meiosis';
 import { IPage } from '../models/page';
 import { Layout } from '../components/layout';
-import { Mapbox } from '../components/mapbox';
+import { Mapbox } from '../components/map/mapbox';
+import { mapSideBar } from '../components/map/map-sidebar';
 import { sideBar } from '../components/sidebar';
 import { profileSelector } from '../components/profile-selector';
-import { Chat } from '../components/chat';
-import { Settings } from '../components/settings';
+import { Chat } from '../components/chat/chat';
+import { Settings } from '../components/settings/settings';
 
 export enum Pages {
   PROFILE = 'PROFILE',
@@ -95,7 +96,7 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/mapbox',
     visible: true,
     component: Mapbox,
-    sidebar: sideBar,
+    sidebar: mapSideBar,
     hasSidebar: true,
   },
   {

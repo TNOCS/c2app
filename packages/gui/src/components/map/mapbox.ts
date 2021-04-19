@@ -4,10 +4,10 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
 import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
-import { IActions, IAppModel } from '../services/meiosis';
-import * as MapUtils from '../models/map';
-import car from 'url:../assets/car_icon.png';
-import fireman from 'url:../assets/fireman_icon.png';
+import { IActions, IAppModel } from '../../services/meiosis';
+import * as MapUtils from '../../models/map';
+import car from 'url:../../assets/car_icon.png';
+import fireman from 'url:../../assets/fireman_icon.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;

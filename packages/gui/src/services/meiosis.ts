@@ -67,7 +67,7 @@ export const appStateMgmt = {
           {
             type: 'Feature',
             properties: {
-              callsign: '123',
+              name: '123',
               type: 'firefighter',
             },
             geometry: {
@@ -78,7 +78,7 @@ export const appStateMgmt = {
           {
             type: 'Feature',
             properties: {
-              callsign: '111',
+              name: '111',
               type: 'firefighter',
             },
             geometry: {

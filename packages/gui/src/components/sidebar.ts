@@ -1,6 +1,5 @@
-import { Feature } from 'geojson';
 import m, { FactoryComponent, route } from 'mithril';
-import { IActions, IAppModel, IGroup } from '../services/meiosis';
+import { IActions, IAppModel } from '../services/meiosis';
 import M from 'materialize-css'
 
 export const sideBar: FactoryComponent<{
@@ -22,121 +21,14 @@ export const sideBar: FactoryComponent<{
             m(
               'ul.collapsible.collapsible-accordion',
               m('li', [
-                m('a.collapsible-header', 'POIs', [
+                m('a.collapsible-header', 'Dropdown', [
                   m('i.material-icons', 'arrow_drop_down'),
                   m('i.material-icons', 'add_location'),
                 ]),
                 m(
                   'div.collapsible-body',
-                  m('div', [
-                    m('h5', 'Clicked POI'),
-                    m(
-                      'button.button[type=button]',
-                      {
-                        onclick: () => {
-                          vnode.attrs.actions.resetClickedFeature();
-                        },
-                      },
-                      'Clear clicked POI'
-                    ),
-                    m(
-                      'p',
-                      `${
-                        vnode.attrs.state.app.clickedFeature
-                          ? 'Type: ' +
-                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties.type) +
-                            ' Callsign: ' +
-                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties.callsign)
-                          : ''
-                      }`
-                    ),
-                  ])
+                  m('div', [m('p', 'dropdown content')])
                 ),
-              ])
-            )
-          ),
-          m(
-            'li.no-padding',
-            m(
-              'ul.collapsible.collapsible-accordion',
-              m('li', [
-                m('a.collapsible-header', 'Groups', [
-                  m('i.material-icons', 'arrow_drop_down'),
-                  m('i.material-icons', 'group'),
-                ]),
-                m(
-                  'div.collapsible-body',
-                  m('div', [
-                    m('h5', 'Selected FRs'),
-                    [
-                      m(
-                        'button.button[type=button]',
-                        {
-                          onclick: () => {
-                            vnode.attrs.actions.resetSelectedFeatures();
-                          },
-                        },
-                        'Clear selected FRs'
-                      ),
-                      m(
-                        'button.button[type=button]',
-                        {
-                          onclick: () => {
-                            vnode.attrs.actions.createGroup();
-                          },
-                        },
-                        'Group selected FRs'
-                      ),
-                    ],
-                    m(
-                      'p',
-                      vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
-                        return m('span', JSON.stringify(feature.type));
-                      })
-                    ),
-                    m('h5', 'Groups'),
-                    m(
-                      'p',
-                      vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
-                        return m('p', [
-                          m('p', 'ID: ' + index + ' Members: ' + group.callsigns.length, [
-                            m(
-                              'button.button[type=button]',
-                              {
-                                onclick: () => {
-                                  vnode.attrs.actions.updateGroup(group);
-                                },
-                              },
-                              'Update'
-                            ),
-                            m(
-                              'button.button[type=button]',
-                              {
-                                onclick: () => {
-                                  vnode.attrs.actions.deleteGroup(group);
-                                },
-                              },
-                              'Delete'
-                            ),
-                          ]),
-                        ]);
-                      })
-                    ),
-                  ])
-                ),
-              ])
-            )
-          ),
-          m(
-            'li.no-padding',
-            m(
-              'ul.collapsible.collapsible-accordion',
-              m('li', [
-                m('a.collapsible-header', 'Layers', [
-                  m('i.material-icons', 'arrow_drop_down'),
-                  m('i.material-icons', 'layers'),
-                ]),
-                m('div.collapsible-body', m('div', [])),
               ])
             )
           ),
