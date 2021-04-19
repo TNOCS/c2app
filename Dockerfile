@@ -1,9 +1,9 @@
 # Creates the Chemical Hazard Tool server and GUI
 #
 # You can access the container using:
-#   docker run -it chemical-hazard-tool sh
+#   docker run -it c2app sh
 # To start it stand-alone:
-#   docker run -it -p 3333:3333 chemical-hazard-tool
+#   docker run -it -p 3000:3000 c2app
 
 # Build the app separately
 FROM node:alpine AS builder

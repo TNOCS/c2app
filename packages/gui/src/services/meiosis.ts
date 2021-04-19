@@ -3,35 +3,52 @@ import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
 import { Feature, FeatureCollection } from 'geojson';
 import { Socket } from './socket';
-import { uuid4 } from '../utils/index';
 
 export interface IAppModel {
   app: {
     socket: Socket;
     positionSource: FeatureCollection;
     chemicalHazardSource: FeatureCollection;
-    groups: IGroup[];
+    groups: Array<IGroup>;
     profile: '' | 'commander' | 'firefighter';
+    callsign?: string;
     clickedFeature?: Feature;
     selectedFeatures?: FeatureCollection;
     alerts?: string;
+    chat?: IGroup;
+    messages: Map<string, Array<IMessage>>
   };
 }
 
-export interface IGroup {
-  data: FeatureCollection;
+export interface IMessage {
   id: string;
+  sender: string;
+  message: string;
+}
+
+export interface IGroup {
+  id: string;
+  callsigns: Array<string>;
+  owner: string;
 }
 
 export interface IActions {
   updateClickedFeature: (feature: Feature) => void;
-  updateSelectedFeatures: (features: Feature[]) => void;
+  updateSelectedFeatures: (features: Array<Feature>) => void;
   resetClickedFeature: () => void;
   resetSelectedFeatures: () => void;
-  groupSelectedFeatures: () => void;
+
+  initGroups: () => void;
+  createGroup: () => void;
   updateGroup: (group: IGroup) => void;
-  removeGroup: (group: IGroup) => void;
+  deleteGroup: (group: IGroup) => void;
+
   updateProfile: (data: string) => void;
+  updateCallsign: (data: string) => void;
+
+  openChat: (group: IGroup) => void;
+  closeChat: () => void;
+  sendChat: (group: IGroup, message: string) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -44,9 +61,36 @@ export const appStateMgmt = {
     app: {
       profile: '',
       socket: new Socket(update),
-      positionSource: {} as FeatureCollection,
+      positionSource: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              callsign: '123',
+              type: 'firefighter',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [5.48, 51.442],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              callsign: '111',
+              type: 'firefighter',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [5.48, 51.441],
+            },
+          },
+        ],
+      } as FeatureCollection,
       chemicalHazardSource: {} as FeatureCollection,
-      groups: [] as IGroup[],
+      groups: Array<IGroup>(),
+      messages: new Map<string, Array<IMessage>>(),
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -54,7 +98,7 @@ export const appStateMgmt = {
       updateClickedFeature: (feature: Feature) => {
         us({ app: { clickedFeature: feature } });
       },
-      updateSelectedFeatures: (features: Feature[]) => {
+      updateSelectedFeatures: (features: Array<Feature>) => {
         us({ app: { selectedFeatures: { type: 'FeatureCollection', features: features } } });
       },
       resetClickedFeature: () => {
@@ -63,48 +107,84 @@ export const appStateMgmt = {
       resetSelectedFeatures: () => {
         us({ app: { selectedFeatures: undefined } });
       },
-      groupSelectedFeatures: () => {
+      initGroups: async () => {
+        const result = await states()['app'].socket.serverInit(states());
         us({
           app: {
-            groups: (groups: IGroup[]) => {
-              if (states()['app'].selectedFeatures)
-                groups.push({ data: states()['app'].selectedFeatures as FeatureCollection, id: uuid4() });
-              return groups;
+            groups: () => {
+              return result;
             },
           },
         });
-        states()['app'].socket.queueServerUpdate();
       },
-      updateGroup: (group: IGroup) => {
+      createGroup: async () => {
+        if(!states()['app'].selectedFeatures) return;
+        const result = await states()['app'].socket.serverCreate(states());
         us({
           app: {
-            groups: (groups: IGroup[]) => {
-              const id = groups.findIndex((element: IGroup) => {
-                return element.id == group.id;
-              });
-              if (id > -1) groups[id].data = states()['app'].selectedFeatures as FeatureCollection;
-              return groups;
+            groups: () => {
+              return result;
             },
           },
         });
-        states()['app'].socket.queueServerUpdate();
       },
-      removeGroup: (group: IGroup) => {
+      updateGroup: async (group: IGroup) => {
+        if(!states()['app'].selectedFeatures) return;
+        const result = await states()['app'].socket.serverUpdate(states(), group.id);
         us({
           app: {
-            groups: (groups: IGroup[]) => {
-              const id = groups.findIndex((element: IGroup) => {
-                return element.id == group.id;
-              });
-              if (id > -1) groups.splice(id, 1);
-              return groups;
+            groups: () => {
+              return result;
             },
           },
         });
-        states()['app'].socket.queueServerUpdate();
+      },
+      deleteGroup: async (group: IGroup) => {
+        const result = await states()['app'].socket.serverDelete(states(), group.id);
+        us({
+          app: {
+            groups: () => {
+              return result;
+            },
+          },
+        });
       },
       updateProfile: (data: string) => {
-        us({ app: { profile: () => { return data } } });
+        us({
+          app: {
+            profile: () => {
+              return data;
+            },
+          },
+        });
+      },
+      updateCallsign: (data: string) => {
+        us({
+          app: {
+            callsign: () => {
+              return data;
+            },
+          },
+        });
+      },
+      openChat: (group: IGroup) => {
+        us({
+          app: {
+            chat: () => {
+              return group;
+            },
+          },
+        });
+      },
+      closeChat: () => {
+        us({
+          app: {
+            chat: undefined,
+          },
+        });
+      },
+      sendChat: (group: IGroup, message: string) => {
+        states()['app'].socket.serverSend(states(), group, message);
       },
     };
   },
@@ -117,7 +197,7 @@ const app = {
   actions: (us: UpdateStream, states: Stream<IAppModel>) =>
     Object.assign({}, appStateMgmt.actions(us, states)) as IActions,
   // Services that run everytime the state is updated (so after the action is done)
-  services: [(s) => s.app.socket.updateServer(s)] as Array<(s: IAppModel) => Partial<IAppModel> | void>,
+  services: [] as Array<(s: IAppModel) => Partial<IAppModel> | void>,
   // Effects run from state update until some condition is met (can cause infinite loop)
   effects: (_update: UpdateStream, _actions: IActions) => [] as Array<(state: IAppModel) => Promise<void> | void>,
 };

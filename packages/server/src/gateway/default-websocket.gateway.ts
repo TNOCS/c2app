@@ -4,51 +4,140 @@ import {
   SubscribeMessage,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, Feature } from 'geojson';
+import { uuid4 } from '../utils/index';
+import { Server, Socket } from 'socket.io';
 
 export interface IGroup {
-  data: FeatureCollection;
+  features: FeatureCollection;
+  callsigns: Array<string>;
+  owner: string;
+}
+
+export interface IReturnGroup {
+  id: string;
+  callsigns: Array<string>;
+  owner: string;
+}
+
+export interface IGroupsInit {
+  callsign: string;
+}
+
+export interface IGroupCreate {
+  callsign: string;
+  group: FeatureCollection;
+}
+
+export interface IGroupUpdate {
+  callsign: string;
+  group: FeatureCollection;
   id: string;
 }
 
-export interface IGroupsUpdate {
-  clientId: string;
-  groups: IGroup[]
+export interface IGroupDelete {
+  callsign: string;
+  id: string;
 }
 
-export interface IGroupsRequest{
-  clientId: string;
+export interface IMessage {
+  id: string;
+  callsign: string;
+  message: string;
 }
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server;
-  clients: number = 0;
-  groups: {[key: string]: IGroup[]} = {};
+  @WebSocketServer() server: Server;
+  private clients: number = 0;
+  private groups: Map<string, IGroup> = new Map<string, IGroup>();
+  private callsignToSocketId: Map<string, string> = new Map<string, string>();
 
-  // A client has connected
-  async handleConnection(socket) {
+  /** Handlers */
+  async handleConnection(client: Socket) {
     this.clients++;
-    console.log(socket.id + ' Client count: ' + this.clients);
+    console.log('Connected: ' + client.id + ' Client count: ' + this.clients);
   }
 
-  // A client has disconnected
-  async handleDisconnect() {
+  async handleDisconnect(client: Socket) {
     this.clients--;
-    console.log('Disconnect, client count: ' + this.clients);
+    console.log('Disconnected: ' + client.id + ' Client count: ' + this.clients);
+  }
+
+  @SubscribeMessage('client-init')
+  handleClientInit(client: Socket, data: IGroupsInit): string {
+    this.callsignToSocketId.set(data.callsign, client.id);
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-create')
+  handleClientCreate(client: Socket, data: IGroupCreate): string {
+    const group = this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group });
+
+    group.callsigns.forEach((callsign: string) => {
+      this.server
+        .to(this.callsignToSocketId.get(callsign))
+        .emit('server-notification', this.getGroupIdsForCallsign(callsign));
+    });
+
+    return this.getGroupIdsForCallsign(data.callsign);
   }
 
   @SubscribeMessage('client-update')
-  handleClientUpdate(@MessageBody() data: IGroupsUpdate): string {
-    this.groups[data.clientId] = data.groups;
-    return "success";
+  handleClientUpdate(client: Socket, data: IGroupUpdate): string {
+    this.setGroupForId(data);
+
+    return this.getGroupIdsForCallsign(data.callsign);
   }
 
-  @SubscribeMessage('groups')
-  handleGroups(@MessageBody() data: IGroupsRequest): string {
-    return JSON.stringify(this.groups[data.clientId]);
+  @SubscribeMessage('client-delete')
+  handleClientDelete(client: Socket, data: IGroupDelete): string {
+    this.groups.delete(data.id);
+
+    return this.getGroupIdsForCallsign(data.callsign);
+  }
+
+  @SubscribeMessage('client-message')
+  handleMessage(client: Socket, data: IMessage): string {
+    const group = this.groups.get(data.id);
+
+    group.callsigns.forEach((callsign: string) => {
+      this.server
+        .to(this.callsignToSocketId.get(callsign))
+        .emit('server-message', JSON.stringify({ message: data.message, id: data.id, sender: data.callsign }));
+    });
+    if (!group.callsigns.includes(group.owner)) {
+      this.server
+        .to(this.callsignToSocketId.get(group.owner))
+        .emit('server-message', JSON.stringify({ message: data.message, id: data.id, sender: data.callsign }));
+    }
+
+    return data.message;
+  }
+
+  /** Helper Funcs */
+  getGroupIdsForCallsign(callsign: string): string {
+    let returnArray: Array<IReturnGroup> = new Array<IReturnGroup>();
+
+    this.groups.forEach((group: IGroup, uuid: string) => {
+      if (group.owner == callsign || group.callsigns.includes(callsign)) {
+        returnArray.push({ id: uuid, callsigns: group.callsigns, owner: group.owner });
+      }
+    });
+
+    return JSON.stringify(returnArray);
+  }
+
+  setGroupForId(update: IGroupUpdate): IGroup {
+    const featureCollection = update.group as FeatureCollection;
+
+    const callsigns = featureCollection.features.map((feature: Feature) => {
+      return feature.properties.callsign;
+    });
+
+    this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign });
+    return this.groups.get(update.id);
   }
 }

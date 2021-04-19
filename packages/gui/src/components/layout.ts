@@ -1,7 +1,6 @@
-import m, { FactoryComponent } from 'mithril';
-import { IAppModel } from '../services';
+import m, { FactoryComponent, route } from 'mithril';
+import { IAppModel } from '../services/meiosis';
 import logo from 'url:../assets/explosion.svg';
-import { Icon } from 'mithril-materialized';
 
 export const Layout: FactoryComponent<{
   state: IAppModel;
@@ -16,7 +15,7 @@ export const Layout: FactoryComponent<{
             'nav',
             { style: 'height:64px' },
             m('.nav-wrapper', [
-              m('a.brand-logo[href=#]', [
+              m('a.brand-logo', {onclick: () => {route.set('/mapbox')}}, [
                 m(`img[width=100][height=45][src=${logo}]`, {
                   style: 'margin: 7px 0 0 5px;',
                 }),
@@ -41,11 +40,7 @@ export const Layout: FactoryComponent<{
                   'data-target': 'slide-out',
                   href: m.route.get(),
                 },
-                m(Icon, {
-                  iconName: 'menu',
-                  className: '.hide-on-med-and-up',
-                  style: 'margin-left: 5px;',
-                })
+                m('i.material-icons.hide-on-large-only', 'menu')
               ),
               m(
                 'div',
@@ -57,7 +52,7 @@ export const Layout: FactoryComponent<{
                   {
                     style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
                   },
-                  vnode.attrs.state.app.profile
+                  `${vnode.attrs.state.app.callsign ? vnode.attrs.state.app.profile + ' ' + vnode.attrs.state.app.callsign : ''}`
                 )
               ),
             ])

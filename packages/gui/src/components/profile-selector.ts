@@ -1,37 +1,72 @@
 import m, { FactoryComponent } from 'mithril';
-import { actions, IActions, IAppModel } from '../services';
-import { Button, Dropdown } from 'mithril-materialized';
+import { IActions, IAppModel } from '../services/meiosis';
+import M from 'materialize-css'
 
 export const profileSelector: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
+  let callsign: string;
+  let profile: string;
   return {
     view: (vnode) => {
-      return m('div.col.s12', [
-        m(Dropdown, {
-          class: `green col s12`,
-          items: [
+      return m(
+        'div.col.s12',
+        m('form.row', [
+          m('div.input-field.col.s12.m4', [
+            m('input', {
+              id: 'callsign',
+              type: 'text',
+              value: callsign,
+              onchange: (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                callsign = target.value;
+              },
+            }),
+            m(
+              'label',
+              {
+                for: 'callsign',
+              },
+              'Callsign'
+            ),
+          ]),
+          m('div.input-field.col.s12.m4', [
+            m(
+              'select',
+              {
+                onchange: (e: Event) => {
+                  const target = e.target as HTMLInputElement;
+                  profile = target.value;
+                },
+              },
+              [
+                m('option', { value: '', disabled: true, selected: true }, 'Choose your profile'),
+                m('option', { value: 'commander' }, 'commander'),
+                m('option', { value: 'firefighter' }, 'firefighter'),
+              ]
+            ),
+            m('label', 'Profile'),
+          ]),
+          m(
+            'button.btn.waves-effect.waves-light.col.s12.m4',
             {
-              label: 'commander',
+              onclick: () => {
+                vnode.attrs.actions.updateCallsign(callsign);
+                vnode.attrs.actions.updateProfile(profile);
+                m.route.set('/mapbox');
+              },
             },
-            {
-              label: 'firefighter',
-            },
-          ],
-          initialValue: vnode.attrs.state.app.profile,
-          onchange: (v: string | number) => {
-            actions.updateProfile(v.toString());
-          },
-        }),
-        m(Button, {
-          class: `green col s12`,
-          label: 'Submit',
-          onclick: () => {
-            m.route.set('/mapbox');
-          },
-        }),
-      ]);
+            'Go',
+            m('i.material-icons.right', 'send')
+          ),
+        ])
+      );
+    },
+    oncreate: () => {
+      const elemSelect = document.querySelectorAll('select');
+      M.FormSelect.init(elemSelect);
     },
   };
+  
 };

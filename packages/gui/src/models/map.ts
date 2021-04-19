@@ -31,6 +31,7 @@ export const drawConfig = {
   controls: {
     polygon: true,
     trash: true,
+    point: true,
   },
 };
 

@@ -1,13 +1,13 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../services';
-import * as MapUtils from '../../models/map';
 import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { MapboxStyleSwitcherControl } from 'mapbox-gl-style-switcher';
 import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
-import car from 'url:../../assets/Car.png';
-import fireman from 'url:../../assets/Firemen unit.png';
+import { IActions, IAppModel } from '../services/meiosis';
+import * as MapUtils from '../models/map';
+import car from 'url:../assets/car_icon.png';
+import fireman from 'url:../assets/fireman_icon.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -15,8 +15,13 @@ export const Mapbox: FactoryComponent<{
 }> = () => {
   mapboxgl.accessToken = 'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ';
   let map: mapboxgl.Map;
+  let draw: MapboxDraw;
 
   return {
+    oninit: (vnode) => {
+      const { actions } = vnode.attrs;
+      actions.initGroups();
+    },
     view: () => {
       return m('div.col.s12.l9.right', { id: 'mapboxMap' });
     },
@@ -26,10 +31,12 @@ export const Mapbox: FactoryComponent<{
 
       // Create map and add controls
       map = new mapboxgl.Map(MapUtils.mapConfig);
+      draw = new MapboxDraw(MapUtils.drawConfig);
+
       map.addControl(new mapboxgl.NavigationControl(), 'top-left');
       map.addControl(new MapboxStyleSwitcherControl(MapUtils.mapStyles, 'Mapbox'), 'top-left');
-      map.addControl(new MapboxDraw(MapUtils.drawConfig), 'top-left');
-      map.addControl(new RulerControl, 'top-left')
+      map.addControl(draw, 'top-left');
+      map.addControl(new RulerControl(), 'top-left');
 
       // Add map listeners and socket listener
       map.on('load', () => {
@@ -66,7 +73,7 @@ export const Mapbox: FactoryComponent<{
               'icon-size': 0.5,
               'icon-allow-overlap': true,
             },
-            filter: ['==', 'type', 'man'],
+            filter: ['all', ['in', 'type', 'man', 'firefighter']],
           });
         });
 
