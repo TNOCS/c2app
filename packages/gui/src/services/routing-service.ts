@@ -23,10 +23,6 @@ class RoutingService {
     this.setList(pages);
   }
 
-  public getList() {
-    return this.pages;
-  }
-
   public setList(list: IPage[]) {
     this.pages = Object.freeze(list);
   }
@@ -41,38 +37,31 @@ class RoutingService {
     return page ? page.route : this.defaultRoute;
   }
 
-  public switchTo(pageId: Pages, params?: { [key: string]: string | number | undefined }) {
-    const page = this.pages.filter((p) => p.id === pageId).shift();
-    if (page) {
-      m.route.set(page.route, params ? params : undefined);
-    }
-  }
-
   public routingTable() {
     return this.pages.reduce((r, p) => {
       r[p.route] = p.hasSidebar
         ? {
-            onmatch:
-              p.id === Pages.PROFILE
-                ? undefined
-                : () => {
-                    if (states().app.profile === '') m.route.set('/');
-                  },
-            render: () =>
-              m(this.layout, { state: states() }, [
-                m(p.sidebar, { state: states(), actions: actions }),
-                m(p.component, { state: states(), actions: actions }),
-              ]),
-          }
+          onmatch:
+            p.id === Pages.PROFILE
+              ? undefined
+              : () => {
+                if (states().app.profile === '') m.route.set('/');
+              },
+          render: () =>
+            m(this.layout, { state: states() }, [
+              m(p.sidebar, { state: states(), actions: actions }),
+              m(p.component, { state: states(), actions: actions }),
+            ]),
+        }
         : {
-            onmatch:
-              p.id === Pages.PROFILE
-                ? undefined
-                : () => {
-                    if (states().app.profile === '') m.route.set('/');
-                  },
-            render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
-          };
+          onmatch:
+            p.id === Pages.PROFILE
+              ? undefined
+              : () => {
+                if (states().app.profile === '') m.route.set('/');
+              },
+          render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
+        };
       return r;
     }, {} as RouteDefs);
   }

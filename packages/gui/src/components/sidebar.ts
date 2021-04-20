@@ -1,13 +1,13 @@
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
-import M from 'materialize-css'
+import M from 'materialize-css';
 
 export const sideBar: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
   return {
-    view: (vnode) => {
+    view: (_vnode) => {
       return m(
         'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed',
         {
@@ -27,10 +27,10 @@ export const sideBar: FactoryComponent<{
                 ]),
                 m(
                   'div.collapsible-body',
-                  m('div', [m('p', 'dropdown content')])
+                  m('div', [m('p', 'dropdown content')]),
                 ),
-              ])
-            )
+              ]),
+            ),
           ),
           m('div.divider'),
           m(
@@ -43,8 +43,8 @@ export const sideBar: FactoryComponent<{
                   route.set('/mapbox');
                 },
               },
-              m('i.material-icons', 'map')
-            )
+              m('i.material-icons', 'map'),
+            ),
           ),
           m(
             'li',
@@ -56,8 +56,8 @@ export const sideBar: FactoryComponent<{
                   route.set('/chat');
                 },
               },
-              m('i.material-icons', 'chat')
-            )
+              m('i.material-icons', 'chat'),
+            ),
           ),
           m(
             'li',
@@ -69,12 +69,12 @@ export const sideBar: FactoryComponent<{
                   route.set('/settings');
                 },
               },
-              m('i.material-icons', 'settings')
-            )
+              m('i.material-icons', 'settings'),
+            ),
           ),
           // Fix the weird scroll clipping caused by
-          m('div', {style: 'margin: 128px'})
-        ]
+          m('div', { style: 'margin: 128px' }),
+        ],
       );
     },
     oncreate: () => {

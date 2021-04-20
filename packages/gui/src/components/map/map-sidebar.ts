@@ -1,7 +1,7 @@
 import { Feature } from 'geojson';
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel, IGroup } from '../../services/meiosis';
-import M from 'materialize-css'
+import M from 'materialize-css';
 
 export const mapSideBar: FactoryComponent<{
   state: IAppModel;
@@ -37,23 +37,23 @@ export const mapSideBar: FactoryComponent<{
                           vnode.attrs.actions.resetClickedFeature();
                         },
                       },
-                      'Clear clicked POI'
+                      'Clear clicked POI',
                     ),
                     m(
                       'p',
                       `${
                         vnode.attrs.state.app.clickedFeature
                           ? 'Type: ' +
-                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.type) +
-                            ' Callsign: ' +
-                            JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.name)
+                          JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.type) +
+                          ' Callsign: ' +
+                          JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.name)
                           : ''
-                      }`
+                      }`,
                     ),
-                  ])
+                  ]),
                 ),
-              ])
-            )
+              ]),
+            ),
           ),
           m(
             'li.no-padding',
@@ -76,7 +76,7 @@ export const mapSideBar: FactoryComponent<{
                             vnode.attrs.actions.resetSelectedFeatures();
                           },
                         },
-                        'Clear selected FRs'
+                        'Clear selected FRs',
                       ),
                       m(
                         'button.button[type=button]',
@@ -85,14 +85,14 @@ export const mapSideBar: FactoryComponent<{
                             vnode.attrs.actions.createGroup();
                           },
                         },
-                        'Group selected FRs'
+                        'Group selected FRs',
                       ),
                     ],
                     m(
                       'p',
                       vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
                         return m('span', JSON.stringify(feature.type));
-                      })
+                      }),
                     ),
                     m('h5', 'Groups'),
                     m(
@@ -107,7 +107,7 @@ export const mapSideBar: FactoryComponent<{
                                   vnode.attrs.actions.updateGroup(group);
                                 },
                               },
-                              'Update'
+                              'Update',
                             ),
                             m(
                               'button.button[type=button]',
@@ -116,16 +116,16 @@ export const mapSideBar: FactoryComponent<{
                                   vnode.attrs.actions.deleteGroup(group);
                                 },
                               },
-                              'Delete'
+                              'Delete',
                             ),
                           ]),
                         ]);
-                      })
+                      }),
                     ),
-                  ])
+                  ]),
                 ),
-              ])
-            )
+              ]),
+            ),
           ),
           m(
             'li.no-padding',
@@ -136,9 +136,65 @@ export const mapSideBar: FactoryComponent<{
                   m('i.material-icons', 'arrow_drop_down'),
                   m('i.material-icons', 'layers'),
                 ]),
-                m('div.collapsible-body', m('div', [])),
-              ])
-            )
+                m('div.collapsible-body', m('div', [
+                  m(
+                    'li.no-padding',
+                    m(
+                      'ul.collapsible.collapsible-accordion',
+                      m('li', [
+                        m('a.collapsible-header', 'Base Layers', [
+                          m('i.material-icons', 'arrow_drop_down'),
+                        ]),
+                        m('div.collapsible-body', m('div', [
+                          m(
+                            'button.btn.waves-effect.waves-light.col.s12',
+                            {
+                              onclick: () => {
+                                vnode.attrs.actions.switchStyle('mapbox/outdoors-v11');
+                              },
+                            },
+                            'Here'),
+                          m(
+                            'button.btn.waves-effect.waves-light.col.s12',
+                            {
+                              onclick: () => {
+                                vnode.attrs.actions.switchStyle('mapbox/streets-v11');
+                              },
+                            },
+                            'Mapbox'),
+                        ])),
+                      ]),
+                    ),
+                  ),
+                  m(
+                    'li.no-padding',
+                    m(
+                      'ul.collapsible.collapsible-accordion',
+                      m('li', [
+                        m('a.collapsible-header', 'POI Layers', [
+                          m('i.material-icons', 'arrow_drop_down'),
+                        ]),
+                        m('div.collapsible-body', m('div', m('form', vnode.attrs.state.app.layers.map((layer: [string, boolean], index: number) => {
+                            return m('p',
+                              m('label', [
+                                m('input', {
+                                  type: 'checkbox',
+                                  class: 'filled-in',
+                                  checked: layer[1],
+                                  onclick: () => {
+                                    vnode.attrs.actions.toggleLayer(layer, index);
+                                  },
+                                }),
+                                m('span', layer[0])]),
+                            );
+                          })),
+                        )),
+                      ]),
+                    ),
+                  ),
+                ])),
+              ]),
+            ),
           ),
           m('div.divider'),
           m(
@@ -151,8 +207,8 @@ export const mapSideBar: FactoryComponent<{
                   route.set('/mapbox');
                 },
               },
-              m('i.material-icons', 'map')
-            )
+              m('i.material-icons', 'map'),
+            ),
           ),
           m(
             'li',
@@ -164,8 +220,8 @@ export const mapSideBar: FactoryComponent<{
                   route.set('/chat');
                 },
               },
-              m('i.material-icons', 'chat')
-            )
+              m('i.material-icons', 'chat'),
+            ),
           ),
           m(
             'li',
@@ -177,12 +233,12 @@ export const mapSideBar: FactoryComponent<{
                   route.set('/settings');
                 },
               },
-              m('i.material-icons', 'settings')
-            )
+              m('i.material-icons', 'settings'),
+            ),
           ),
           // Fix the weird scroll clipping caused by
-          m('div', {style: 'margin: 128px'})
-        ]
+          m('div', { style: 'margin: 128px' }),
+        ],
       );
     },
     oncreate: () => {

@@ -16,7 +16,10 @@ export interface IAppModel {
     selectedFeatures?: FeatureCollection;
     alerts?: string;
     chat?: IGroup;
-    messages: Map<string, Array<IMessage>>
+    messages: Map<string, Array<IMessage>>;
+    mapStyle: string;
+    switchStyle: boolean;
+    layers: Array<[string, boolean]>
   };
 }
 
@@ -47,8 +50,11 @@ export interface IActions {
   updateCallsign: (data: string) => void;
 
   openChat: (group: IGroup) => void;
-  closeChat: () => void;
   sendChat: (group: IGroup, message: string) => void;
+
+  switchStyle: (style: string) => void;
+  styleSwitched: () => void;
+  toggleLayer: (layer: [string, boolean], index: number) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -91,6 +97,9 @@ export const appStateMgmt = {
       chemicalHazardSource: {} as FeatureCollection,
       groups: Array<IGroup>(),
       messages: new Map<string, Array<IMessage>>(),
+      mapStyle: 'mapbox://styles/mapbox/streets-v11',
+      switchStyle: false,
+      layers: [['geojson_fr', true], ['geojson_fr2', true]] as Array<[string, boolean]>,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -118,7 +127,7 @@ export const appStateMgmt = {
         });
       },
       createGroup: async () => {
-        if(!states()['app'].selectedFeatures) return;
+        if (!states()['app'].selectedFeatures) return;
         const result = await states()['app'].socket.serverCreate(states());
         us({
           app: {
@@ -129,7 +138,7 @@ export const appStateMgmt = {
         });
       },
       updateGroup: async (group: IGroup) => {
-        if(!states()['app'].selectedFeatures) return;
+        if (!states()['app'].selectedFeatures) return;
         const result = await states()['app'].socket.serverUpdate(states(), group.id);
         us({
           app: {
@@ -176,15 +185,33 @@ export const appStateMgmt = {
           },
         });
       },
-      closeChat: () => {
+      sendChat: (group: IGroup, message: string) => {
+        states()['app'].socket.serverSend(states(), group, message);
+      },
+      switchStyle: (style: string) => {
         us({
           app: {
-            chat: undefined,
+            mapStyle: style,
+            switchStyle: true,
           },
         });
       },
-      sendChat: (group: IGroup, message: string) => {
-        states()['app'].socket.serverSend(states(), group, message);
+      styleSwitched: () => {
+        us({
+          app: {
+            switchStyle: false,
+          },
+        });
+      },
+      toggleLayer: (layer: [string, boolean], index: number) => {
+        us({
+          app: {
+            layers: (layers: Array<[string, boolean]>) => {
+              layers[index] = [layer[0], !layer[1]];
+              return layers;
+            },
+          },
+        });
       },
     };
   },
@@ -205,7 +232,7 @@ const app = {
 const runServices = (startingState: IAppModel) =>
   app.services.reduce(
     (state: IAppModel, service: (s: IAppModel) => Partial<IAppModel> | void) => merge(state, service(state)),
-    startingState
+    startingState,
   );
 
 export const states = Stream.scan((state, patch) => runServices(merge(state, patch)), app.initial, update);

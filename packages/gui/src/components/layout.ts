@@ -1,5 +1,6 @@
 import m, { FactoryComponent, route } from 'mithril';
 import { IAppModel } from '../services/meiosis';
+// @ts-ignore
 import logo from 'url:../assets/explosion.svg';
 
 export const Layout: FactoryComponent<{
@@ -15,7 +16,11 @@ export const Layout: FactoryComponent<{
             'nav',
             { style: 'height:64px' },
             m('.nav-wrapper', [
-              m('a.brand-logo', {onclick: () => {route.set('/mapbox')}}, [
+              m('a.brand-logo', {
+                onclick: () => {
+                  route.set('/mapbox');
+                },
+              }, [
                 m(`img[width=100][height=45][src=${logo}]`, {
                   style: 'margin: 7px 0 0 5px;',
                 }),
@@ -29,8 +34,8 @@ export const Layout: FactoryComponent<{
                     {
                       style: 'text-align: left; margin: -7px 0 0 60px; background: #01689B',
                     },
-                    'C2 Application'
-                  )
+                    'C2 Application',
+                  ),
                 ),
               ]),
               m(
@@ -40,7 +45,7 @@ export const Layout: FactoryComponent<{
                   'data-target': 'slide-out',
                   href: m.route.get(),
                 },
-                m('i.material-icons.hide-on-large-only', 'menu')
+                m('i.material-icons.hide-on-large-only', 'menu'),
               ),
               m(
                 'div',
@@ -52,11 +57,11 @@ export const Layout: FactoryComponent<{
                   {
                     style: 'text-align: right; margin: -7px 0 0 60px; background: #01689B',
                   },
-                  `${vnode.attrs.state.app.callsign ? vnode.attrs.state.app.profile + ' ' + vnode.attrs.state.app.callsign : ''}`
-                )
+                  `${vnode.attrs.state.app.callsign ? vnode.attrs.state.app.profile + ' ' + vnode.attrs.state.app.callsign : ''}`,
+                ),
               ),
-            ])
-          )
+            ]),
+          ),
         ),
         m('.row', vnode.children),
       ]);

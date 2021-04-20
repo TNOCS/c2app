@@ -55,7 +55,7 @@ export class Socket {
         { callsign: s.app.callsign, group: s.app.selectedFeatures },
         (result: string) => {
           resolve(JSON.parse(result));
-        }
+        },
       );
     });
   }
@@ -65,7 +65,7 @@ export class Socket {
       this.socket.emit(
         'client-update',
         { callsign: s.app.callsign, group: s.app.selectedFeatures, id: id },
-        (result: string) => resolve(JSON.parse(result))
+        (result: string) => resolve(JSON.parse(result)),
       );
     });
   }
@@ -82,7 +82,8 @@ export class Socket {
     this.socket.emit(
       'client-message',
       { id: group.id, callsign: s.app.callsign, message: message },
-      (result: string) => {}
+      (_result: string) => {
+      },
     );
   }
 }
