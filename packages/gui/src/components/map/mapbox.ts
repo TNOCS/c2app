@@ -6,10 +6,6 @@ import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
 import * as MapUtils from '../../models/map';
-// @ts-ignore
-import car from 'url:../../assets/car_icon.png';
-// @ts-ignore
-import fireman from 'url:../../assets/fireman_icon.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -18,66 +14,6 @@ export const Mapbox: FactoryComponent<{
   mapboxgl.accessToken = 'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ';
   let map: mapboxgl.Map;
   let draw: MapboxDraw;
-
-  // styleID should be in the form "mapbox/satellite-v9"
-  const switchBasemap = async (styleID: string) => {
-    const currentStyle = map.getStyle();
-    const newStyle = await m.request(
-      `https://api.mapbox.com/styles/v1/${styleID}?access_token=pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ`,
-    ) as mapboxgl.Style;
-
-    // ensure any sources from the current style are copied across to the new style
-    newStyle.sources = Object.assign(
-      {},
-      currentStyle.sources,
-      newStyle.sources,
-    );
-
-    // find the index of where to insert our layers to retain in the new style
-    let labelIndex = newStyle.layers?.findIndex((el) => {
-      return el.id == 'state-label';
-    });
-
-    // default to on top
-    if (labelIndex === -1) {
-      labelIndex = newStyle.layers?.length;
-    }
-    const appLayers = currentStyle.layers?.filter((el) => {
-      // app layers are the layers to retain, and these are any layers which have a different source set
-      return (
-        // @ts-ignore
-        el.source &&
-        // @ts-ignore
-        el.source != 'mapbox://mapbox.satellite' &&
-        // @ts-ignore
-        el.source != 'mapbox' &&
-        // @ts-ignore
-        el.source != 'composite'
-      );
-    });
-
-    newStyle.layers = [
-      // @ts-ignore
-      ...newStyle.layers.slice(0, labelIndex),
-      // @ts-ignore
-      ...appLayers,
-      // @ts-ignore
-      ...newStyle.layers.slice(labelIndex, -1),
-    ];
-
-    //newStyle.sprite = currentStyle.sprite;
-    map.setStyle(newStyle);
-
-    map.loadImage(fireman, function(error, image) {
-      if (error) throw error;
-      if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
-    });
-    map.loadImage(car, function(error, image) {
-      if (error) throw error;
-      if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
-    });
-  };
-
 
   return {
     oninit: ({ attrs: { state: _appState, actions } }) => {
@@ -105,48 +41,71 @@ export const Mapbox: FactoryComponent<{
       map.on('load', () => {
         map.on('draw.create', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
         map.on('draw.update', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
-        map.on('click', 'geojson_fr', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
-        map.on('mouseenter', 'geojson_fr', () => (map.getCanvas().style.cursor = 'pointer'));
-        map.on('mouseleave', 'geojson_fr', () => (map.getCanvas().style.cursor = ''));
+        map.on('click', 'firemenPositions', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
+        map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
+        map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
         map.once('styledata', () => {
+          const positionSource = appState.app.positionSource;
+          const gridSource = MapUtils.getGridSource(appState);
+          const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
+          console.log(gridSource)
+
           map.addSource('positions', {
             type: 'geojson',
-            data: appState.app.positionSource,
+            data: positionSource,
+          });
+          map.addSource('grid', {
+            type: 'geojson',
+            data: gridSource,
+          });
+          map.addSource('gridLabels', {
+            type: 'geojson',
+            data: gridLabelsSource,
           });
 
-          map.loadImage(fireman, function(error, image) {
-            if (error) throw error;
-            map.addImage('fireman', image as ImageBitmap);
+          MapUtils.loadImages(map);
 
-            map.addLayer({
-              id: 'geojson_fr',
-              type: 'symbol',
-              source: 'positions',
-              layout: {
-                'icon-image': 'fireman',
-                'icon-size': 0.5,
-                'icon-allow-overlap': true,
-              },
-              filter: ['all', ['in', 'type', 'man', 'firefighter']],
-            });
+          map.addLayer({
+            id: 'firemenPositions',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'fireman',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
+            },
+            filter: ['all', ['in', 'type', 'man', 'firefighter']],
           });
-
-          map.loadImage(car, function(error, image) {
-            if (error) throw error;
-            map.addImage('car', image as ImageBitmap);
-
-            map.addLayer({
-              id: 'geojson_fr2',
-              type: 'symbol',
-              source: 'positions',
-              layout: {
-                'icon-image': 'car',
-                'icon-size': 0.5,
-                'icon-allow-overlap': true,
-                'visibility': 'visible',
-              },
-              filter: ['==', 'type', 'car'],
-            });
+          map.addLayer({
+            id: 'carPositions',
+            type: 'symbol',
+            source: 'positions',
+            layout: {
+              'icon-image': 'car',
+              'icon-size': 0.5,
+              'icon-allow-overlap': true,
+            },
+            filter: ['==', 'type', 'car'],
+          });
+          map.addLayer({
+            id: 'grid',
+            type: 'line',
+            source: 'grid',
+            layout: {
+              'visibility': appState.app.showGrid ? 'visible' : 'none',
+            },
+          });
+          // TODO: make text-field change based on encoding type and amount of polygons
+          map.addLayer({
+            id: 'gridLabels',
+            type: 'symbol',
+            source: 'gridLabels',
+            layout: {
+              'visibility': appState.app.showGrid ? 'visible' : 'none',
+              'text-field': 'AB',
+              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+              'text-anchor': 'center',
+            },
           });
         });
       });
@@ -154,15 +113,31 @@ export const Mapbox: FactoryComponent<{
     // Executes on every redraw
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
+      console.log('Update')
 
       if (appState.app.switchStyle) {
-        switchBasemap(appState.app.mapStyle);
-        actions.styleSwitched();
+        MapUtils.switchBasemap(map, appState.app.mapStyle).then(() => {
+          actions.styleSwitched();
+        });
       }
 
       appState.app.layers.forEach((layer: [string, boolean]) => {
         map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
+
+      const gridSource = MapUtils.getGridSource(appState);
+      const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
+
+      (map.getSource('grid') as GeoJSONSource).setData(gridSource);
+      (map.getSource('gridLabels') as GeoJSONSource).setData(gridLabelsSource);
+      map.setLayoutProperty('grid', 'visibility', appState.app.showGrid ? 'visible' : 'none');
+      map.setLayoutProperty('gridLabels', 'visibility', appState.app.showGrid ? 'visible' : 'none');
+
+      if (appState.app.updateLocation) {
+        const bounds = map.getBounds();
+        actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
+        //appState.app.gridLocation = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+      }
 
       (map.getSource('positions') as GeoJSONSource).setData(appState.app.positionSource);
     },

@@ -19,7 +19,11 @@ export interface IAppModel {
     messages: Map<string, Array<IMessage>>;
     mapStyle: string;
     switchStyle: boolean;
-    layers: Array<[string, boolean]>
+    layers: Array<[string, boolean]>;
+    showGrid: boolean,
+    gridCellSize: number,
+    updateLocation: boolean,
+    gridLocation: [number, number, number, number]
   };
 }
 
@@ -55,6 +59,10 @@ export interface IActions {
   switchStyle: (style: string) => void;
   styleSwitched: () => void;
   toggleLayer: (layer: [string, boolean], index: number) => void;
+  toggleGrid: () => void;
+  updateGridCellSize: (size: number) => void;
+  toggleUpdateLocation: () => void;
+  updateGridLocation: (bbox: [number, number, number, number]) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -99,7 +107,11 @@ export const appStateMgmt = {
       messages: new Map<string, Array<IMessage>>(),
       mapStyle: 'mapbox://styles/mapbox/streets-v11',
       switchStyle: false,
-      layers: [['geojson_fr', true], ['geojson_fr2', true]] as Array<[string, boolean]>,
+      layers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
+      showGrid: false,
+      gridCellSize: 0.5,
+      updateLocation: false,
+      gridLocation: [5.46, 51.42, 5.50, 51.46],
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -210,6 +222,38 @@ export const appStateMgmt = {
               layers[index] = [layer[0], !layer[1]];
               return layers;
             },
+          },
+        });
+      },
+      toggleGrid: () => {
+        us({
+          app: {
+            showGrid: (showGrid: boolean) => {
+              return !showGrid;
+            },
+          },
+        });
+      },
+      updateGridCellSize: (size: number) => {
+        us({
+          app: {
+            gridCellSize: size,
+          },
+        });
+      },
+      toggleUpdateLocation: () => {
+        us({
+          app: {
+            updateLocation: (update: boolean) => {
+              return !update;
+            },
+          },
+        });
+      },
+      updateGridLocation: (bbox: [number, number, number, number]) => {
+        us({
+          app: {
+            gridLocation: bbox,
           },
         });
       },

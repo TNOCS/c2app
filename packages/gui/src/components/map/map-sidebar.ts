@@ -7,6 +7,7 @@ export const mapSideBar: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
+  let gridCellSize: number;
   return {
     view: (vnode) => {
       return m(
@@ -145,23 +146,23 @@ export const mapSideBar: FactoryComponent<{
                         m('a.collapsible-header', 'Base Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
-                        m('div.collapsible-body', m('div', [
+                        m('div.collapsible-body', m('div.row', [
                           m(
-                            'button.btn.waves-effect.waves-light.col.s12',
+                            'button.btn.waves-effect.waves-light.col.s6',
                             {
                               onclick: () => {
-                                vnode.attrs.actions.switchStyle('mapbox/outdoors-v11');
+                                vnode.attrs.actions.switchStyle('mapbox/dark-v10');
                               },
                             },
-                            'Here'),
+                            'Dark'),
                           m(
-                            'button.btn.waves-effect.waves-light.col.s12',
+                            'button.btn.waves-effect.waves-light.col.s6',
                             {
                               onclick: () => {
                                 vnode.attrs.actions.switchStyle('mapbox/streets-v11');
                               },
                             },
-                            'Mapbox'),
+                            'Light'),
                         ])),
                       ]),
                     ),
@@ -171,11 +172,11 @@ export const mapSideBar: FactoryComponent<{
                     m(
                       'ul.collapsible.collapsible-accordion',
                       m('li', [
-                        m('a.collapsible-header', 'POI Layers', [
+                        m('a.collapsible-header', 'Realtime Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
-                        m('div.collapsible-body', m('div', m('form', vnode.attrs.state.app.layers.map((layer: [string, boolean], index: number) => {
-                            return m('p',
+                        m('div.collapsible-body', m('div.row', m('form', vnode.attrs.state.app.layers.map((layer: [string, boolean], index: number) => {
+                            return m('p.col.s11.right',
                               m('label', [
                                 m('input', {
                                   type: 'checkbox',
@@ -189,6 +190,81 @@ export const mapSideBar: FactoryComponent<{
                             );
                           })),
                         )),
+                      ]),
+                    ),
+                  ),
+                  m(
+                    'li.no-padding',
+                    m(
+                      'ul.collapsible.collapsible-accordion',
+                      m('li', [
+                        m('a.collapsible-header', 'Grid Layers', [
+                          m('i.material-icons', 'arrow_drop_down'),
+                        ]),
+                        m('div.collapsible-body', m('div.row', m('form', [m('p.col.s11.right',
+                          m('label', [
+                            m('input', {
+                              type: 'checkbox',
+                              class: 'filled-in',
+                              checked: vnode.attrs.state.app.showGrid,
+                              onclick: () => {
+                                vnode.attrs.actions.toggleGrid();
+                              },
+                            }),
+                            m('span', 'Show Custom Grid')]),
+                          ),
+                          m('div.divider.col.s11.right'),
+                          m('div.input-field.col.s11.right', [
+                            m('input', {
+                              id: 'gridCellSize',
+                              type: 'text',
+                              value: gridCellSize,
+                              onchange: (e: Event) => {
+                                const target = e.target as HTMLInputElement;
+                                gridCellSize = Number(target.value);
+                              },
+                            }),
+                            m(
+                              'label',
+                              {
+                                for: 'gridCellSize',
+                              },
+                              'Cell Size (km)',
+                            ),
+                          ]),
+                          m('p.col.s11.right',
+                            m('label', [
+                              m('input', {
+                                type: 'checkbox',
+                                class: 'filled-in',
+                                checked: vnode.attrs.state.app.updateLocation,
+                                onclick: () => {
+                                  vnode.attrs.actions.toggleUpdateLocation();
+                                },
+                              }),
+                              m('span', 'Fit Grid to Current Viewport')]),
+                          ),
+                          m(
+                            'button.btn.waves-effect.waves-light.col.s11.right',
+                            {
+                              onclick: () => {
+                                vnode.attrs.actions.updateGridCellSize(gridCellSize);
+                              },
+                            },
+                            'Generate Grid'),
+                          ])),
+                        ),
+                      ]),
+                    ),
+                  ),
+                  m(
+                    'li.no-padding',
+                    m(
+                      'ul.collapsible.collapsible-accordion',
+                      m('li', [
+                        m('a.collapsible-header', 'Custom Layers', [
+                          m('i.material-icons', 'arrow_drop_down'),
+                        ]),
                       ]),
                     ),
                   ),
