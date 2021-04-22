@@ -6,25 +6,73 @@ import { Socket } from './socket';
 
 export interface IAppModel {
   app: {
+    // Core
     socket: Socket;
-    positionSource: FeatureCollection;
+
+    // Alerts
+    alerts?: string;
     chemicalHazardSource: FeatureCollection;
-    groups: Array<IGroup>;
-    profile: '' | 'commander' | 'firefighter';
-    callsign?: string;
+
+    // Positions
+    positionSource: FeatureCollection;
+
+    // Clicking/Selecting
     clickedFeature?: Feature;
     selectedFeatures?: FeatureCollection;
-    alerts?: string;
-    chat?: IGroup;
+
+    // Groups
+    groups: Array<IGroup>;
+
+    // Profile
+    profile: '' | 'commander' | 'firefighter';
+    callsign?: string;
+
+    // Chat
     messages: Map<string, Array<IMessage>>;
+    chat?: IGroup;
+
+    // Layers/styles
     mapStyle: string;
     switchStyle: boolean;
-    layers: Array<[string, boolean]>;
-    showGrid: boolean,
-    gridCellSize: number,
-    updateLocation: boolean,
-    gridLocation: [number, number, number, number]
+    realtimeLayers: Array<[string, boolean]>;
+    gridLayers: Array<[string, boolean]>;
+    gridOptions: IGridOptions;
   };
+}
+
+export interface IActions {
+  // Clicking/selecting
+  updateClickedFeature: (feature: Feature) => void;
+  updateSelectedFeatures: (features: Array<Feature>) => void;
+  resetClickedFeature: () => void;
+  resetSelectedFeatures: () => void;
+
+  // Groups
+  initGroups: () => void;
+  createGroup: () => void;
+  updateGroup: (group: IGroup) => void;
+  deleteGroup: (group: IGroup) => void;
+
+  // Profile
+  updateProfile: (data: string) => void;
+  updateCallsign: (data: string) => void;
+
+  // Chat
+  openChat: (group: IGroup) => void;
+  sendChat: (group: IGroup, message: string) => void;
+
+  // Layers/styles
+  switchStyle: (style: string) => void;
+  toggleLayer: (selector: string, index: number) => void;
+  updateGridCellSize: (size: number) => void;
+  toggleUpdateLocation: () => void;
+  updateGridLocation: (bbox: [number, number, number, number]) => void;
+}
+
+export interface IGridOptions {
+  gridCellSize: number;
+  updateLocation: boolean;
+  gridLocation: [number, number, number, number];
 }
 
 export interface IMessage {
@@ -39,32 +87,6 @@ export interface IGroup {
   owner: string;
 }
 
-export interface IActions {
-  updateClickedFeature: (feature: Feature) => void;
-  updateSelectedFeatures: (features: Array<Feature>) => void;
-  resetClickedFeature: () => void;
-  resetSelectedFeatures: () => void;
-
-  initGroups: () => void;
-  createGroup: () => void;
-  updateGroup: (group: IGroup) => void;
-  deleteGroup: (group: IGroup) => void;
-
-  updateProfile: (data: string) => void;
-  updateCallsign: (data: string) => void;
-
-  openChat: (group: IGroup) => void;
-  sendChat: (group: IGroup, message: string) => void;
-
-  switchStyle: (style: string) => void;
-  styleSwitched: () => void;
-  toggleLayer: (layer: [string, boolean], index: number) => void;
-  toggleGrid: () => void;
-  updateGridCellSize: (size: number) => void;
-  toggleUpdateLocation: () => void;
-  updateGridLocation: (bbox: [number, number, number, number]) => void;
-}
-
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
 export type UpdateStream = Stream<Partial<ModelUpdateFunction>>;
 const update = Stream<ModelUpdateFunction>();
@@ -73,8 +95,13 @@ const update = Stream<ModelUpdateFunction>();
 export const appStateMgmt = {
   initial: {
     app: {
-      profile: '',
+      // Core
       socket: new Socket(update),
+
+      // Alerts
+      chemicalHazardSource: {} as FeatureCollection,
+
+      // Positions
       positionSource: {
         type: 'FeatureCollection',
         features: [
@@ -102,20 +129,32 @@ export const appStateMgmt = {
           },
         ],
       } as FeatureCollection,
-      chemicalHazardSource: {} as FeatureCollection,
+
+      // Clicking/Selecting
+
+      // Groups
       groups: Array<IGroup>(),
+
+      // Profile
+      profile: '',
+
+      // Chat
       messages: new Map<string, Array<IMessage>>(),
-      mapStyle: 'mapbox://styles/mapbox/streets-v11',
-      switchStyle: false,
-      layers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
-      showGrid: false,
-      gridCellSize: 0.5,
-      updateLocation: false,
-      gridLocation: [5.46, 51.42, 5.50, 51.46],
+
+      // Layers/styles
+      mapStyle: 'mapbox/streets-v11',
+      realtimeLayers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
+      gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
+      gridOptions: {
+        gridCellSize: 0.5,
+        updateLocation: false,
+        gridLocation: [5.46, 51.42, 5.50, 51.46],
+      } as IGridOptions,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
     return {
+      // Clicking/selecting
       updateClickedFeature: (feature: Feature) => {
         us({ app: { clickedFeature: feature } });
       },
@@ -128,6 +167,8 @@ export const appStateMgmt = {
       resetSelectedFeatures: () => {
         us({ app: { selectedFeatures: undefined } });
       },
+
+      //Groups
       initGroups: async () => {
         const result = await states()['app'].socket.serverInit(states());
         us({
@@ -170,6 +211,8 @@ export const appStateMgmt = {
           },
         });
       },
+
+      // Profile
       updateProfile: (data: string) => {
         us({
           app: {
@@ -188,6 +231,8 @@ export const appStateMgmt = {
           },
         });
       },
+
+      // Chat
       openChat: (group: IGroup) => {
         us({
           app: {
@@ -200,52 +245,53 @@ export const appStateMgmt = {
       sendChat: (group: IGroup, message: string) => {
         states()['app'].socket.serverSend(states(), group, message);
       },
+
+      // Layers/style
       switchStyle: (style: string) => {
         us({
           app: {
             mapStyle: style,
-            switchStyle: true,
           },
         });
       },
-      styleSwitched: () => {
-        us({
-          app: {
-            switchStyle: false,
-          },
-        });
-      },
-      toggleLayer: (layer: [string, boolean], index: number) => {
-        us({
-          app: {
-            layers: (layers: Array<[string, boolean]>) => {
-              layers[index] = [layer[0], !layer[1]];
-              return layers;
-            },
-          },
-        });
-      },
-      toggleGrid: () => {
-        us({
-          app: {
-            showGrid: (showGrid: boolean) => {
-              return !showGrid;
-            },
-          },
-        });
+      toggleLayer: (selector: string, index: number) => {
+        switch (selector) {
+          case 'realtime':
+            us({
+              app: {
+                realtimeLayers: (layers: Array<[string, boolean]>) => {
+                  layers[index] = [layers[index][0], !layers[index][1]];
+                  return layers;
+                },
+              },
+            });
+            break;
+          case 'grid':
+            us({
+              app: {
+                gridLayers: (layers: [string, boolean][]) => {
+                  return layers.map((layer: [string, boolean]) => {
+                    return [layer[0], !layer[1]];
+                  });
+                },
+              },
+            });
+            break;
+        }
       },
       updateGridCellSize: (size: number) => {
         us({
           app: {
-            gridCellSize: size,
+            gridOptions: { gridCellSize: size, updateLocation: false },
           },
         });
       },
       toggleUpdateLocation: () => {
         us({
           app: {
-            updateLocation: (update: boolean) => {
-              return !update;
+            gridOptions: (options: IGridOptions) => {
+              options.updateLocation = !options.updateLocation;
+              return options;
             },
           },
         });
@@ -253,7 +299,7 @@ export const appStateMgmt = {
       updateGridLocation: (bbox: [number, number, number, number]) => {
         us({
           app: {
-            gridLocation: bbox,
+            gridOptions: { gridLocation: bbox },
           },
         });
       },

@@ -175,7 +175,7 @@ export const mapSideBar: FactoryComponent<{
                         m('a.collapsible-header', 'Realtime Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
-                        m('div.collapsible-body', m('div.row', m('form', vnode.attrs.state.app.layers.map((layer: [string, boolean], index: number) => {
+                        m('div.collapsible-body', m('div.row', m('form', vnode.attrs.state.app.realtimeLayers.map((layer: [string, boolean], index: number) => {
                             return m('p.col.s11.right',
                               m('label', [
                                 m('input', {
@@ -183,7 +183,7 @@ export const mapSideBar: FactoryComponent<{
                                   class: 'filled-in',
                                   checked: layer[1],
                                   onclick: () => {
-                                    vnode.attrs.actions.toggleLayer(layer, index);
+                                    vnode.attrs.actions.toggleLayer('realtime', index);
                                   },
                                 }),
                                 m('span', layer[0])]),
@@ -206,9 +206,9 @@ export const mapSideBar: FactoryComponent<{
                             m('input', {
                               type: 'checkbox',
                               class: 'filled-in',
-                              checked: vnode.attrs.state.app.showGrid,
+                              checked: vnode.attrs.state.app.gridLayers[0][1],
                               onclick: () => {
-                                vnode.attrs.actions.toggleGrid();
+                                vnode.attrs.actions.toggleLayer('grid', 0);
                               },
                             }),
                             m('span', 'Show Custom Grid')]),
@@ -237,7 +237,7 @@ export const mapSideBar: FactoryComponent<{
                               m('input', {
                                 type: 'checkbox',
                                 class: 'filled-in',
-                                checked: vnode.attrs.state.app.updateLocation,
+                                checked: vnode.attrs.state.app.gridOptions.updateLocation,
                                 onclick: () => {
                                   vnode.attrs.actions.toggleUpdateLocation();
                                 },

@@ -2,7 +2,7 @@ import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
-import { IActions, IAppModel } from '../services/meiosis';
+import { IActions, IGridOptions } from '../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
 // @ts-ignore
@@ -41,8 +41,8 @@ export const displayPopup = (features: Feature[], actions: IActions) => {
   actions.updateClickedFeature(features[0]);
 };
 
-export const getGridSource = (appState: IAppModel): FeatureCollection<Polygon> => {
-  return SquareGrid(appState.app.gridLocation, appState.app.gridCellSize, { units: 'kilometers' });
+export const getGridSource = (gridOptions: IGridOptions): FeatureCollection<Polygon> => {
+  return SquareGrid(gridOptions.gridLocation, gridOptions.gridCellSize, { units: 'kilometers' });
 };
 
 export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): FeatureCollection => {

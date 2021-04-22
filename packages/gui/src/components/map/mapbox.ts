@@ -27,7 +27,7 @@ export const Mapbox: FactoryComponent<{
       // Create map and add controls
       map = new mapboxgl.Map({
         container: 'mapboxMap',
-        style: appState.app.mapStyle,
+        style: `mapbox://styles/${appState.app.mapStyle}`,
         center: [5.48, 51.44] as [number, number],
         zoom: 12,
       });
@@ -46,9 +46,8 @@ export const Mapbox: FactoryComponent<{
         map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
         map.once('styledata', () => {
           const positionSource = appState.app.positionSource;
-          const gridSource = MapUtils.getGridSource(appState);
+          const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
           const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
-          console.log(gridSource)
 
           map.addSource('positions', {
             type: 'geojson',
@@ -92,7 +91,7 @@ export const Mapbox: FactoryComponent<{
             type: 'line',
             source: 'grid',
             layout: {
-              'visibility': appState.app.showGrid ? 'visible' : 'none',
+              'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
             },
           });
           // TODO: make text-field change based on encoding type and amount of polygons
@@ -101,7 +100,7 @@ export const Mapbox: FactoryComponent<{
             type: 'symbol',
             source: 'gridLabels',
             layout: {
-              'visibility': appState.app.showGrid ? 'visible' : 'none',
+              'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
               'text-field': 'AB',
               'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
               'text-anchor': 'center',
@@ -113,33 +112,30 @@ export const Mapbox: FactoryComponent<{
     // Executes on every redraw
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
-      console.log('Update')
 
-      if (appState.app.switchStyle) {
-        MapUtils.switchBasemap(map, appState.app.mapStyle).then(() => {
-          actions.styleSwitched();
-        });
+      if (appState.app.gridOptions.updateLocation) {
+        const bounds = map.getBounds();
+        actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
       }
 
-      appState.app.layers.forEach((layer: [string, boolean]) => {
+      const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
+      const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
+
+      (map.getSource('positions') as GeoJSONSource).setData(appState.app.positionSource);
+      (map.getSource('grid') as GeoJSONSource).setData(gridSource);
+      (map.getSource('gridLabels') as GeoJSONSource).setData(gridLabelsSource);
+
+      if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
+        MapUtils.switchBasemap(map, appState.app.mapStyle).catch();
+      }
+
+      appState.app.realtimeLayers.forEach((layer: [string, boolean]) => {
         map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
 
-      const gridSource = MapUtils.getGridSource(appState);
-      const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
-
-      (map.getSource('grid') as GeoJSONSource).setData(gridSource);
-      (map.getSource('gridLabels') as GeoJSONSource).setData(gridLabelsSource);
-      map.setLayoutProperty('grid', 'visibility', appState.app.showGrid ? 'visible' : 'none');
-      map.setLayoutProperty('gridLabels', 'visibility', appState.app.showGrid ? 'visible' : 'none');
-
-      if (appState.app.updateLocation) {
-        const bounds = map.getBounds();
-        actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
-        //appState.app.gridLocation = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
-      }
-
-      (map.getSource('positions') as GeoJSONSource).setData(appState.app.positionSource);
+      appState.app.gridLayers.forEach((layer: [string, boolean]) => {
+        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+      });
     },
   };
 };
