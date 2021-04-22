@@ -1,3 +1,4 @@
+import m from 'mithril';
 import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
@@ -9,7 +10,6 @@ import polylabel from 'polylabel';
 import car from 'url:../assets/car_icon.png';
 // @ts-ignore
 import fireman from 'url:../assets/fireman_icon.png';
-import m from 'mithril';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -45,18 +45,39 @@ export const getGridSource = (gridOptions: IGridOptions): FeatureCollection<Poly
   return SquareGrid(gridOptions.gridLocation, gridOptions.gridCellSize, { units: 'kilometers' });
 };
 
+const getRowLetter = (index: number, rows: number) => {
+  return String.fromCharCode(Math.abs((index % rows) - rows) + 64);
+};
+
+const getColumnNumber = (index: number, rows: number) => {
+  return Math.floor(index / rows) + 1;
+};
+
 export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): FeatureCollection => {
+  let rows = new Set<number>();
+  let prev_size: number = 0;
+  gridSource.features.some((feature: Feature) => {
+    let longLat = polylabel((feature.geometry as Polygon).coordinates);
+    rows.add(longLat[1]);
+    const curr_size = rows.size;
+    if (prev_size === curr_size) return true;
+    prev_size = curr_size;
+    return false;
+  });
+
   return {
     type: 'FeatureCollection',
     features:
-      gridSource.features.map((feature: Feature) => {
+      gridSource.features.map((feature: Feature, index: number) => {
         return {
           type: 'Feature',
           geometry: {
             type: 'Point',
             coordinates: polylabel((feature.geometry as Polygon).coordinates),
           } as Geometry,
-          properties: {},
+          properties: {
+            cellLabel: `${getRowLetter(index, rows.size) + getColumnNumber(index, rows.size)}`,
+          },
         } as Feature;
       }),
   } as FeatureCollection;

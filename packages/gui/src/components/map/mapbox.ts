@@ -6,6 +6,10 @@ import RulerControl from 'mapbox-gl-controls/lib/ruler';
 import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
 import * as MapUtils from '../../models/map';
+// @ts-ignore
+import fireman from 'url:../../assets/fireman_icon.png';
+// @ts-ignore
+import car from 'url:../../assets/car_icon.png';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -62,29 +66,35 @@ export const Mapbox: FactoryComponent<{
             data: gridLabelsSource,
           });
 
-          MapUtils.loadImages(map);
-
-          map.addLayer({
-            id: 'firemenPositions',
-            type: 'symbol',
-            source: 'positions',
-            layout: {
-              'icon-image': 'fireman',
-              'icon-size': 0.5,
-              'icon-allow-overlap': true,
-            },
-            filter: ['all', ['in', 'type', 'man', 'firefighter']],
+          map.loadImage(fireman, function(error, image) {
+            if (error) throw error;
+            if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
+            map.addLayer({
+              id: 'firemenPositions',
+              type: 'symbol',
+              source: 'positions',
+              layout: {
+                'icon-image': 'fireman',
+                'icon-size': 0.5,
+                'icon-allow-overlap': true,
+              },
+              filter: ['all', ['in', 'type', 'man', 'firefighter']],
+            });
           });
-          map.addLayer({
-            id: 'carPositions',
-            type: 'symbol',
-            source: 'positions',
-            layout: {
-              'icon-image': 'car',
-              'icon-size': 0.5,
-              'icon-allow-overlap': true,
-            },
-            filter: ['==', 'type', 'car'],
+          map.loadImage(car, function(error, image) {
+            if (error) throw error;
+            if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
+            map.addLayer({
+              id: 'carPositions',
+              type: 'symbol',
+              source: 'positions',
+              layout: {
+                'icon-image': 'car',
+                'icon-size': 0.5,
+                'icon-allow-overlap': true,
+              },
+              filter: ['==', 'type', 'car'],
+            });
           });
           map.addLayer({
             id: 'grid',
@@ -94,16 +104,13 @@ export const Mapbox: FactoryComponent<{
               'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
             },
           });
-          // TODO: make text-field change based on encoding type and amount of polygons
           map.addLayer({
             id: 'gridLabels',
             type: 'symbol',
             source: 'gridLabels',
             layout: {
               'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
-              'text-field': 'AB',
-              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-              'text-anchor': 'center',
+              'text-field': '{cellLabel}',
             },
           });
         });
