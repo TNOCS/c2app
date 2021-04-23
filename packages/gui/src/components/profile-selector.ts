@@ -10,9 +10,12 @@ export const profileSelector: FactoryComponent<{
   let profile: string;
   return {
     view: (vnode) => {
-      return m(
-        'div.col.s12',
-        m('form.row', [
+      return m('div.col.s12',
+        m('form.row', {
+          onsubmit: function(e: Event) {
+            e.preventDefault();
+          },
+        }, [
           m('div.input-field.col.s12.m4', [
             m('input', {
               id: 'callsign',
@@ -64,8 +67,7 @@ export const profileSelector: FactoryComponent<{
       );
     },
     oncreate: () => {
-      const elemSelect = document.querySelectorAll('select');
-      M.FormSelect.init(elemSelect);
+      M.AutoInit();
     },
   };
 

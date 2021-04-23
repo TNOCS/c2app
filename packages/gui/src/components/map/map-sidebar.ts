@@ -175,7 +175,11 @@ export const mapSideBar: FactoryComponent<{
                         m('a.collapsible-header', 'Realtime Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
-                        m('div.collapsible-body', m('div.row', m('form', vnode.attrs.state.app.realtimeLayers.map((layer: [string, boolean], index: number) => {
+                        m('div.collapsible-body', m('div.row', m('form', {
+                            onsubmit: function(e: Event) {
+                              e.preventDefault();
+                            },
+                          }, vnode.attrs.state.app.realtimeLayers.map((layer: [string, boolean], index: number) => {
                             return m('p.col.s11.right',
                               m('label', [
                                 m('input', {
@@ -201,7 +205,11 @@ export const mapSideBar: FactoryComponent<{
                         m('a.collapsible-header', 'Grid Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
-                        m('div.collapsible-body', m('div.row', m('form', [m('p.col.s11.right',
+                        m('div.collapsible-body', m('div.row', m('form', {
+                            onsubmit: function(e: Event) {
+                              e.preventDefault();
+                            },
+                          }, [m('p.col.s11.right',
                           m('label', [
                             m('input', {
                               type: 'checkbox',
@@ -213,45 +221,45 @@ export const mapSideBar: FactoryComponent<{
                             }),
                             m('span', 'Show Custom Grid')]),
                           ),
-                          m('div.divider.col.s11.right'),
-                          m('div.input-field.col.s11.right', [
-                            m('input', {
-                              id: 'gridCellSize',
-                              type: 'text',
-                              value: gridCellSize,
-                              onchange: (e: Event) => {
-                                const target = e.target as HTMLInputElement;
-                                gridCellSize = Number(target.value);
-                              },
-                            }),
-                            m(
-                              'label',
-                              {
-                                for: 'gridCellSize',
-                              },
-                              'Cell Size (km)',
-                            ),
-                          ]),
-                          m('p.col.s11.right',
-                            m('label', [
+                            m('div.divider.col.s11.right'),
+                            m('div.input-field.col.s11.right', [
                               m('input', {
-                                type: 'checkbox',
-                                class: 'filled-in',
-                                checked: vnode.attrs.state.app.gridOptions.updateLocation,
-                                onclick: () => {
-                                  vnode.attrs.actions.toggleUpdateLocation();
+                                id: 'gridCellSize',
+                                type: 'text',
+                                value: gridCellSize,
+                                onchange: (e: Event) => {
+                                  const target = e.target as HTMLInputElement;
+                                  gridCellSize = Number(target.value);
                                 },
                               }),
-                              m('span', 'Fit Grid to Current Viewport')]),
-                          ),
-                          m(
-                            'button.btn.waves-effect.waves-light.col.s11.right',
-                            {
-                              onclick: () => {
-                                vnode.attrs.actions.updateGridCellSize(gridCellSize);
+                              m(
+                                'label',
+                                {
+                                  for: 'gridCellSize',
+                                },
+                                'Cell Size (km)',
+                              ),
+                            ]),
+                            m('p.col.s11.right',
+                              m('label', [
+                                m('input', {
+                                  type: 'checkbox',
+                                  class: 'filled-in',
+                                  checked: vnode.attrs.state.app.gridOptions.updateLocation,
+                                  onclick: () => {
+                                    vnode.attrs.actions.toggleUpdateLocation();
+                                  },
+                                }),
+                                m('span', 'Fit Grid to Current Viewport')]),
+                            ),
+                            m(
+                              'button.btn.waves-effect.waves-light.col.s11.right',
+                              {
+                                onclick: () => {
+                                  vnode.attrs.actions.updateGridCellSize(gridCellSize);
+                                },
                               },
-                            },
-                            'Generate Grid'),
+                              'Generate Grid'),
                           ])),
                         ),
                       ]),
@@ -265,6 +273,11 @@ export const mapSideBar: FactoryComponent<{
                         m('a.collapsible-header', 'Custom Layers', [
                           m('i.material-icons', 'arrow_drop_down'),
                         ]),
+                        m('div.collapsible-body',
+                          m('div.row',
+                            m('button.btn.modal-trigger', { 'data-target': 'modal1' }, 'Create Layer'),
+                          ),
+                        ),
                       ]),
                     ),
                   ),
@@ -314,14 +327,20 @@ export const mapSideBar: FactoryComponent<{
           ),
           // Fix the weird scroll clipping caused by
           m('div', { style: 'margin: 128px' }),
+          m('div.modal', { id: 'modal1' },
+            m('div.modal-content', [
+              m('h4', 'Modal Header'),
+              m('p', 'texttttt'),
+            ]),
+            m('div.modal-footer',
+              m('a.modal-close.waves-effect.waves-green.btn-flat', 'Create'),
+            ),
+          ),
         ],
       );
     },
     oncreate: () => {
-      const elemSidenav = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(elemSidenav);
-      const elemsCollapsible = document.querySelectorAll('.collapsible');
-      M.Collapsible.init(elemsCollapsible);
+      M.AutoInit();
     },
   };
 };

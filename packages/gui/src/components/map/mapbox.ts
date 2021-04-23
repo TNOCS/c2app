@@ -53,17 +53,17 @@ export const Mapbox: FactoryComponent<{
           const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
           const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
 
-          map.addSource('positions', {
+          map.addSource('gridLabelsSource', {
+            type: 'geojson',
+            data: gridLabelsSource,
+          });
+          map.addSource('positionSource', {
             type: 'geojson',
             data: positionSource,
           });
-          map.addSource('grid', {
+          map.addSource('gridSource', {
             type: 'geojson',
             data: gridSource,
-          });
-          map.addSource('gridLabels', {
-            type: 'geojson',
-            data: gridLabelsSource,
           });
 
           map.loadImage(fireman, function(error, image) {
@@ -72,8 +72,9 @@ export const Mapbox: FactoryComponent<{
             map.addLayer({
               id: 'firemenPositions',
               type: 'symbol',
-              source: 'positions',
+              source: 'positionSource',
               layout: {
+                'visibility': appState.app.realtimeLayers[0][1] ? 'visible' : 'none',
                 'icon-image': 'fireman',
                 'icon-size': 0.5,
                 'icon-allow-overlap': true,
@@ -87,8 +88,9 @@ export const Mapbox: FactoryComponent<{
             map.addLayer({
               id: 'carPositions',
               type: 'symbol',
-              source: 'positions',
+              source: 'positionSource',
               layout: {
+                'visibility': appState.app.realtimeLayers[1][1] ? 'visible' : 'none',
                 'icon-image': 'car',
                 'icon-size': 0.5,
                 'icon-allow-overlap': true,
@@ -99,7 +101,7 @@ export const Mapbox: FactoryComponent<{
           map.addLayer({
             id: 'grid',
             type: 'line',
-            source: 'grid',
+            source: 'gridSource',
             layout: {
               'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
             },
@@ -107,7 +109,7 @@ export const Mapbox: FactoryComponent<{
           map.addLayer({
             id: 'gridLabels',
             type: 'symbol',
-            source: 'gridLabels',
+            source: 'gridLabelsSource',
             layout: {
               'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
               'text-field': '{cellLabel}',
@@ -128,9 +130,9 @@ export const Mapbox: FactoryComponent<{
       const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
       const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
 
-      (map.getSource('positions') as GeoJSONSource).setData(appState.app.positionSource);
-      (map.getSource('grid') as GeoJSONSource).setData(gridSource);
-      (map.getSource('gridLabels') as GeoJSONSource).setData(gridLabelsSource);
+      (map.getSource('positionSource') as GeoJSONSource).setData(appState.app.positionSource);
+      (map.getSource('gridSource') as GeoJSONSource).setData(gridSource);
+      (map.getSource('gridLabelsSource') as GeoJSONSource).setData(gridLabelsSource);
 
       if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
         MapUtils.switchBasemap(map, appState.app.mapStyle).catch();

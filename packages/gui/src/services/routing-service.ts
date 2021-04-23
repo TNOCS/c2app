@@ -39,29 +39,30 @@ class RoutingService {
 
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] = p.hasSidebar
-        ? {
-          onmatch:
-            p.id === Pages.PROFILE
-              ? undefined
-              : () => {
-                if (states().app.profile === '') m.route.set('/');
-              },
-          render: () =>
-            m(this.layout, { state: states() }, [
-              m(p.sidebar, { state: states(), actions: actions }),
-              m(p.component, { state: states(), actions: actions }),
-            ]),
-        }
-        : {
-          onmatch:
-            p.id === Pages.PROFILE
-              ? undefined
-              : () => {
-                if (states().app.profile === '') m.route.set('/');
-              },
-          render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
-        };
+      r[p.route] =
+        p.hasSidebar
+          ? {
+            onmatch:
+              p.id === Pages.PROFILE
+                ? undefined
+                : () => {
+                  if (states().app.profile === '') m.route.set('/profile');
+                },
+            render: () =>
+              m(this.layout, { state: states() }, [
+                m(p.sidebar, { state: states(), actions: actions }),
+                m(p.component, { state: states(), actions: actions }),
+              ]),
+          }
+          : {
+            onmatch:
+              p.id === Pages.PROFILE
+                ? undefined
+                : () => {
+                  if (states().app.profile === '') m.route.set('/profile');
+                },
+            render: () => m(this.layout, { state: states() }, m(p.component, { state: states(), actions: actions })),
+          };
       return r;
     }, {} as RouteDefs);
   }
@@ -72,7 +73,7 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     id: Pages.PROFILE,
     title: 'Profile',
     icon: 'profile',
-    route: '/',
+    route: '/profile',
     visible: true,
     component: profileSelector,
     sidebar: sideBar,

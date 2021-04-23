@@ -36,6 +36,8 @@ export interface IAppModel {
     switchStyle: boolean;
     realtimeLayers: Array<[string, boolean]>;
     gridLayers: Array<[string, boolean]>;
+    sensorLayers: Array<[string, boolean]>;
+    customLayers: Array<[string, boolean]>;
     gridOptions: IGridOptions;
   };
 }
@@ -145,6 +147,8 @@ export const appStateMgmt = {
       mapStyle: 'mapbox/streets-v11',
       realtimeLayers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
       gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
+      sensorLayers: [] as Array<[string, boolean]>,
+      customLayers: [] as Array<[string, boolean]>,
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
