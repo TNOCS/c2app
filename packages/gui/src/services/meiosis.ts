@@ -66,15 +66,17 @@ export interface IActions {
   // Layers/styles
   switchStyle: (style: string) => void;
   toggleLayer: (selector: string, index: number) => void;
-  updateGridCellSize: (size: number) => void;
-  toggleUpdateLocation: () => void;
   updateGridLocation: (bbox: [number, number, number, number]) => void;
+  updateGridOptions: (gridCellSize: number, updateLocation: boolean) => void;
+  updateGridDone: () => void;
+  updateCustomLayers: (layerName: string, layerType: string) => void;
 }
 
 export interface IGridOptions {
   gridCellSize: number;
   updateLocation: boolean;
   gridLocation: [number, number, number, number];
+  updateGrid: boolean;
 }
 
 export interface IMessage {
@@ -153,6 +155,7 @@ export const appStateMgmt = {
         gridCellSize: 0.5,
         updateLocation: false,
         gridLocation: [5.46, 51.42, 5.50, 51.46],
+        updateGrid: true,
       } as IGridOptions,
     },
   },
@@ -273,30 +276,29 @@ export const appStateMgmt = {
           case 'grid':
             us({
               app: {
-                gridLayers: (layers: [string, boolean][]) => {
-                  return layers.map((layer: [string, boolean]) => {
-                    return [layer[0], !layer[1]];
-                  });
+                gridLayers: (layers: Array<[string, boolean]>) => {
+                  layers[index] = [layers[index][0], !layers[index][1]];
+                  return layers;
+                },
+              },
+            });
+            break;
+          case 'custom':
+            us({
+              app: {
+                customLayers: (layers: Array<[string, boolean]>) => {
+                  layers[index] = [layers[index][0], !layers[index][1]];
+                  return layers;
                 },
               },
             });
             break;
         }
       },
-      updateGridCellSize: (size: number) => {
+      updateGridOptions: (gridCellSize: number, updateLocation: boolean) => {
         us({
           app: {
-            gridOptions: { gridCellSize: size, updateLocation: false },
-          },
-        });
-      },
-      toggleUpdateLocation: () => {
-        us({
-          app: {
-            gridOptions: (options: IGridOptions) => {
-              options.updateLocation = !options.updateLocation;
-              return options;
-            },
+            gridOptions: { gridCellSize: gridCellSize, updateLocation: updateLocation, updateGrid: true },
           },
         });
       },
@@ -304,6 +306,23 @@ export const appStateMgmt = {
         us({
           app: {
             gridOptions: { gridLocation: bbox },
+          },
+        });
+      },
+      updateGridDone: () => {
+        us({
+          app: {
+            gridOptions: { updateGrid: false },
+          },
+        });
+      },
+      updateCustomLayers: (layerName: string, _layerType: string) => {
+        us({
+          app: {
+            customLayers: (layers: Array<[string, boolean]>) => {
+              layers.push([layerName, false] as [string, boolean]);
+              return layers;
+            },
           },
         });
       },

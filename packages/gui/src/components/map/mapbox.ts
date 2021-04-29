@@ -50,7 +50,7 @@ export const Mapbox: FactoryComponent<{
         map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
         map.once('styledata', () => {
           const positionSource = appState.app.positionSource;
-          const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
+          const gridSource = MapUtils.getGridSource(map, actions, appState);
           const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
 
           map.addSource('gridLabelsSource', {
@@ -122,17 +122,17 @@ export const Mapbox: FactoryComponent<{
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
 
-      if (appState.app.gridOptions.updateLocation) {
-        const bounds = map.getBounds();
-        actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
+      if (appState.app.gridOptions.updateGrid) {
+        const gridSource = MapUtils.getGridSource(map, actions, appState);
+        const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
+
+        (map.getSource('gridSource') as GeoJSONSource).setData(gridSource);
+        (map.getSource('gridLabelsSource') as GeoJSONSource).setData(gridLabelsSource);
+
+        actions.updateGridDone();
       }
 
-      const gridSource = MapUtils.getGridSource(appState.app.gridOptions);
-      const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
-
       (map.getSource('positionSource') as GeoJSONSource).setData(appState.app.positionSource);
-      (map.getSource('gridSource') as GeoJSONSource).setData(gridSource);
-      (map.getSource('gridLabelsSource') as GeoJSONSource).setData(gridLabelsSource);
 
       if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
         MapUtils.switchBasemap(map, appState.app.mapStyle).catch();
@@ -143,8 +143,30 @@ export const Mapbox: FactoryComponent<{
       });
 
       appState.app.gridLayers.forEach((layer: [string, boolean]) => {
-        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
+
+      appState.app.customLayers.forEach((layer: [string, boolean]) => {
+        if(!map.getSource(layer[0]+'Source')) {
+          map.addSource(layer[0]+'Source', {
+            type: 'geojson',
+            data: appState.app.positionSource,
+          });
+        }
+        if(!map.getLayer(layer[0])) {
+          map.addLayer({
+            id: layer[0],
+            type: 'circle',
+            source: layer[0]+'Source',
+            layout: {
+              'visibility': layer[1] ? 'visible' : 'none',
+            },
+          });
+        }
+        else {
+          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+        }
+      })
     },
   };
 };

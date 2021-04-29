@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
-import { IActions, IGridOptions } from '../services/meiosis';
+import { IActions, IAppModel } from '../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
 // @ts-ignore
@@ -41,8 +41,14 @@ export const displayPopup = (features: Feature[], actions: IActions) => {
   actions.updateClickedFeature(features[0]);
 };
 
-export const getGridSource = (gridOptions: IGridOptions): FeatureCollection<Polygon> => {
-  return SquareGrid(gridOptions.gridLocation, gridOptions.gridCellSize, { units: 'kilometers' });
+export const getGridSource = (map: mapboxgl.Map, actions: IActions, appState: IAppModel): FeatureCollection<Polygon> => {
+  if (appState.app.gridOptions.updateLocation) {
+    const bounds = map.getBounds();
+    actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
+    appState.app.gridOptions.gridLocation = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+  }
+
+  return SquareGrid(appState.app.gridOptions.gridLocation, appState.app.gridOptions.gridCellSize, { units: 'kilometers' });
 };
 
 const getRowLetter = (index: number, rows: number) => {
