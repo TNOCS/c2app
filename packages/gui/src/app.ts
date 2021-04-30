@@ -6,7 +6,6 @@ import 'materialize-css/dist/css/materialize.min.css';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import 'mapbox-gl-style-switcher/styles.css';
 
 import './styles.css';
 

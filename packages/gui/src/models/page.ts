@@ -1,7 +1,5 @@
 import { ComponentTypes } from 'mithril';
 
-export type IconType = () => string | string;
-
 type IconResolver = () => string;
 type IconOrResolver = string | IconResolver;
 

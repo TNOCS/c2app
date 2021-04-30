@@ -154,7 +154,7 @@ export const agentToFeature = (agent: IAgent) => ({
     tags: {
       agenda: agent.agenda ? agent.agenda.map((i) => i.name).join(', ') : '',
     },
-    callsign: '1234'
+    name: '1234'
   },
 });
 

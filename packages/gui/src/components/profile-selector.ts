@@ -1,6 +1,6 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
-import M from 'materialize-css'
+import M from 'materialize-css';
 
 export const profileSelector: FactoryComponent<{
   state: IAppModel;
@@ -10,9 +10,12 @@ export const profileSelector: FactoryComponent<{
   let profile: string;
   return {
     view: (vnode) => {
-      return m(
-        'div.col.s12',
-        m('form.row', [
+      return m('div.col.s12',
+        m('form.row', {
+          onsubmit: function(e: Event) {
+            e.preventDefault();
+          },
+        }, [
           m('div.input-field.col.s12.m4', [
             m('input', {
               id: 'callsign',
@@ -28,7 +31,7 @@ export const profileSelector: FactoryComponent<{
               {
                 for: 'callsign',
               },
-              'Callsign'
+              'Callsign',
             ),
           ]),
           m('div.input-field.col.s12.m4', [
@@ -44,7 +47,7 @@ export const profileSelector: FactoryComponent<{
                 m('option', { value: '', disabled: true, selected: true }, 'Choose your profile'),
                 m('option', { value: 'commander' }, 'commander'),
                 m('option', { value: 'firefighter' }, 'firefighter'),
-              ]
+              ],
             ),
             m('label', 'Profile'),
           ]),
@@ -58,15 +61,14 @@ export const profileSelector: FactoryComponent<{
               },
             },
             'Go',
-            m('i.material-icons.right', 'send')
+            m('i.material-icons.right', 'send'),
           ),
-        ])
+        ]),
       );
     },
     oncreate: () => {
-      const elemSelect = document.querySelectorAll('select');
-      M.FormSelect.init(elemSelect);
+      M.AutoInit();
     },
   };
-  
+
 };

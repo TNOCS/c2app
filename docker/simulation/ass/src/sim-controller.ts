@@ -1,17 +1,18 @@
 import { envServices, updateAgent } from './env-services';
-import { TestBedAdapter, LogLevel } from 'node-test-bed-adapter';
+import { TestBedAdapter, LogLevel, IAlert, IInfo } from 'node-test-bed-adapter';
 import { IAgent } from './models/agent';
 import { uuid4, simTime, log, sleep, generateAgents, agentToFeature } from './utils';
 
 // const SimEntityItemTopic = 'simulation_entity_item';
 const SimEntityFeatureCollectionTopic = 'simulation_entity_featurecollection';
+const cap = 'standard_cap';
 
 export const simController = async (
   options: {
     /** Simulation speed. 0 is paused, 1 is real-time. */
     simSpeed?: number;
     startTime?: Date;
-  } = {}
+  } = {},
 ) => {
   createAdapter(async (tb) => {
     const { simSpeed = 1, startTime = simTime(0, 6) } = options;
@@ -39,7 +40,44 @@ export const simController = async (
         },
       };
       tb.send(payload, (error) => error && log(error));
+    };
+
+    const capTest = () => {
       console.log('send');
+      const payload = {
+        topic: cap,
+        messages: {
+          identifier: 'agent-smith',
+          sender: 'agent-smith',
+          sent: 'agent-smith',
+          status: 'Exercise',
+          msgType: 'Alert',
+          scope: 'Restricted',
+          info: {
+            category: 'Rescue',
+            event: 'Testing cap messages',
+            urgency: 'Immediate',
+            severity: 'Extreme',
+            certainty: 'Likely',
+            area: [
+              {
+                areaDesc: 'first',
+                polygon: [
+                  '5.477628707885741, 51.443763428806044',
+                  '5.4743242263793945, 51.44181075517023',
+                  '5.477542877197266, 51.43921597746186',
+                  '5.485525131225586, 51.440633760869964',
+                  '5.486512184143066, 51.44403091184326',
+                  '5.4817914962768555, 51.447481302560234',
+                  '5.480632781982422, 51.443549441248216',
+                  '5.477628707885741, 51.443763428806044',
+                ]
+              },
+            ],
+          } as IInfo,
+        } as IAlert,
+      };
+      tb.send(payload, (error) => error && log(error));
     };
 
     services.locations = {
@@ -97,11 +135,12 @@ export const simController = async (
     let i = 0;
     while (i < 10000000) {
       await Promise.all(
-        agents.filter((a) => passiveTypes.indexOf(a.type) < 0 && !a.memberOf).map((a) => updateAgent(a, services))
+        agents.filter((a) => passiveTypes.indexOf(a.type) < 0 && !a.memberOf).map((a) => updateAgent(a, services)),
       );
       updateTime();
       await sleep(1);
       i % 25 === 0 && notifyOthers();
+      i % 250 === 0 && capTest();
       i++;
     }
   });
@@ -113,7 +152,7 @@ const createAdapter = (callback: (tb: TestBedAdapter) => void) => {
     kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
     schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
     clientId: 'agent-smith',
-    produce: [SimEntityFeatureCollectionTopic],
+    produce: [SimEntityFeatureCollectionTopic, cap],
     logging: {
       logToConsole: LogLevel.Info,
       logToKafka: LogLevel.Warn,
