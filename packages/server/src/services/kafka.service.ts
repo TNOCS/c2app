@@ -1,5 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { TestBedAdapter, Logger, LogLevel, IAdapterMessage, ProduceRequest } from 'node-test-bed-adapter';
+import {
+  TestBedAdapter,
+  Logger,
+  LogLevel,
+  IAdapterMessage,
+  ProduceRequest,
+  IAlert,
+} from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
 
@@ -10,7 +17,7 @@ interface ISendResponse {
 }
 
 const SimEntityFeatureCollectionTopic = 'simulation_entity_featurecollection';
-const ChemicalHazard = 'chemical_hazard';
+const capMessage = 'standard_cap';
 const log = Logger.instance;
 
 @Injectable()
@@ -20,7 +27,9 @@ export class KafkaService {
   public busy = false;
 
   constructor(@Inject('DefaultWebSocketGateway') private readonly socket: DefaultWebSocketGateway) {
-    this.createAdapter().catch((e) => {log.error(e)});
+    this.createAdapter().catch((e) => {
+      log.error(e);
+    });
   }
 
   public createAdapter(): Promise<TestBedAdapter> {
@@ -30,15 +39,17 @@ export class KafkaService {
         clientId: 'c2app-server',
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: ChemicalHazard }],
+        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
         },
       });
-      this.adapter.on('error', (e) => {
+      this.adapter.on('error', (_e) => {
         // On error, try to connect again
-        this.adapter.connect().catch((e) => {log.error(e)})
+        this.adapter.connect().catch((e) => {
+          log.error(e);
+        });
       });
       this.adapter.on('message', (message: IAdapterMessage) => {
         this.messageQueue.push(message);
@@ -48,7 +59,9 @@ export class KafkaService {
         log.info('Kafka is connected');
         resolve(this.adapter);
       });
-      this.adapter.connect().catch((e) => {log.error(e)})
+      this.adapter.connect().catch((e) => {
+        log.error(e);
+      });
     });
   }
 
@@ -68,10 +81,10 @@ export class KafkaService {
 
       switch (message.topic) {
         case SimEntityFeatureCollectionTopic:
-          this.socket.server.emit('positions', this.prepareGeoJSONLayer(message.value as FeatureCollection));
+          this.socket.server.emit('positions', KafkaService.prepareGeoJSONLayer(message.value as FeatureCollection));
           break;
-        case ChemicalHazard:
-          this.socket.server.emit('chemical-hazard', this.prepareChemicalHazard(message.value as FeatureCollection));
+        case capMessage:
+          this.socket.server.emit('alert', message.value as IAlert);
           break;
         default:
           log.warn('Unknown topic');
@@ -81,15 +94,10 @@ export class KafkaService {
     this.busy = false;
   }
 
-  private prepareGeoJSONLayer(collection: FeatureCollection) {
+  private static prepareGeoJSONLayer(collection: FeatureCollection) {
     for (const feature of collection.features) {
       feature.geometry = feature.geometry['eu.driver.model.sim.support.geojson.geometry.Point'];
     }
-    return collection as FeatureCollection;
-  }
-
-  private prepareChemicalHazard(collection: FeatureCollection) {
-    // specific code for chemical hazard areas
     return collection as FeatureCollection;
   }
 }

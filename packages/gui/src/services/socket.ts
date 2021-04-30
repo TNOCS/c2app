@@ -1,6 +1,7 @@
 import { FeatureCollection } from 'geojson';
 import { IAppModel, UpdateStream, IGroup, IMessage } from './meiosis';
 import io from 'socket.io-client';
+import { IAlert } from '../types';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -11,8 +12,32 @@ export class Socket {
     this.socket.on('positions', (data: FeatureCollection) => {
       us({ app: { positionSource: data } });
     });
-    this.socket.on('chemical-hazard', (data: FeatureCollection) => {
-      us({ app: { chemicalHazardSource: data } });
+    this.socket.on('alert', (data: IAlert) => {
+      us({
+        app: {
+          alerts: (alerts: Array<IAlert>) => {
+            const index = alerts.findIndex((val: IAlert) => {
+              return val.identifier === data.identifier
+            })
+            if(index > -1) {
+              alerts[index] = data;
+              return alerts;
+            }
+            alerts.push(data);
+            return alerts;
+          },
+          alertLayers: (layers: Array<[string, boolean]>) => {
+            const index = layers.findIndex((val: [string, boolean]) => {
+              return val[0] === data.identifier;
+            })
+            if(index > -1) {
+              return layers;
+            }
+            layers.push([data.identifier, true]);
+            return layers;
+          },
+        },
+      });
     });
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;

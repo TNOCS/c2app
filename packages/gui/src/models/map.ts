@@ -2,7 +2,7 @@ import m from 'mithril';
 import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
+import { Point, Feature, Polygon, FeatureCollection, Geometry, Position } from 'geojson';
 import { IActions, IAppModel } from '../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
@@ -10,6 +10,7 @@ import polylabel from 'polylabel';
 import car from 'url:../assets/car_icon.png';
 // @ts-ignore
 import fireman from 'url:../assets/fireman_icon.png';
+import { IAlert, IArea, IInfo } from '../types';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -20,7 +21,15 @@ export const drawConfig = {
   },
 };
 
-export const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature<Polygon>[], actions: IActions) => {
+export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
+  if (features[0].geometry.type === 'Polygon') {
+    getFeaturesInPolygon(map, features, actions);
+  } else if (features[0].geometry.type === 'Point') {
+    actions.updateClickedFeature(features[0]);
+  }
+};
+
+const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
   if (!map.getLayer('firemenPositions')) return;
 
   const bounding = bbox(features[0]);
@@ -31,7 +40,7 @@ export const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature<Polygo
   const polyFeatures = bboxFeatures.filter((element) =>
     booleanPointInPolygon(
       [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
-      features[0],
+      features[0] as Feature<Polygon>,
     ),
   );
   actions.updateSelectedFeatures(polyFeatures);
@@ -147,4 +156,53 @@ export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
 
   map.setStyle(newStyle);
   loadImages(map);
+};
+
+// TODO: Fix this (depends on how CAP is going to work)
+export const prepareGeoJSON = (alertMessage: IAlert): FeatureCollection => {
+  const alertInfo = alertMessage.info as IInfo;
+  const alertArea = alertInfo.area as IArea[];
+
+  let featureCollection: FeatureCollection;
+  if (alertArea[0].areaDesc.includes('polygon')) {
+    featureCollection = {
+      type: 'FeatureCollection',
+      features:
+        [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                (alertArea[0].polygon as string[]).map((coordinate: string) => {
+                  let splitCoords = coordinate.split(', ');
+                  return [Number(splitCoords[0]), Number(splitCoords[1])];
+                }) as Position[],
+              ],
+            },
+            properties: {},
+          } as Feature<Polygon>,
+        ],
+    } as FeatureCollection;
+  } else {
+    featureCollection = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [[5.477628707885741, 51.443763428806044],
+                [5.4743242263793945, 51.44181075517023],
+                [5.477542877197266, 51.43921597746186],
+                [5.477628707885741, 51.443763428806044]],
+            ],
+          },
+          properties: {},
+        } as Feature<Polygon>,
+      ],
+    } as FeatureCollection;
+  }
+  return featureCollection;
 };

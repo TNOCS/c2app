@@ -10,6 +10,7 @@ import * as MapUtils from '../../models/map';
 import fireman from 'url:../../assets/fireman_icon.png';
 // @ts-ignore
 import car from 'url:../../assets/car_icon.png';
+import { IAlert } from '../../types';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -41,10 +42,16 @@ export const Mapbox: FactoryComponent<{
       map.addControl(draw, 'top-left');
       map.addControl(new RulerControl(), 'top-left');
 
-      // Add map listeners and socket listener
+      // Add map listeners
       map.on('load', () => {
-        map.on('draw.create', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
-        map.on('draw.update', ({ features }) => MapUtils.getFeaturesInPolygon(map, features, actions));
+        map.on('draw.create', ({ features }) => {
+          MapUtils.handleDrawEvent(map, features, actions);
+          actions.updateDrawings(draw.getAll());
+        });
+        map.on('draw.update', ({ features }) => {
+          MapUtils.handleDrawEvent(map, features, actions);
+          actions.updateDrawings(draw.getAll());
+        });
         map.on('click', 'firemenPositions', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
         map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
@@ -122,6 +129,11 @@ export const Mapbox: FactoryComponent<{
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
 
+      if (appState.app.clearDrawing) {
+        draw.deleteAll();
+        actions.drawingCleared();
+      }
+
       if (appState.app.gridOptions.updateGrid) {
         const gridSource = MapUtils.getGridSource(map, actions, appState);
         const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
@@ -143,30 +155,56 @@ export const Mapbox: FactoryComponent<{
       });
 
       appState.app.gridLayers.forEach((layer: [string, boolean]) => {
-          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
 
-      appState.app.customLayers.forEach((layer: [string, boolean]) => {
-        if(!map.getSource(layer[0]+'Source')) {
-          map.addSource(layer[0]+'Source', {
+      appState.app.customLayers.forEach((layer: [string, boolean], index: number) => {
+        // For custom layers, first check if the source for this layer exists
+        if (!map.getSource(layer[0] + 'Source')) {
+          map.addSource(layer[0] + 'Source', {
             type: 'geojson',
-            data: appState.app.positionSource,
+            data: appState.app.customSources[index],
           });
+        } else {
+          (map.getSource(layer[0] + 'Source') as GeoJSONSource).setData(appState.app.customSources[index]);
         }
-        if(!map.getLayer(layer[0])) {
+        // For custom layers, first check if the layer already exists
+        if (!map.getLayer(layer[0])) {
           map.addLayer({
             id: layer[0],
             type: 'circle',
-            source: layer[0]+'Source',
+            source: layer[0] + 'Source',
             layout: {
               'visibility': layer[1] ? 'visible' : 'none',
             },
           });
         }
-        else {
-          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+      });
+
+      appState.app.alertLayers.forEach((layer: [string, boolean], index: number) => {
+        // For custom layers, first check if the source for this layer exists
+        if (!map.getSource(layer[0] + 'Source')) {
+          map.addSource(layer[0] + 'Source', {
+            type: 'geojson',
+            data: MapUtils.prepareGeoJSON(appState.app.alerts[index] as IAlert),
+          });
+        } else {
+          (map.getSource(layer[0] + 'Source') as GeoJSONSource).setData(MapUtils.prepareGeoJSON(appState.app.alerts[index] as IAlert));
         }
-      })
+        // For custom layers, first check if the layer already exists
+        if (!map.getLayer(layer[0])) {
+          map.addLayer({
+            id: layer[0],
+            type: 'fill',
+            source: layer[0] + 'Source',
+            layout: {
+              'visibility': layer[1] ? 'visible' : 'none',
+            },
+          });
+        }
+        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+      });
     },
   };
 };
