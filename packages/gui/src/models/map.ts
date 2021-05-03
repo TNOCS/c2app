@@ -27,6 +27,8 @@ export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions:
   } else if (features[0].geometry.type === 'Point') {
     actions.updateClickedFeature(features[0]);
   }
+  const instance = M.Modal.getInstance(document.getElementById('createPOIModal') as HTMLElement);
+  instance.open();
 };
 
 const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {

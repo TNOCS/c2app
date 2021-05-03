@@ -7,7 +7,7 @@
 
 # Build the app separately
 FROM node:alpine AS builder
-RUN apk add --no-cache --virtual .gyp python make g++ git && \
+RUN apk add --no-cache --virtual .gyp python3 make g++ git vips-dev && \
   npm i -g yalc
 RUN mkdir /packages && \
   mkdir /packages/shared && \

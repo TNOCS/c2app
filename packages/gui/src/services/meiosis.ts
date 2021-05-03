@@ -49,6 +49,7 @@ export interface IAppModel {
 export interface IActions {
   // Core
   drawingCleared: () => void;
+  createPOI: () => void;
 
   // Clicking/selecting
   updateClickedFeature: (feature: Feature) => void;
@@ -240,6 +241,7 @@ export const appStateMgmt = {
           },
         });
       },
+      createPOI: () => {},
 
       // Clicking/selecting
       updateClickedFeature: (feature: Feature) => {
