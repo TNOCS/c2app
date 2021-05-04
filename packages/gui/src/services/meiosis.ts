@@ -4,6 +4,7 @@ import { merge } from '../utils/mergerino';
 import { Feature, FeatureCollection } from 'geojson';
 import { Socket } from './socket';
 import { IAlert, IInfo } from '../types';
+import { IChemicalHazard, IControlParameters, IScenarioDefinition } from '../../../shared/src';
 
 export interface IAppModel {
   app: {
@@ -43,6 +44,12 @@ export interface IAppModel {
     alertLayers: Array<[string, boolean]>;
     gridOptions: IGridOptions;
     customSources: Array<FeatureCollection>;
+
+    // CHT
+    source: {
+      scenario: IScenarioDefinition;
+      control_parameters: IControlParameters;
+    };
   };
 }
 
@@ -80,6 +87,10 @@ export interface IActions {
   updateCustomLayers: (layerName: string, addCurrentDrawings: boolean) => void;
   addDrawingsToLayer: (index: number) => void;
   updateDrawings: (features: FeatureCollection) => void;
+  deleteLayer: (index: number) => void;
+
+  // CHT
+  submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
 }
 
 export interface IGridOptions {
@@ -228,6 +239,12 @@ export const appStateMgmt = {
         updateGrid: true,
       } as IGridOptions,
       customSources: [] as Array<FeatureCollection>,
+
+      // CHT
+      source: {
+        scenario: {} as IScenarioDefinition,
+        control_parameters: {} as IControlParameters,
+      }
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -241,7 +258,13 @@ export const appStateMgmt = {
           },
         });
       },
-      createPOI: () => {},
+      createPOI: () => {
+        us({
+          app: {
+            gridOptions: { updateGrid: true },
+          },
+        });
+      },
 
       // Clicking/selecting
       updateClickedFeature: (feature: Feature) => {
@@ -452,6 +475,29 @@ export const appStateMgmt = {
       },
       updateDrawings: (features: FeatureCollection) => {
         us({ app: { drawings: features } });
+      },
+      deleteLayer: (index: number) => {
+        us({
+          app: {
+            customLayers: (layers: Array<[string, boolean]>) => {
+              layers.splice(index, 1);
+              return layers;
+            },
+            customSources: (layers: Array<FeatureCollection>) => {
+              layers.splice(index, 1);
+              return layers;
+            },
+          },
+        });
+      },
+
+      //CHT
+      submitCHT: async (hazard: Partial<IChemicalHazard>, location: number[]) => {
+        (hazard.scenario as IScenarioDefinition).source_location = location;
+        (hazard.scenario as IScenarioDefinition).source_location[2] = 0;
+        console.log('publish')
+        const res = await states()['app'].socket.serverCHT(hazard);
+        console.log(res);
       },
     };
   },

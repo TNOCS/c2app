@@ -2,6 +2,7 @@ import { FeatureCollection } from 'geojson';
 import { IAppModel, UpdateStream, IGroup, IMessage } from './meiosis';
 import io from 'socket.io-client';
 import { IAlert } from '../types';
+import { IChemicalHazard } from '../../../shared/src';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -110,5 +111,13 @@ export class Socket {
       (_result: string) => {
       },
     );
+  }
+
+  serverCHT(hazard: Partial<IChemicalHazard>): Promise<Array<IGroup>> {
+    return new Promise((resolve) => {
+      this.socket.emit('client-cht', { hazard: hazard }, (result: string) => {
+        resolve(JSON.parse(result));
+      });
+    });
   }
 }

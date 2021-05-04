@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { KafkaService } from './services/kafka.service';
 import { DefaultWebSocketGateway } from './gateway/default-websocket.gateway';
 
 @Module({
-  imports: [],
+  imports: [HttpModule],
   controllers: [AppController],
   providers: [KafkaService, DefaultWebSocketGateway],
 })

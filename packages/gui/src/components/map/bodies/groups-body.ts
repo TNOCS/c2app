@@ -14,14 +14,12 @@ export const groupsBody: FactoryComponent<{
             m('label.row',
               m('div.valign-wrapper', [
                 m('p.col.s7', 'ID: ' + index + ' Members: ' + group.callsigns.length),
-                m('a.btn.waves-effect.waves-light.col.s2.offset-s1',
+                m('a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',
                   {
-                    onclick: () => {
-                      vnode.attrs.actions.updateGroup(group);
-                    },
+                    'data-target': 'editGroupModal',
                   },
                   m('i.material-icons', 'edit')),
-                m('a.btn.waves-effect.waves-light.col.s2',
+                m('a.btn.waves-effect.waves-light.red.col.s2',
                   {
                     onclick: () => {
                       vnode.attrs.actions.deleteGroup(group);

@@ -148,7 +148,22 @@ services:
       - mld
       - /data/${PBF_FILE}.osrm
     volumes:
-      - ${DATA_FOLDER}/walking:/data  
+      - ${DATA_FOLDER}/walking:/data
+
+  meteoservice:
+    image: assistanceeu/meteoservice:0.1.4.b21234d
+    ports:
+      - 8081:8081
+
+  dispersionservice:
+    image: assistanceeu/dispersionservice:0.3.2-0e69b47
+    depends_on:
+      - broker
+      - schema_registry
+    ports:
+      - 8080:8080
+    environment:
+      METEO_SERVICE: http://meteoservice:8081
 
   #c2app:
   #  image: timovdk/c2app:0.1.0

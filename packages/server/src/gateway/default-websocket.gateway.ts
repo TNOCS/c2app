@@ -6,8 +6,10 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { FeatureCollection, Feature } from 'geojson';
-import { uuid4 } from '../utils/index';
+import { uuid4 } from '../utils';
 import { Server, Socket } from 'socket.io';
+import { IChemicalHazard } from '../../../shared/src';
+import { HttpService } from '@nestjs/common';
 
 export interface IGroup {
   features: FeatureCollection;
@@ -47,8 +49,14 @@ export interface IMessage {
   message: string;
 }
 
+export interface ICHT {
+  hazard: Partial<IChemicalHazard>
+}
+
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private httpService: HttpService) {}
+
   @WebSocketServer() server: Server;
   private clients: number = 0;
   private groups: Map<string, IGroup> = new Map<string, IGroup>();
@@ -115,6 +123,12 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     }
 
     return data.message;
+  }
+
+  @SubscribeMessage('client-cht')
+  async handleClientCHT(client: Socket, data: ICHT): Promise<string> {
+    const res = await this.httpService.post(`http://localhost:8080/process`, data.hazard).toPromise();
+    return JSON.stringify(res.data);
   }
 
   /** Helper Funcs */
