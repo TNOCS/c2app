@@ -10,7 +10,7 @@ import polylabel from 'polylabel';
 import car from 'url:../assets/car_icon.png';
 // @ts-ignore
 import fireman from 'url:../assets/fireman_icon.png';
-import { IAlert, IArea, IInfo } from '../types';
+import { IAlert, IArea, IInfo } from '../../../shared/src';
 
 export const drawConfig = {
   displayControlsDefault: false,

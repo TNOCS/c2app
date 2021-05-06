@@ -1,10 +1,9 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
-import { Feature, FeatureCollection, Geometry, Point } from 'geojson';
+import { Feature, Point } from 'geojson';
 import { LayoutForm } from 'mithril-ui-form';
 import { formGenerator } from '../../../template/form';
-import { IChemicalHazard } from '../../../../../shared/src';
 
 export const createPOIModal: FactoryComponent<{
   state: IAppModel;
@@ -13,35 +12,11 @@ export const createPOIModal: FactoryComponent<{
   let chosenTab: 'Group' | 'POI' | 'Chemical Hazard' | 'Annotation' = 'Annotation';
   let groupName: string;
   let layerIndex: number;
-  const state = {
-    map: undefined as undefined,
-    overlays: {} as { [key: string]: any },
-    zoom: 10,
-    loaded: false,
-    isValid: false,
-    error: '',
-    deltaTime: 0,
-    /** Relevant context for the Form, can be used with show/disabling */
-    context: {
-      admin: true,
-    },
-    sources: undefined as undefined | FeatureCollection<Point>,
-    clouds: undefined as undefined,
-    canPublish: false,
-    version: 0,
-    geojsonClouds: undefined as undefined | FeatureCollection<Geometry>,
-  };
-
-  const formChanged = (source: Partial<IChemicalHazard>, isValid: boolean) => {
-    state.canPublish = isValid;
-    console.log(JSON.stringify(source, null, 2));
-  };
 
   return {
     view: (vnode) => {
       let source = vnode.attrs.state.app.source;
       const form = formGenerator(source);
-      let context = state.context;
 
       return m('div.modal.modal-fixed-footer', { id: 'createPOIModal' },
         m('div.modal-content', [
@@ -84,6 +59,7 @@ export const createPOIModal: FactoryComponent<{
           ]),
           m('row', [
             chosenTab === 'Group' ? m('div', [
+                m('p', 'Creates a group of the selected First Responders listed below'),
                 m('p', 'Selected FRs'),
                 m('p', vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
                     return m('span', JSON.stringify(feature.type));
@@ -111,7 +87,7 @@ export const createPOIModal: FactoryComponent<{
                 m('div.col.s4'),
               ])
               : chosenTab === 'POI' ? m('div', [
-                m('p.col.s12', 'POI INPUT GOES HERE'),
+                m('p.col.s12', 'Creates a POI on this location on the map and adds it to the selected layer'),
                 m('div.input-field.col.s12', [
                   m('select', {
                       id: 'layerSelect',
@@ -131,20 +107,15 @@ export const createPOIModal: FactoryComponent<{
               ])
               :
               chosenTab === 'Chemical Hazard' ? m('div', [
-                  m('p.col.s12', 'CHT INPUT GOES HERE'),
+                  m('p.col.s12', 'Creates a chemical hazard on this location on the map'),
                   m(LayoutForm, {
                     form,
                     obj: source,
-                    onchange: (isValid) => {
-                      formChanged(source, isValid);
-                      // console.log(JSON.stringify(obj, null, 2));
-                    },
-                    context,
                     section: 'source',
                   }),
                 ])
                 : m('div', [
-                  m('p.col.s12', 'Creates a drawing on a map without side-effects.'),
+                  m('p.col.s12', 'Creates a drawing on this location on the map without side-effects'),
                 ]),
           ]),
         ]),
@@ -154,7 +125,7 @@ export const createPOIModal: FactoryComponent<{
             onclick: () => {
               chosenTab === 'Group' ? vnode.attrs.actions.createGroup()
                 : chosenTab === 'POI' ? vnode.attrs.actions.addDrawingsToLayer(layerIndex)
-                : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.submitCHT(source, (vnode.attrs.state.app.drawings.features[0].geometry as Point).coordinates)
+                : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.submitCHT(source, (vnode.attrs.state.app.latestDrawing.geometry as Point).coordinates)
                   : vnode.attrs.actions.createPOI();
             },
           }, `${'Create ' + chosenTab}`),

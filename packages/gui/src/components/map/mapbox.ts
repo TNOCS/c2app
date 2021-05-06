@@ -1,16 +1,15 @@
 import m, { FactoryComponent } from 'mithril';
 import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-// @ts-ignore
-import RulerControl from 'mapbox-gl-controls/lib/ruler';
+import { RulerControl } from 'mapbox-gl-controls';
 import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
+import { IAlert } from '../../../../shared/src';
 import * as MapUtils from '../../models/map';
 // @ts-ignore
 import fireman from 'url:../../assets/fireman_icon.png';
 // @ts-ignore
 import car from 'url:../../assets/car_icon.png';
-import { IAlert } from '../../types';
 
 export const Mapbox: FactoryComponent<{
   state: IAppModel;
@@ -46,11 +45,11 @@ export const Mapbox: FactoryComponent<{
       map.on('load', () => {
         map.on('draw.create', ({ features }) => {
           MapUtils.handleDrawEvent(map, features, actions);
-          actions.updateDrawings(draw.getAll());
+          actions.updateDrawings(features[0]);
         });
         map.on('draw.update', ({ features }) => {
           MapUtils.handleDrawEvent(map, features, actions);
-          actions.updateDrawings(draw.getAll());
+          actions.updateDrawings(features[0]);
         });
         map.on('click', 'firemenPositions', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
         map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
@@ -129,8 +128,8 @@ export const Mapbox: FactoryComponent<{
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
 
-      if (appState.app.clearDrawing) {
-        draw.deleteAll();
+      if (appState.app.clearDrawing.delete) {
+        draw.delete(appState.app.clearDrawing.id)
         actions.drawingCleared();
       }
 
@@ -205,6 +204,37 @@ export const Mapbox: FactoryComponent<{
         }
         map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
+
+      if (appState.app.CHTSource.features) {
+        if (!map.getSource('CHTSource')) {
+          map.addSource('CHTSource', {
+            type: 'geojson',
+            data: appState.app.CHTSource,
+          });
+        } {
+          (map.getSource('CHTSource') as GeoJSONSource).setData(appState.app.CHTSource);
+        }
+        // For custom layers, first check if the layer already exists
+        appState.app.CHTLayers.forEach((layer: [string, boolean]) => {
+          if (!map.getLayer(layer[0])) {
+            map.addLayer({
+              id: layer[0],
+              type: 'fill',
+              source: 'CHTSource',
+              layout: {},
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', Number(layer[0])]],
+            });
+          }
+          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
+        });
+      }
     },
   };
 };

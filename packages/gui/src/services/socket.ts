@@ -1,7 +1,7 @@
 import { FeatureCollection } from 'geojson';
-import { IAppModel, UpdateStream, IGroup, IMessage } from './meiosis';
+import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert } from '../types';
+import { IAlert, IGroup, IMessage } from '../../../shared/src';
 import { IChemicalHazard } from '../../../shared/src';
 
 export class Socket {
@@ -18,9 +18,9 @@ export class Socket {
         app: {
           alerts: (alerts: Array<IAlert>) => {
             const index = alerts.findIndex((val: IAlert) => {
-              return val.identifier === data.identifier
-            })
-            if(index > -1) {
+              return val.identifier === data.identifier;
+            });
+            if (index > -1) {
               alerts[index] = data;
               return alerts;
             }
@@ -30,8 +30,8 @@ export class Socket {
           alertLayers: (layers: Array<[string, boolean]>) => {
             const index = layers.findIndex((val: [string, boolean]) => {
               return val[0] === data.identifier;
-            })
-            if(index > -1) {
+            });
+            if (index > -1) {
               return layers;
             }
             layers.push([data.identifier, true]);
@@ -113,7 +113,7 @@ export class Socket {
     );
   }
 
-  serverCHT(hazard: Partial<IChemicalHazard>): Promise<Array<IGroup>> {
+  serverCHT(hazard: Partial<IChemicalHazard>): Promise<FeatureCollection> {
     return new Promise((resolve) => {
       this.socket.emit('client-cht', { hazard: hazard }, (result: string) => {
         resolve(JSON.parse(result));

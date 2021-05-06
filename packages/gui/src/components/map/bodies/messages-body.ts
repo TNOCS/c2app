@@ -1,6 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
+import { IAlert } from '../../../../../shared/src';
 
 export const messagesBody: FactoryComponent<{
   state: IAppModel;
@@ -10,19 +11,8 @@ export const messagesBody: FactoryComponent<{
     view: (vnode) => {
       return m('div', [
         m('h5', 'Messages'),
-        m('div.row', vnode.attrs.state.app.alertLayers.map((layer: [string, boolean], index: number) => {
-          return m('p.col.s11.right',
-            m('label', [
-              m('input', {
-                type: 'checkbox',
-                class: 'filled-in',
-                checked: layer[1],
-                onclick: () => {
-                  vnode.attrs.actions.toggleLayer('alert', index);
-                },
-              }),
-              m('span', layer[0])]),
-          );
+        m('div.row', vnode.attrs.state.app.alerts.map((alert: IAlert) => {
+          return m('p.col.s11.right', alert.identifier);
         })),
       ]);
     },

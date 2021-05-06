@@ -151,12 +151,12 @@ services:
       - ${DATA_FOLDER}/walking:/data
 
   meteoservice:
-    image: assistanceeu/meteoservice:0.1.4.b21234d
+    image: assistanceeu/meteoservice:latest
     ports:
       - 8081:8081
 
   dispersionservice:
-    image: assistanceeu/dispersionservice:0.3.2-0e69b47
+    image: assistanceeu/dispersionservice:latest
     depends_on:
       - broker
       - schema_registry
@@ -166,7 +166,7 @@ services:
       METEO_SERVICE: http://meteoservice:8081
 
   #c2app:
-  #  image: timovdk/c2app:0.1.0
+  #  image: timovdk/c2app:latest
   #  depends_on:
   #    - broker
   #    - schema_registry

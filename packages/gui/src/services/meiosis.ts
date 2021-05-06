@@ -3,14 +3,21 @@ import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
 import { Feature, FeatureCollection } from 'geojson';
 import { Socket } from './socket';
-import { IAlert, IInfo } from '../types';
-import { IChemicalHazard, IControlParameters, IScenarioDefinition } from '../../../shared/src';
+import {
+  IAlert,
+  IChemicalHazard,
+  IControlParameters,
+  IGridOptions,
+  IGroup,
+  IInfo,
+  IMessage,
+  IScenarioDefinition,
+} from '../../../shared/src';
 
 export interface IAppModel {
   app: {
     // Core
     socket: Socket;
-    clearDrawing: boolean;
 
     // Alerts
     alerts: Array<IAlert>;
@@ -21,7 +28,11 @@ export interface IAppModel {
     // Clicking/Selecting
     clickedFeature?: Feature;
     selectedFeatures?: FeatureCollection;
-    drawings: FeatureCollection;
+    latestDrawing: Feature;
+    clearDrawing: {
+      delete: boolean,
+      id: string
+    },
 
     // Groups
     groups: Array<IGroup>;
@@ -50,6 +61,8 @@ export interface IAppModel {
       scenario: IScenarioDefinition;
       control_parameters: IControlParameters;
     };
+    CHTSource: FeatureCollection;
+    CHTLayers: Array<[string, boolean]>;
   };
 }
 
@@ -84,32 +97,13 @@ export interface IActions {
   updateGridLocation: (bbox: [number, number, number, number]) => void;
   updateGridOptions: (gridCellSize: number, updateLocation: boolean) => void;
   updateGridDone: () => void;
-  updateCustomLayers: (layerName: string, addCurrentDrawings: boolean) => void;
+  updateCustomLayers: (layerName: string) => void;
   addDrawingsToLayer: (index: number) => void;
-  updateDrawings: (features: FeatureCollection) => void;
+  updateDrawings: (feature: Feature) => void;
   deleteLayer: (index: number) => void;
 
   // CHT
   submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
-}
-
-export interface IGridOptions {
-  gridCellSize: number;
-  updateLocation: boolean;
-  gridLocation: [number, number, number, number];
-  updateGrid: boolean;
-}
-
-export interface IMessage {
-  id: string;
-  sender: string;
-  message: string;
-}
-
-export interface IGroup {
-  id: string;
-  callsigns: Array<string>;
-  owner: string;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -122,7 +116,6 @@ export const appStateMgmt = {
     app: {
       // Core
       socket: new Socket(update),
-      clearDrawing: false,
 
       // Alerts
       alerts: /*[] as Array<IAlert>,*/ [
@@ -214,7 +207,11 @@ export const appStateMgmt = {
       } as FeatureCollection,
 
       // Clicking/Selecting
-      drawings: {} as FeatureCollection,
+      latestDrawing: {} as Feature,
+      clearDrawing: {
+        delete: false,
+        id: '',
+      },
 
       // Groups
       groups: Array<IGroup>(),
@@ -231,7 +228,7 @@ export const appStateMgmt = {
       gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
       sensorLayers: [] as Array<[string, boolean]>,
       customLayers: [] as Array<[string, boolean]>,
-      alertLayers: [] as Array<[string, boolean]>, //[['agent-smith', true], ['agent-smith-2', true]] as Array<[string, boolean]>,
+      alertLayers: /*[] as Array<[string, boolean]>,*/ [['agent-smith', true], ['agent-smith-2', true]] as Array<[string, boolean]>,
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
@@ -244,7 +241,9 @@ export const appStateMgmt = {
       source: {
         scenario: {} as IScenarioDefinition,
         control_parameters: {} as IControlParameters,
-      }
+      },
+      CHTSource: {} as FeatureCollection,
+      CHTLayers: [] as Array<[string, boolean]>,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -253,7 +252,7 @@ export const appStateMgmt = {
       drawingCleared: () => {
         us({
           app: {
-            clearDrawing: false,
+            clearDrawing: { delete: false, id: '' },
             drawings: undefined,
           },
         });
@@ -294,7 +293,7 @@ export const appStateMgmt = {
       createGroup: async () => {
         us({
           app: {
-            clearDrawing: true,
+            clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
           },
         });
         if (!states()['app'].selectedFeatures) return;
@@ -310,7 +309,7 @@ export const appStateMgmt = {
       updateGroup: async (group: IGroup) => {
         us({
           app: {
-            clearDrawing: true,
+            clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
           },
         });
         if (!states()['app'].selectedFeatures) return;
@@ -418,6 +417,16 @@ export const appStateMgmt = {
               },
             });
             break;
+          case 'CHT':
+            us({
+              app: {
+                CHTLayers: (layers: Array<[string, boolean]>) => {
+                  layers[index] = [layers[index][0], !layers[index][1]];
+                  return layers;
+                },
+              },
+            });
+            break;
         }
       },
       updateGridOptions: (gridCellSize: number, updateLocation: boolean) => {
@@ -441,7 +450,7 @@ export const appStateMgmt = {
           },
         });
       },
-      updateCustomLayers: (layerName: string, addCurrentDrawings: boolean) => {
+      updateCustomLayers: (layerName: string) => {
         us({
           app: {
             customLayers: (layers: Array<[string, boolean]>) => {
@@ -449,12 +458,12 @@ export const appStateMgmt = {
               return layers;
             },
             customSources: (sources: Array<FeatureCollection>) => {
-              if (addCurrentDrawings) {
-                sources.push(states()['app'].drawings as FeatureCollection);
-              }
+              sources.push({
+                type: 'FeatureCollection',
+                features: [] as Feature[],
+              } as FeatureCollection);
               return sources;
             },
-            clearDrawing: true,
           },
         });
       },
@@ -463,18 +472,26 @@ export const appStateMgmt = {
           app: {
             customSources: (sources: Array<FeatureCollection>) => {
               if (index < sources.length) {
-                sources[index] = states()['app'].drawings as FeatureCollection;
+                let features = sources[index].features as Feature[];
+                features.push(states()['app'].latestDrawing as Feature);
+                sources[index].features = features;
               } else {
-                sources.push(states()['app'].drawings as FeatureCollection);
+                sources.push({
+                  type: 'FeatureCollection',
+                  features: [states()['app'].latestDrawing as Feature],
+                });
               }
               return sources;
             },
-            clearDrawing: true,
+            clearDrawing: {
+              delete: true,
+              id: states()['app'].latestDrawing.id,
+            },
           },
         });
       },
-      updateDrawings: (features: FeatureCollection) => {
-        us({ app: { drawings: features } });
+      updateDrawings: (feature: Feature) => {
+        us({ app: { latestDrawing: feature } });
       },
       deleteLayer: (index: number) => {
         us({
@@ -495,9 +512,36 @@ export const appStateMgmt = {
       submitCHT: async (hazard: Partial<IChemicalHazard>, location: number[]) => {
         (hazard.scenario as IScenarioDefinition).source_location = location;
         (hazard.scenario as IScenarioDefinition).source_location[2] = 0;
-        console.log('publish')
-        const res = await states()['app'].socket.serverCHT(hazard);
-        console.log(res);
+
+        const result = await states()['app'].socket.serverCHT(hazard) as FeatureCollection;
+        const features = result.features as Feature[];
+
+        const dts = features.map((feature: Feature) => {
+          return feature.properties?.deltaTime;
+        }) as number[];
+        // @ts-ignore
+        const uniqueDTs = [...new Set(dts)] as number[];
+
+        const CHTLayers = uniqueDTs.map((dt: number) => {
+          return [dt.toString(), true];
+        }) as Array<[string, boolean]>;
+
+        result.features = features.map((feature: Feature) => {
+          // @ts-ignore
+          feature.properties.color = '#' + feature.properties?.color as string;
+          return feature;
+        });
+
+        us({
+          app: {
+            CHTSource: () => {
+              return result;
+            },
+            CHTLayers: () => {
+              return CHTLayers;
+            },
+          },
+        });
       },
     };
   },

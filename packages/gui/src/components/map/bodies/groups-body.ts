@@ -1,7 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
-import { IGroup } from '../../../services/meiosis';
+import { IGroup } from '../../../../../shared/src';
 
 export const groupsBody: FactoryComponent<{
   state: IAppModel;

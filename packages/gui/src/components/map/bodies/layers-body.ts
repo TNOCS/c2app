@@ -151,6 +151,67 @@ export const layersBody: FactoryComponent<{
             ]),
           ),
         ),
+        /// Alert Layers
+        m('li.no-padding',
+          m('ul.collapsible.collapsible-accordion',
+            m('li', [
+              m('a.collapsible-header', 'Alert Layers', [
+                m('i.material-icons', 'arrow_drop_down'),
+              ]),
+              m('div.collapsible-body',
+                m('div.row',
+                  m('form',
+                    vnode.attrs.state.app.alertLayers.map((layer: [string, boolean], index: number) => {
+                      return m('p.col.s11.right',
+                        m('label', [
+                          m('input', {
+                            type: 'checkbox',
+                            class: 'filled-in',
+                            checked: layer[1],
+                            onclick: () => {
+                              vnode.attrs.actions.toggleLayer('alert', index);
+                            },
+                          }),
+                          m('span', layer[0])]),
+                      );
+                    })
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        /// CHT
+        m('li.no-padding',
+          m('ul.collapsible.collapsible-accordion',
+            m('li', [
+              m('a.collapsible-header', 'CHT Layers', [
+                m('i.material-icons', 'arrow_drop_down'),
+              ]),
+              m('div.collapsible-body',
+                m('div.row',
+                  m('p.col.s10.offset-s1', 'Time since release [s]'),
+                  m('form',
+                    vnode.attrs.state.app.CHTLayers?.map((layer: [string, boolean], index: number) => {
+                      return m('p.col.s11.right',
+                        m('label', [
+                          m('input', {
+                            type: 'checkbox',
+                            class: 'filled-in',
+                            checked: layer[1],
+                            onclick: () => {
+                              vnode.attrs.actions.toggleLayer('CHT', index);
+                            },
+                          }),
+                          m('span', layer[0])]),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+            ]),
+          ),
+        ),
       ];
     },
     oncreate: () => {

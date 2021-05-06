@@ -1,4 +1,3 @@
-
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';

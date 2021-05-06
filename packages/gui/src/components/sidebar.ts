@@ -1,21 +1,21 @@
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
 import M from 'materialize-css';
+import { messagesBody } from './map/bodies';
 
 export const sideBar: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
   return {
-    view: (_vnode) => {
+    view: (vnode) => {
       return m(
         'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed',
         {
           style: 'top: 64px; overflow-y: auto',
         },
         [
-          m('h5', 'Messages'),
-          m('p', /*vnode.attrs.state.app.alerts*/ 'No new messages'),
+          m(messagesBody, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
           m(
             'li.no-padding',
             m(
@@ -78,10 +78,7 @@ export const sideBar: FactoryComponent<{
       );
     },
     oncreate: () => {
-      const elemSidenav = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(elemSidenav);
-      const elemsCollapsible = document.querySelectorAll('.collapsible');
-      M.Collapsible.init(elemsCollapsible);
+      M.AutoInit();
     },
   };
 };
