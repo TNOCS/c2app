@@ -135,9 +135,5 @@ export const createPOIModal: FactoryComponent<{
     oncreate: () => {
       M.AutoInit();
     },
-    onupdate: () => {
-      const elem = document.getElementById('layerSelect') as HTMLElement;
-      M.FormSelect.init(elem);
-    },
   };
 };

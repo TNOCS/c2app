@@ -43,14 +43,8 @@ export const Mapbox: FactoryComponent<{
 
       // Add map listeners
       map.on('load', () => {
-        map.on('draw.create', ({ features }) => {
-          MapUtils.handleDrawEvent(map, features, actions);
-          actions.updateDrawings(features[0]);
-        });
-        map.on('draw.update', ({ features }) => {
-          MapUtils.handleDrawEvent(map, features, actions);
-          actions.updateDrawings(features[0]);
-        });
+        map.on('draw.create', ({ features }) => MapUtils.handleDrawEvent(map, features, actions));
+        map.on('draw.update', ({ features }) => MapUtils.handleDrawEvent(map, features, actions));
         map.on('click', 'firemenPositions', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
         map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
@@ -129,7 +123,7 @@ export const Mapbox: FactoryComponent<{
       if (!map.loaded()) return;
 
       if (appState.app.clearDrawing.delete) {
-        draw.delete(appState.app.clearDrawing.id)
+        draw.delete(appState.app.clearDrawing.id);
         actions.drawingCleared();
       }
 
@@ -211,7 +205,8 @@ export const Mapbox: FactoryComponent<{
             type: 'geojson',
             data: appState.app.CHTSource,
           });
-        } {
+        }
+        {
           (map.getSource('CHTSource') as GeoJSONSource).setData(appState.app.CHTSource);
         }
         // For custom layers, first check if the layer already exists

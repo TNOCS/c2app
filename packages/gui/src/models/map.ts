@@ -22,11 +22,14 @@ export const drawConfig = {
 };
 
 export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
+  actions.updateDrawings(features[0]);
   if (features[0].geometry.type === 'Polygon') {
     getFeaturesInPolygon(map, features, actions);
   } else if (features[0].geometry.type === 'Point') {
     actions.updateClickedFeature(features[0]);
   }
+  const elem = document.getElementById('layerSelect') as HTMLElement;
+  M.FormSelect.init(elem);
   const instance = M.Modal.getInstance(document.getElementById('createPOIModal') as HTMLElement);
   instance.open();
 };

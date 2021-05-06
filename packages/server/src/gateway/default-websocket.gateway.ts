@@ -27,6 +27,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   private clients: number = 0;
   private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   private callsignToSocketId: Map<string, string> = new Map<string, string>();
+  private URL: string = process.env.DISPERSION_SERVICE ? `${ process.env.DISPERSION_SERVICE + '/process'}` : 'http://localhost:8080/process';
 
   /** Handlers */
   async handleConnection(client: Socket) {
@@ -93,7 +94,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
   @SubscribeMessage('client-cht')
   async handleClientCHT(client: Socket, data: ICHT): Promise<string> {
-    const res = await this.httpService.post(`http://localhost:8080/process`, data.hazard).toPromise();
+    const res = await this.httpService.post(this.URL, data.hazard).toPromise();
     return JSON.stringify(res.data);
   }
 
