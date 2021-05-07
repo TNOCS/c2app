@@ -7,11 +7,11 @@ export const editGroupModal: FactoryComponent<{
   actions: IActions;
 }> = () => {
   return {
-    view: (_vnode) => {
+    view: (vnode) => {
       return m('div.modal.modal-fixed-footer', { id: 'editGroupModal' },
         m('div.modal-content', [
           m('h4', 'Edit Group'),
-          m('p', 'CONTENT HERE'),
+          m('p', `${'groupId: ' + vnode.attrs.state.app.editGroup}`),
         ]),
         m('div.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),

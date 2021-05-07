@@ -17,6 +17,9 @@ export const groupsBody: FactoryComponent<{
                 m('a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',
                   {
                     'data-target': 'editGroupModal',
+                    onclick: () => {
+                      vnode.attrs.actions.setGroupEdit(index);
+                    }
                   },
                   m('i.material-icons', 'edit')),
                 m('a.btn.waves-effect.waves-light.red.col.s2',

@@ -36,6 +36,7 @@ export interface IAppModel {
 
     // Groups
     groups: Array<IGroup>;
+    editGroup: number;
 
     // Profile
     profile: '' | 'commander' | 'firefighter';
@@ -55,6 +56,7 @@ export interface IAppModel {
     alertLayers: Array<[string, boolean]>;
     gridOptions: IGridOptions;
     customSources: Array<FeatureCollection>;
+    editLayer: number;
 
     // CHT
     source: {
@@ -82,6 +84,7 @@ export interface IActions {
   createGroup: () => void;
   updateGroup: (group: IGroup) => void;
   deleteGroup: (group: IGroup) => void;
+  setGroupEdit: (index: number) => void;
 
   // Profile
   updateProfile: (data: string) => void;
@@ -101,6 +104,7 @@ export interface IActions {
   addDrawingsToLayer: (index: number) => void;
   updateDrawings: (feature: Feature) => void;
   deleteLayer: (index: number) => void;
+  setLayerEdit: (index: number) => void;
 
   // CHT
   submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
@@ -366,6 +370,13 @@ export const appStateMgmt = {
       sendChat: (group: IGroup, message: string) => {
         states()['app'].socket.serverSend(states(), group, message);
       },
+      setGroupEdit: (index: number) => {
+        us({
+          app: {
+            editGroup: index,
+          },
+        });
+      },
 
       // Layers/style
       switchStyle: (style: string) => {
@@ -504,6 +515,13 @@ export const appStateMgmt = {
               layers.splice(index, 1);
               return layers;
             },
+          },
+        });
+      },
+      setLayerEdit: (index: number) => {
+        us({
+          app: {
+            editLayer: index,
           },
         });
       },

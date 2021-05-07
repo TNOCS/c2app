@@ -11,7 +11,10 @@ export class Socket {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
 
     this.socket.on('positions', (data: FeatureCollection) => {
-      us({ app: { positionSource: data } });
+      if (!this.shouldUpdate()) {
+      } else {
+        us({ app: { positionSource: data } });
+      }
     });
     this.socket.on('alert', (data: IAlert) => {
       us({
@@ -119,5 +122,14 @@ export class Socket {
         resolve(JSON.parse(result));
       });
     });
+  }
+
+  shouldUpdate(): boolean {
+    let update: boolean = true;
+    var elems = document.querySelectorAll('.modal');
+    elems.forEach((elem: Element) => {
+      if (M.Modal.getInstance(elem).isOpen) update = false;
+    });
+    return update;
   }
 }

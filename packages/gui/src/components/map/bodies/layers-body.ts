@@ -125,18 +125,17 @@ export const layersBody: FactoryComponent<{
                                 }),
                                 m('span', layer[0]),
                               ])),
-                            m('a.btn.waves-effect.waves-light.col.s1.offset-s2.modal-trigger',
+                            m('a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',
                               {
                                 'data-target': 'editLayerModal',
-                                onclick: (e: Event) => {
-                                  e.preventDefault();
+                                onclick: () => {
+                                  vnode.attrs.actions.setLayerEdit(index);
                                 },
                               },
                               m('i.material-icons', 'edit')),
-                            m('a.btn.waves-effect.waves-light.red.col.s1',
+                            m('a.btn.waves-effect.waves-light.red.col.s2',
                               {
-                                onclick: (e: Event) => {
-                                  e.preventDefault();
+                                onclick: () => {
                                   vnode.attrs.actions.deleteLayer(index);
                                 },
                               },
