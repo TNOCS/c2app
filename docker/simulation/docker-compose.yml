@@ -105,7 +105,7 @@ services:
     image: drivereu/test-bed-time-service:latest
     depends_on:
       - broker
-      - schema_registry    
+      - schema_registry
     ports:
       - "8100:8100"
     environment:
@@ -148,42 +148,29 @@ services:
       - mld
       - /data/${PBF_FILE}.osrm
     volumes:
-      - ${DATA_FOLDER}/walking:/data  
+      - ${DATA_FOLDER}/walking:/data
 
-  #meteoservice:
-  #  image: assistanceeu/meteoservice:latest
-  #  ports:
-  #    - 8081:8081
-#
-  #dispersionservice:
-  #  image: assistanceeu/dispersionservice:latest
-  #  depends_on:
-  #    - broker
-  #    - schema_registry
-  #  ports:
-  #    - 8080:8080
-  #  environment:
-  #    METEO_SERVICE: http://meteoservice:8081
-#
-  #chemical_hazard_tool:
-  #  image: assistanceeu/chemical-hazard-tool:latest
-  #  depends_on:
-  #    - broker
-  #    - schema_registry
-  #  ports:
-  #    - 3333:3333
-  #  environment:
-  #    KAFKA_HOST: broker:9092
-  #    SCHEMA_REGISTRY: http://schema_registry:3502
-  #    PORT: 3333
-  #    METEO_SERVICE: http://meteoservice:8081
-  #    DISPERSION_SERVICE: http://dispersionservice:8080
-#
+  meteoservice:
+    image: assistanceeu/meteoservice:latest
+    ports:
+      - 8081:8081
+
+  dispersionservice:
+    image: assistanceeu/dispersionservice:latest
+    depends_on:
+      - broker
+      - schema_registry
+    ports:
+      - 8080:8080
+    environment:
+      METEO_SERVICE: http://meteoservice:8081
+
   #c2app:
-  #  image: timovdk/c2app:0.1.0
+  #  image: timovdk/c2app:latest
   #  depends_on:
   #    - broker
-  #    - schema_registry    
+  #    - schema_registry
+  #    - dispersionservice
   #  ports:
   #    - 3000:3000
   #  environment:
@@ -191,3 +178,4 @@ services:
   #    SCHEMA_REGISTRY: http://schema_registry:3502
   #    PORT: 3000
   #    SERVER: http://localhost:3000
+  #    DISPERSION_SERVICE: http://dispersionservice:8080

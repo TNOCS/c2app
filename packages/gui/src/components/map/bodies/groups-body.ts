@@ -1,8 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
-import { Feature } from 'geojson';
-import { IGroup } from '../../../services/meiosis';
+import { IGroup } from '../../../../../shared/src';
 
 export const groupsBody: FactoryComponent<{
   state: IAppModel;
@@ -10,63 +9,31 @@ export const groupsBody: FactoryComponent<{
 }> = () => {
   return {
     view: (vnode) => {
-      return [
-        m('h5', 'Selected FRs'),
-        [
-          m(
-            'button.button[type=button]',
-            {
-              onclick: () => {
-                vnode.attrs.actions.resetSelectedFeatures();
-              },
-            },
-            'Clear selected FRs',
-          ),
-          m(
-            'button.button[type=button]',
-            {
-              onclick: () => {
-                vnode.attrs.actions.createGroup();
-              },
-            },
-            'Group selected FRs',
-          ),
-        ],
-        m(
-          'p',
-          vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
-            return m('span', JSON.stringify(feature.type));
-          }),
-        ),
-        m('h5', 'Groups'),
-        m(
-          'p',
-          vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
-            return m('p', [
-              m('p', 'ID: ' + index + ' Members: ' + group.callsigns.length, [
-                m(
-                  'button.button[type=button]',
+      return m('div', vnode.attrs.state.app.groups.length !== 0 ? vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
+          return m('div.collection-item',
+            m('label.row',
+              m('div.valign-wrapper', [
+                m('p.col.s7', 'ID: ' + index + ' Members: ' + group.callsigns.length),
+                m('a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',
                   {
+                    'data-target': 'editGroupModal',
                     onclick: () => {
-                      vnode.attrs.actions.updateGroup(group);
-                    },
+                      vnode.attrs.actions.setGroupEdit(index);
+                    }
                   },
-                  'Update',
-                ),
-                m(
-                  'button.button[type=button]',
+                  m('i.material-icons', 'edit')),
+                m('a.btn.waves-effect.waves-light.red.col.s2',
                   {
                     onclick: () => {
                       vnode.attrs.actions.deleteGroup(group);
                     },
                   },
-                  'Delete',
-                ),
+                  m('i.material-icons', 'delete')),
               ]),
-            ]);
-          }),
-        ),
-      ];
+            ),
+          );
+        }) : m('div', m('p', 'No groups')),
+      );
     },
     oncreate: () => {
       M.AutoInit();

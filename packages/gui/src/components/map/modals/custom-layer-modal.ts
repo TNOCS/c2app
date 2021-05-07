@@ -7,7 +7,6 @@ export const customLayerModal: FactoryComponent<{
   actions: IActions;
 }> = () => {
   let layerName: string;
-  let addCurrentDrawings: boolean;
   return {
     view: (vnode) => {
       return m('div.modal.modal-fixed-footer', { id: 'customLayerModal' },
@@ -32,25 +31,13 @@ export const customLayerModal: FactoryComponent<{
                 'Layer Name',
               ),
             ]),
-            m('p.col.s12',
-              m('label', [
-                m('input', {
-                  type: 'checkbox',
-                  class: 'filled-in',
-                  checked: addCurrentDrawings,
-                  onclick: () => {
-                    addCurrentDrawings = !addCurrentDrawings;
-                  },
-                }),
-                m('span', 'Add Current POIs')]),
-            ),
           ]),
         ]),
         m('div.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
           m('a.modal-close.waves-effect.waves-green.btn-flat', {
             onclick: () => {
-              vnode.attrs.actions.updateCustomLayers(layerName, addCurrentDrawings);
+              vnode.attrs.actions.updateCustomLayers(layerName);
             },
           }, 'Create Layer'),
         ),

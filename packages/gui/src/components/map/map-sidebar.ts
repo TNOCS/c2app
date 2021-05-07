@@ -1,8 +1,7 @@
-
 import m, { FactoryComponent, route } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { gridModal, customLayerModal } from './modals';
+import { gridModal, customLayerModal, createPOIModal, editLayerModal, editGroupModal } from './modals';
 import { groupsBody, layersBody, poiBody, messagesBody } from './bodies';
 
 export const mapSideBar: FactoryComponent<{
@@ -14,6 +13,9 @@ export const mapSideBar: FactoryComponent<{
       return [
         m(gridModal, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
         m(customLayerModal, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
+        m(createPOIModal, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
+        m(editLayerModal, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
+        m(editGroupModal, {state: vnode.attrs.state, actions: vnode.attrs.actions}),
         m(
           'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed',
           {

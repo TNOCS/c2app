@@ -5,10 +5,10 @@ import {
   LogLevel,
   IAdapterMessage,
   ProduceRequest,
-  IAlert,
 } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
+import { IAlert } from '../../../shared/src'
 
 interface ISendResponse {
   [topic: string]: {

@@ -10,7 +10,7 @@ import polylabel from 'polylabel';
 import car from 'url:../assets/car_icon.png';
 // @ts-ignore
 import fireman from 'url:../assets/fireman_icon.png';
-import { IAlert, IArea, IInfo } from '../types';
+import { IAlert, IArea, IInfo } from '../../../shared/src';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -22,11 +22,16 @@ export const drawConfig = {
 };
 
 export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
+  actions.updateDrawings(features[0]);
   if (features[0].geometry.type === 'Polygon') {
     getFeaturesInPolygon(map, features, actions);
   } else if (features[0].geometry.type === 'Point') {
     actions.updateClickedFeature(features[0]);
   }
+  const elem = document.getElementById('layerSelect') as HTMLElement;
+  M.FormSelect.init(elem);
+  const instance = M.Modal.getInstance(document.getElementById('createPOIModal') as HTMLElement);
+  instance.open();
 };
 
 const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {

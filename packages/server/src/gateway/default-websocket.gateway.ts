@@ -6,53 +6,28 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { FeatureCollection, Feature } from 'geojson';
-import { uuid4 } from '../utils/index';
+import { uuid4 } from '../utils';
 import { Server, Socket } from 'socket.io';
-
-export interface IGroup {
-  features: FeatureCollection;
-  callsigns: Array<string>;
-  owner: string;
-}
-
-export interface IReturnGroup {
-  id: string;
-  callsigns: Array<string>;
-  owner: string;
-}
-
-export interface IGroupsInit {
-  callsign: string;
-}
-
-export interface IGroupCreate {
-  callsign: string;
-  group: FeatureCollection;
-}
-
-export interface IGroupUpdate {
-  callsign: string;
-  group: FeatureCollection;
-  id: string;
-}
-
-export interface IGroupDelete {
-  callsign: string;
-  id: string;
-}
-
-export interface IMessage {
-  id: string;
-  callsign: string;
-  message: string;
-}
+import {
+  IServerMessage,
+  IServerGroup,
+  IGroupsInit,
+  IGroupCreate,
+  IGroupUpdate,
+  IGroupDelete, ICHT, IReturnGroup,
+} from '../../../shared/src';
+import { HttpService } from '@nestjs/common';
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private httpService: HttpService) {
+  }
+
   @WebSocketServer() server: Server;
   private clients: number = 0;
-  private groups: Map<string, IGroup> = new Map<string, IGroup>();
+  private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   private callsignToSocketId: Map<string, string> = new Map<string, string>();
+  private URL: string = process.env.DISPERSION_SERVICE ? `${ process.env.DISPERSION_SERVICE + '/process'}` : 'http://localhost:8080/process';
 
   /** Handlers */
   async handleConnection(client: Socket) {
@@ -100,7 +75,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-message')
-  handleMessage(client: Socket, data: IMessage): string {
+  handleMessage(client: Socket, data: IServerMessage): string {
     const group = this.groups.get(data.id);
 
     group.callsigns.forEach((callsign: string) => {
@@ -117,11 +92,17 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     return data.message;
   }
 
+  @SubscribeMessage('client-cht')
+  async handleClientCHT(client: Socket, data: ICHT): Promise<string> {
+    const res = await this.httpService.post(this.URL, data.hazard).toPromise();
+    return JSON.stringify(res.data);
+  }
+
   /** Helper Funcs */
   getGroupIdsForCallsign(callsign: string): string {
     let returnArray: Array<IReturnGroup> = new Array<IReturnGroup>();
 
-    this.groups.forEach((group: IGroup, uuid: string) => {
+    this.groups.forEach((group: IServerGroup, uuid: string) => {
       if (group.owner == callsign || group.callsigns.includes(callsign)) {
         returnArray.push({ id: uuid, callsigns: group.callsigns, owner: group.owner });
       }
@@ -130,14 +111,14 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     return JSON.stringify(returnArray);
   }
 
-  setGroupForId(update: IGroupUpdate): IGroup {
+  setGroupForId(update: IGroupUpdate): IServerGroup {
     const featureCollection = update.group as FeatureCollection;
 
     const callsigns = [
       ...new Set(
         featureCollection.features.map((feature: Feature) => {
           return feature.properties.name;
-        })
+        }),
       ),
     ];
 

@@ -1,7 +1,8 @@
 import { FeatureCollection } from 'geojson';
-import { IAppModel, UpdateStream, IGroup, IMessage } from './meiosis';
+import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert } from '../types';
+import { IAlert, IGroup, IMessage } from '../../../shared/src';
+import { IChemicalHazard } from '../../../shared/src';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -10,16 +11,19 @@ export class Socket {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
 
     this.socket.on('positions', (data: FeatureCollection) => {
-      us({ app: { positionSource: data } });
+      if (!this.shouldUpdate()) {
+      } else {
+        us({ app: { positionSource: data } });
+      }
     });
     this.socket.on('alert', (data: IAlert) => {
       us({
         app: {
           alerts: (alerts: Array<IAlert>) => {
             const index = alerts.findIndex((val: IAlert) => {
-              return val.identifier === data.identifier
-            })
-            if(index > -1) {
+              return val.identifier === data.identifier;
+            });
+            if (index > -1) {
               alerts[index] = data;
               return alerts;
             }
@@ -29,8 +33,8 @@ export class Socket {
           alertLayers: (layers: Array<[string, boolean]>) => {
             const index = layers.findIndex((val: [string, boolean]) => {
               return val[0] === data.identifier;
-            })
-            if(index > -1) {
+            });
+            if (index > -1) {
               return layers;
             }
             layers.push([data.identifier, true]);
@@ -110,5 +114,22 @@ export class Socket {
       (_result: string) => {
       },
     );
+  }
+
+  serverCHT(hazard: Partial<IChemicalHazard>): Promise<FeatureCollection> {
+    return new Promise((resolve) => {
+      this.socket.emit('client-cht', { hazard: hazard }, (result: string) => {
+        resolve(JSON.parse(result));
+      });
+    });
+  }
+
+  shouldUpdate(): boolean {
+    let update: boolean = true;
+    var elems = document.querySelectorAll('.modal');
+    elems.forEach((elem: Element) => {
+      if (M.Modal.getInstance(elem).isOpen) update = false;
+    });
+    return update;
   }
 }

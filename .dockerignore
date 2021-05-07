@@ -1,0 +1,15 @@
+**/.git
+**/.vscode
+**/docker
+**/node_modules
+**/.parcel-cache
+**/dist
+**/indigo
+
+**/*Dockerfile*
+**/*docker-compose*
+**/*editorconfig*
+**/*eslintrc*
+**/*.gitignore*
+**/*npmignore*
+**/*prettierrc*

@@ -1,5 +1,6 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel, IGroup, IMessage } from '../../services/meiosis';
+import { IActions, IAppModel } from '../../services/meiosis';
+import { IGroup, IMessage } from '../../../../shared/src';
 
 export const Chat: FactoryComponent<{
   state: IAppModel;
