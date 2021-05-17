@@ -29,7 +29,10 @@
     "socket.io-client": "2.3"
   },
   "devDependencies": {
+    "@parcel/packager-raw-url": "^2.0.0-beta.2",
     "@parcel/transformer-image": "next",
+    "@parcel/transformer-typescript-tsc": "^2.0.0-nightly.673",
+    "@parcel/transformer-webmanifest": "^2.0.0-beta.2",
     "@types/mapbox__mapbox-gl-draw": "^1.2.1",
     "@types/mapbox-gl": "^2.1.2",
     "@types/materialize-css": "^1.0.9",
