@@ -3,15 +3,20 @@
   "short_name": "C2App",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#fff",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "description": "A c2app for FRs.",
-  "icons": [{
-    "src": "favicon.ico",
-    "sizes": "192x192",
-    "type": "image/icons"
-  }, {
-    "src": "favicon.ico",
-    "sizes": "512x512",
-    "type": "image/icons"
+  "icons": [
+     {
+        "src": "/src/assets/android-launchericon-192-192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+        "purpose": "any"
+     },
+     {
+        "src": "/src/assets/android-launchericon-512-512.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any"
   }]
 }

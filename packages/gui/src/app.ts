@@ -10,7 +10,7 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import './styles.css';
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/src/sw.js', { scope: '/src/' }).then(function(reg) {
+  navigator.serviceWorker.register('../service-worker.ts').then(function(reg) {
 
     if(reg.installing) {
       console.log('Service worker installing');
