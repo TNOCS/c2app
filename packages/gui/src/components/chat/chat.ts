@@ -70,7 +70,8 @@ export const Chat: FactoryComponent<{
                 m(
                   'button.btn.waves-effect.waves-light.col.s3',
                   {
-                    onclick: () => {
+                    onclick: (e: Event) => {
+                      e.preventDefault();
                       vnode.attrs.actions.sendChat(vnode.attrs.state.app.chat as IGroup, input);
                       input = '';
                     },

@@ -53,6 +53,8 @@ const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: I
 
 export const displayPopup = (features: Feature[], actions: IActions) => {
   actions.updateClickedFeature(features[0]);
+  const instance = M.Sidenav.getInstance(document.getElementById('slide-out-2') as HTMLElement);
+  instance.open();
 };
 
 export const getGridSource = (map: mapboxgl.Map, actions: IActions, appState: IAppModel): FeatureCollection<Polygon> => {

@@ -20,103 +20,95 @@ export const createPOIModal: FactoryComponent<{
 
       return m('div.modal.modal-fixed-footer', { id: 'createPOIModal' },
         m('div.modal-content', [
-          m('h4', `${'Create ' + chosenTab}`),
-          m('row', [
-            m('div.input-field.col.s12', [
-              m('button.btn.waves-effect.waves-light.col.s3',
-                {
-                  disabled: chosenTab === 'Annotation',
-                  onclick: () => {
-                    chosenTab = 'Annotation';
-                  },
+          m('div.row', [
+            m('div.col.s12', m('ul.tabs', [
+              m('li.tab.col.s3', m('a', {
+                href: '#annotation',
+                onclick: () => {
+                  chosenTab = 'Annotation';
                 },
-                'Annotation'),
-              m('button.btn.waves-effect.waves-light.col.s3',
-                {
-                  disabled: chosenTab === 'Group',
-                  onclick: () => {
-                    chosenTab = 'Group';
-                  },
+              }, m('i.material-icons', 'pin_drop'))),
+              m('li.tab.col.s3', m('a', {
+                href: '#group',
+                onclick: () => {
+                  chosenTab = 'Group';
                 },
-                'Group'),
-              m('button.btn.waves-effect.waves-light.col.s3',
-                {
-                  disabled: chosenTab === 'POI',
-                  onclick: () => {
-                    chosenTab = 'POI';
-                  },
+              }, m('i.material-icons', 'group'))),
+              m('li.tab.col.s3', m('a', {
+                href: '#POI',
+                onclick: () => {
+                  chosenTab = 'POI';
                 },
-                'POI'),
-              m('button.btn.waves-effect.waves-light.col.s3',
-                {
-                  disabled: chosenTab === 'Chemical Hazard',
-                  onclick: () => {
-                    chosenTab = 'Chemical Hazard';
-                  },
+              }, m('i.material-icons', 'layers'))),
+              m('li.tab.col.s3', m('a', {
+                href: '#CHT',
+                onclick: () => {
+                  chosenTab = 'Chemical Hazard';
                 },
-                'CHT'),
-            ]),
-          ]),
-          m('row', [
-            chosenTab === 'Group' ? m('div', [
-                m('p', 'Creates a group of the selected First Responders listed below'),
-                m('p', 'Selected FRs'),
-                m('p', vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
-                    return m('span', JSON.stringify(feature.type));
-                  }),
+              }, m('i.material-icons', 'warning'))),
+            ])),
+            ///Annotation
+            m('div.col.s12', { id: 'annotation' }, m('div', [
+              m('p.col.s12', 'Creates a drawing on this location on the map without side-effects'),
+            ])),
+            /// GROUP
+            m('div.col.s12', { id: 'group' }, m('div', [
+              m('p', 'Creates a group of the selected First Responders listed below'),
+              m('p', 'Selected FRs'),
+              m('p', vnode.attrs.state.app.selectedFeatures?.features.map((feature: Feature) => {
+                  return m('span', JSON.stringify(feature.type));
+                }),
+              ),
+              m('div.input-field.col.s4', [
+                m('input', {
+                  id: 'groupName',
+                  type: 'text',
+                  value: groupName,
+                  onchange: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    groupName = target.value;
+                  },
+                }),
+                m(
+                  'label',
+                  {
+                    for: 'groupName',
+                  },
+                  'Group Name',
                 ),
-                m('div.input-field.col.s4', [
-                  m('input', {
-                    id: 'groupName',
-                    type: 'text',
-                    value: groupName,
+              ]),
+              m('div.col.s4'),
+              m('div.col.s4'),
+            ])),
+            /// POI
+            m('div.col.s12', { id: 'POI' }, m('div', [
+              m('p.col.s12', 'Creates a POI on this location on the map and adds it to the selected layer'),
+              m('div.input-field.col.s12', [
+                m('select', {
+                    id: 'layerSelect',
+                    input: layerIndex,
                     onchange: (e: Event) => {
                       const target = e.target as HTMLInputElement;
-                      groupName = target.value;
+                      layerIndex = Number(target.value);
                     },
+                  },
+                  m('option', { value: '', disabled: true, selected: true }, 'Choose the layer'),
+                  vnode.attrs.state.app.customLayers.map((layer: [string, boolean], index: number) => {
+                    return m('option', { value: index }, layer[0]);
                   }),
-                  m(
-                    'label',
-                    {
-                      for: 'groupName',
-                    },
-                    'Group Name',
-                  ),
-                ]),
-                m('div.col.s4'),
-                m('div.col.s4'),
-              ])
-              : chosenTab === 'POI' ? m('div', [
-                m('p.col.s12', 'Creates a POI on this location on the map and adds it to the selected layer'),
-                m('div.input-field.col.s12', [
-                  m('select', {
-                      id: 'layerSelect',
-                      input: layerIndex,
-                      onchange: (e: Event) => {
-                        const target = e.target as HTMLInputElement;
-                        layerIndex = Number(target.value);
-                      },
-                    },
-                    m('option', { value: '', disabled: true, selected: true }, 'Choose the layer'),
-                    vnode.attrs.state.app.customLayers.map((layer: [string, boolean], index: number) => {
-                      return m('option', { value: index }, layer[0]);
-                    }),
-                  ),
-                  m('label', { for: 'layerSelect' }, 'Choose the layer'),
-                ]),
-              ])
-              :
-              chosenTab === 'Chemical Hazard' ? m('div', [
-                  m('p.col.s12', 'Creates a chemical hazard on this location on the map'),
-                  m(LayoutForm, {
-                    form,
-                    obj: source,
-                    section: 'source',
-                  }),
-                ])
-                : m('div', [
-                  m('p.col.s12', 'Creates a drawing on this location on the map without side-effects'),
-                ]),
+                ),
+                m('label', { for: 'layerSelect' }, 'Choose the layer'),
+              ]),
+            ])),
+            /// CHT
+            m('div.col.s12', { id: 'CHT' }, m('div', [
+              m('p.col.s12', 'Creates a chemical hazard on this location on the map'),
+              m(LayoutForm, {
+                form,
+                obj: source,
+                section: 'source',
+              }),
+            ])),
           ]),
         ]),
         m('div.modal-footer',

@@ -11,7 +11,7 @@ import fireman from 'url:../../assets/fireman_icon.png';
 // @ts-ignore
 import car from 'url:../../assets/car_icon.png';
 
-export const Mapbox: FactoryComponent<{
+export const Map: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {

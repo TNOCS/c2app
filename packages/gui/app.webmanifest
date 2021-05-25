@@ -1,11 +1,11 @@
 {
-  "name": "C2APP",
-  "short_name": "C2App",
+  "name": "SAFR",
+  "short_name": "SAFR",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "description": "A c2app for FRs.",
+  "description": "An SA and C2 platform for FRs.",
   "icons": [
      {
         "src": "/src/assets/android-launchericon-192-192.png",

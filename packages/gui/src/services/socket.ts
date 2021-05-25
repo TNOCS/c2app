@@ -3,6 +3,7 @@ import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
 import { IAlert, IGroup, IMessage } from '../../../shared/src';
 import { IChemicalHazard } from '../../../shared/src';
+import M from 'materialize-css';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -42,6 +43,7 @@ export class Socket {
           },
         },
       });
+      M.toast({html: 'New Alert'})
     });
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
@@ -56,6 +58,7 @@ export class Socket {
           },
         },
       });
+      M.toast({html: 'New Chat'})
     });
     this.socket.on('server-notification', (data: string) => {
       const result = JSON.parse(data) as Array<IGroup>;
@@ -67,6 +70,7 @@ export class Socket {
         },
       });
     });
+    M.toast({html: 'Groups Initialized'})
   }
 
   serverInit(s: IAppModel): Promise<Array<IGroup>> {

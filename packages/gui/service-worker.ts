@@ -2,6 +2,7 @@ const cacheName = '::serviceworker';
 const version = 'v0.0.1';
 
 self.addEventListener('install', function(event) {
+  // @ts-ignore
   event.waitUntil(
     caches.open(version + cacheName).then(function(cache) {
       return cache.addAll(['/']);
@@ -10,6 +11,7 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('activate', function(event) {
+  // @ts-ignore
   event.waitUntil(
     caches.keys().then(function(keys) {
       // Remove caches whose name is no longer valid
@@ -27,10 +29,12 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // @ts-ignore
   const request = event.request;
 
   // Always fetch non-GET requests from the network
   if (request.method !== 'GET') {
+    // @ts-ignore
     event.respondWith(
       fetch(request).catch(function() {
         return caches.match('/');
@@ -47,6 +51,7 @@ self.addEventListener('fetch', function(event) {
   ) {
     // The request is text/html, so respond by caching the
     // item or showing the /offline offline
+    // @ts-ignore
     event.respondWith(
       fetch(request)
         .then(function(response) {
@@ -72,6 +77,7 @@ self.addEventListener('fetch', function(event) {
     request.headers.get('Accept')?.indexOf('text/plain') === -1 &&
     request.url.startsWith(this.origin)
   ) {
+    // @ts-ignore
     event.respondWith(
       caches.match(request).then(function(response) {
         return (
