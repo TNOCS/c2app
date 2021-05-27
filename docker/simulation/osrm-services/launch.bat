@@ -1,6 +1,6 @@
 @echo off
 setlocal
-SET PWD=C:\TNO\c2app\docker\simulation\osrm-services
+SET PWD=D:\TNO\c2app\docker\simulation\osrm-services\
 SET FILE=netherlands-latest
 echo Starting route services
 

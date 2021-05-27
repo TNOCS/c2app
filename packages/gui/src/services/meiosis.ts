@@ -571,8 +571,8 @@ export const appStateMgmt = {
         const dts = features.map((feature: Feature) => {
           return feature.properties?.deltaTime;
         }) as number[];
-        // @ts-ignore
-        const uniqueDTs = [...new Set(dts)] as number[];
+
+        const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
 
         const CHTLayers = uniqueDTs.map((dt: number) => {
           return [dt.toString(), true];
@@ -594,6 +594,7 @@ export const appStateMgmt = {
             },
           },
         });
+        m.redraw();
       },
     };
   },

@@ -87,7 +87,7 @@ export const Map: FactoryComponent<{
             },
             paint: {
               'line-opacity': 0.5,
-            }
+            },
           });
           map.addLayer({
             id: 'gridLabels',
@@ -100,7 +100,7 @@ export const Map: FactoryComponent<{
             },
             paint: {
               'text-opacity': 0.5,
-            }
+            },
           });
         });
       });
@@ -192,8 +192,7 @@ export const Map: FactoryComponent<{
             type: 'geojson',
             data: appState.app.CHTSource,
           });
-        }
-        {
+        } else {
           (map.getSource('CHTSource') as GeoJSONSource).setData(appState.app.CHTSource);
         }
         // For custom layers, first check if the layer already exists
