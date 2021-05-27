@@ -61,6 +61,7 @@ export const profileModal: FactoryComponent<{
             onclick: () => {
               vnode.attrs.actions.updateCallsign(callsign);
               vnode.attrs.actions.updateProfile(profile);
+              vnode.attrs.actions.initGroups();
             },
           }, 'Login'),
         ),

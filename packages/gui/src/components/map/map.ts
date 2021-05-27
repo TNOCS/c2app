@@ -5,7 +5,7 @@ import { RulerControl } from 'mapbox-gl-controls';
 import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
 import { IAlert } from '../../../../shared/src';
-import * as MapUtils from '../../models/map';
+import * as MapUtils from '../../models/map-utils';
 // @ts-ignore
 import fireman from 'url:../../assets/fireman_icon.png';
 // @ts-ignore
@@ -20,9 +20,6 @@ export const Map: FactoryComponent<{
   let draw: MapboxDraw;
 
   return {
-    oninit: ({ attrs: { state: _appState, actions } }) => {
-      actions.initGroups();
-    },
     view: () => {
       return m('div.col.s12.l9.right', { id: 'mapboxMap' });
     },

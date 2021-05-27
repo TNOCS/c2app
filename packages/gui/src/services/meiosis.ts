@@ -45,6 +45,7 @@ export interface IAppModel {
     // Chat
     messages: Map<string, Array<IMessage>>;
     chat?: IGroup;
+    newMessages: {[key: string]: number};
 
     // Layers/styles
     mapStyle: string;
@@ -81,8 +82,8 @@ export interface IActions {
 
   // Groups
   initGroups: () => void;
-  createGroup: () => void;
-  updateGroup: (group: IGroup) => void;
+  createGroup: (name: string) => void;
+  updateGroup: (index: number, name: string) => void;
   deleteGroup: (group: IGroup) => void;
   setGroupEdit: (index: number) => void;
 
@@ -225,6 +226,7 @@ export const appStateMgmt = {
 
       // Chat
       messages: new Map<string, Array<IMessage>>(),
+      newMessages: {} as {[key: string]: number},
 
       // Layers/styles
       mapStyle: 'mapbox/streets-v11',
@@ -291,37 +293,50 @@ export const appStateMgmt = {
             groups: () => {
               return result;
             },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                messages[group.id] = 0;
+              })
+              return messages;
+            },
           },
         });
       },
-      createGroup: async () => {
+      createGroup: async (name: string) => {
         us({
           app: {
             clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
           },
         });
         if (!states()['app'].selectedFeatures) return;
-        const result = await states()['app'].socket.serverCreate(states());
+        const result = await states()['app'].socket.serverCreate(states(), name);
         us({
           app: {
             groups: () => {
               return result;
             },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                if(!messages[group.id]) messages[group.id] = 0;
+              })
+              return messages;
+            },
           },
         });
       },
-      updateGroup: async (group: IGroup) => {
-        us({
-          app: {
-            clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
-          },
-        });
-        if (!states()['app'].selectedFeatures) return;
-        const result = await states()['app'].socket.serverUpdate(states(), group.id);
+      updateGroup: async (index: number, name: string) => {
+        const group = states()['app'].groups[index];
+        const result = await states()['app'].socket.serverUpdate(states(), group.id, name);
         us({
           app: {
             groups: () => {
               return result;
+            },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                if(!messages[group.id]) messages[group.id] = 0;
+              })
+              return messages;
             },
           },
         });
@@ -364,6 +379,10 @@ export const appStateMgmt = {
             chat: () => {
               return group;
             },
+            newMessages: (messages: {[key: string]: number}) => {
+              messages[group.id] = 0;
+              return messages;
+            }
           },
         });
       },

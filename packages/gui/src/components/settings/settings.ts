@@ -7,7 +7,7 @@ export const Settings: FactoryComponent<{
 }> = () => {
   return {
     view: (_vnode) => {
-      return m('div.col.s12.l9.right', [m('p', 'Settings go here')]);
+      return m('div.col.s12', [m('p', 'Settings go here')]);
     },
   };
 };

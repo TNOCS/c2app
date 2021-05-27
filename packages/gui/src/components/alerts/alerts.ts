@@ -8,7 +8,7 @@ export const Alerts: FactoryComponent<{
 }> = () => {
   return {
     view: (vnode) => {
-      return m('div.col.s12.l9.right', [
+      return m('div.col.s12', [
         m('p', 'Alerts go here'),
         /// Messages
         m('div', [

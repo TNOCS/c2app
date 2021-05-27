@@ -2,9 +2,9 @@ import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
 // @ts-ignore
 import logo from 'url:../assets/explosion.svg';
-import { profileModal } from './map/modals';
+import { profileModal } from './sidebars/modals';
 import M from 'materialize-css';
-import { poiSidebar } from './poi-sidebar';
+import { poiSidebar } from './sidebars/poi-sidebar';
 
 export const Layout: FactoryComponent<{
   state: IAppModel;

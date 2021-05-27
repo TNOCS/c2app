@@ -3,11 +3,12 @@ import { actions, states, IAppModel, IActions } from './meiosis';
 import { IPage } from '../models/page';
 import { Layout } from '../components/layout';
 import { Map } from '../components/map/map';
-import { mapSideBar } from '../components/map/map-sidebar';
-import { sideBar } from '../components/sidebar';
+import { mapSideBar } from '../components/sidebars/map-sidebar';
+import { sideBar } from '../components/sidebars/sidebar';
 import { Chat } from '../components/chat/chat';
 import { Settings } from '../components/settings/settings';
 import { Alerts } from '../components/alerts/alerts'
+import { chatSidebar } from '../components/sidebars/chat-sidebar';
 
 export enum Pages {
   MAP = 'MAP',
@@ -75,7 +76,7 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     route: '/chat',
     visible: true,
     component: Chat,
-    sidebar: sideBar,
+    sidebar: chatSidebar,
     hasSidebar: true,
   },
   {
@@ -86,7 +87,7 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     visible: true,
     component: Settings,
     sidebar: sideBar,
-    hasSidebar: true,
+    hasSidebar: false,
   },
   {
     id: Pages.ALERTS,
@@ -96,6 +97,6 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     visible: true,
     component: Alerts,
     sidebar: sideBar,
-    hasSidebar: true,
+    hasSidebar: false,
   },
 ]);

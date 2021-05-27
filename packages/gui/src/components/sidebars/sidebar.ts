@@ -1,5 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../services/meiosis';
+import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
 
 export const sideBar: FactoryComponent<{

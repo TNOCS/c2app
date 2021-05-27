@@ -115,7 +115,7 @@ export const createPOIModal: FactoryComponent<{
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
           m('a.modal-close.waves-effect.waves-green.btn-flat', {
             onclick: () => {
-              chosenTab === 'Group' ? vnode.attrs.actions.createGroup()
+              chosenTab === 'Group' ? vnode.attrs.actions.createGroup(groupName)
                 : chosenTab === 'POI' ? vnode.attrs.actions.addDrawingsToLayer(layerIndex)
                 : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.submitCHT(source, (vnode.attrs.state.app.latestDrawing.geometry as Point).coordinates)
                   : vnode.attrs.actions.createPOI();

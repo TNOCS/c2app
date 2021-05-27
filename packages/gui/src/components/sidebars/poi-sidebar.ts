@@ -1,6 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../services/meiosis';
+import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
+import { formatMan, formatCar, formatUnknown } from '../../models/poi-formatting';
 
 export const poiSidebar: FactoryComponent<{
   state: IAppModel;
@@ -9,7 +10,7 @@ export const poiSidebar: FactoryComponent<{
   return {
     view: (vnode) => {
       return m(
-        'ul#slide-out-2.sidenav',
+        'ul#slide-out-2.sidenav.no-autoinit',
         {
           style: 'top: 64px; overflow-y: auto',
         },
@@ -30,18 +31,17 @@ export const poiSidebar: FactoryComponent<{
             },
             'Clear clicked POI',
           ),
-          m(
-            'p',
-            `${
-              vnode.attrs.state.app.clickedFeature
-                ? 'Type: ' +
-                JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.type) +
-                ' Callsign: ' +
-                JSON.stringify(vnode.attrs.state.app.clickedFeature?.properties?.name)
-                : ''
-            }`,
-          ),
-          // Fix the weird scroll clipping caused by
+          // If there is a clicked feature
+          vnode.attrs.state.app.clickedFeature ?
+            // Feature === man
+            vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
+              formatMan(vnode.attrs.state.app.clickedFeature?.properties) :
+              vnode.attrs.state.app.clickedFeature?.properties?.type === 'car' ?
+                formatCar(vnode.attrs.state.app.clickedFeature?.properties) :
+                formatUnknown(vnode.attrs.state.app.clickedFeature?.properties)
+
+            // If there is no clicked feature
+            : m('p', ''),
           m('div', { style: 'margin: 128px' }),
         ]),
       );
