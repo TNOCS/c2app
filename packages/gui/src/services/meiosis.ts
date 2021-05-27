@@ -21,6 +21,7 @@ export interface IAppModel {
 
     // Alerts
     alerts: Array<IAlert>;
+    alert?: IAlert;
 
     // Positions
     positionSource: FeatureCollection;
@@ -45,7 +46,7 @@ export interface IAppModel {
     // Chat
     messages: Map<string, Array<IMessage>>;
     chat?: IGroup;
-    newMessages: {[key: string]: number};
+    newMessages: { [key: string]: number };
 
     // Layers/styles
     mapStyle: string;
@@ -73,6 +74,9 @@ export interface IActions {
   // Core
   drawingCleared: () => void;
   createPOI: () => void;
+
+  // Alerts
+  openAlert: (alert: IAlert) => void;
 
   // Clicking/selecting
   updateClickedFeature: (feature: Feature) => void;
@@ -226,11 +230,11 @@ export const appStateMgmt = {
 
       // Chat
       messages: new Map<string, Array<IMessage>>(),
-      newMessages: {} as {[key: string]: number},
+      newMessages: {} as { [key: string]: number },
 
       // Layers/styles
       mapStyle: 'mapbox/streets-v11',
-      realtimeLayers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
+      realtimeLayers: [['firemenPositions', true]] as Array<[string, boolean]>,
       gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
       sensorLayers: [] as Array<[string, boolean]>,
       customLayers: [] as Array<[string, boolean]>,
@@ -271,6 +275,17 @@ export const appStateMgmt = {
         });
       },
 
+      // Alerts
+      openAlert: (alert: IAlert) => {
+        us({
+          app: {
+            alert: () => {
+              return alert;
+            },
+          },
+        });
+      },
+
       // Clicking/selecting
       updateClickedFeature: (feature: Feature) => {
         us({ app: { clickedFeature: feature } });
@@ -296,7 +311,7 @@ export const appStateMgmt = {
             newMessages: (messages: { [key: string]: number }) => {
               result.forEach((group: IGroup) => {
                 messages[group.id] = 0;
-              })
+              });
               return messages;
             },
           },
@@ -317,8 +332,8 @@ export const appStateMgmt = {
             },
             newMessages: (messages: { [key: string]: number }) => {
               result.forEach((group: IGroup) => {
-                if(!messages[group.id]) messages[group.id] = 0;
-              })
+                if (!messages[group.id]) messages[group.id] = 0;
+              });
               return messages;
             },
           },
@@ -334,8 +349,8 @@ export const appStateMgmt = {
             },
             newMessages: (messages: { [key: string]: number }) => {
               result.forEach((group: IGroup) => {
-                if(!messages[group.id]) messages[group.id] = 0;
-              })
+                if (!messages[group.id]) messages[group.id] = 0;
+              });
               return messages;
             },
           },
@@ -379,10 +394,10 @@ export const appStateMgmt = {
             chat: () => {
               return group;
             },
-            newMessages: (messages: {[key: string]: number}) => {
+            newMessages: (messages: { [key: string]: number }) => {
               messages[group.id] = 0;
               return messages;
-            }
+            },
           },
         });
       },

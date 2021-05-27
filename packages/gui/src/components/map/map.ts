@@ -8,8 +8,6 @@ import { IAlert } from '../../../../shared/src';
 import * as MapUtils from '../../models/map-utils';
 // @ts-ignore
 import fireman from 'url:../../assets/fireman_icon.png';
-// @ts-ignore
-import car from 'url:../../assets/car_icon.png';
 
 export const Map: FactoryComponent<{
   state: IAppModel;
@@ -32,8 +30,9 @@ export const Map: FactoryComponent<{
         center: [5.48, 51.44] as [number, number],
         zoom: 12,
       });
-      draw = new MapboxDraw(MapUtils.drawConfig);
 
+      // Add draw controls
+      draw = new MapboxDraw(MapUtils.drawConfig);
       map.addControl(new mapboxgl.NavigationControl(), 'top-left');
       map.addControl(draw, 'top-left');
       map.addControl(new RulerControl(), 'top-left');
@@ -79,22 +78,6 @@ export const Map: FactoryComponent<{
               filter: ['all', ['in', 'type', 'man', 'firefighter']],
             });
           });
-          map.loadImage(car, function(error, image) {
-            if (error) throw error;
-            if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
-            map.addLayer({
-              id: 'carPositions',
-              type: 'symbol',
-              source: 'positionSource',
-              layout: {
-                'visibility': appState.app.realtimeLayers[1][1] ? 'visible' : 'none',
-                'icon-image': 'car',
-                'icon-size': 0.5,
-                'icon-allow-overlap': true,
-              },
-              filter: ['==', 'type', 'car'],
-            });
-          });
           map.addLayer({
             id: 'grid',
             type: 'line',
@@ -102,6 +85,9 @@ export const Map: FactoryComponent<{
             layout: {
               'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
             },
+            paint: {
+              'line-opacity': 0.5,
+            }
           });
           map.addLayer({
             id: 'gridLabels',
@@ -110,7 +96,11 @@ export const Map: FactoryComponent<{
             layout: {
               'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
               'text-field': '{cellLabel}',
+              'text-allow-overlap': true,
             },
+            paint: {
+              'text-opacity': 0.5,
+            }
           });
         });
       });
