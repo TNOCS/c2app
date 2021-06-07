@@ -2,14 +2,14 @@ import m from 'mithril';
 import mapboxgl from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import { Point, Feature, Polygon, FeatureCollection, Geometry, Position } from 'geojson';
+import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
 import { IActions, IAppModel } from '../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
 // @ts-ignore
-import car from 'url:../assets/car_icon.png';
+import car from '../assets/car_icon.png';
 // @ts-ignore
-import fireman from 'url:../assets/fireman_icon.png';
+import fireman from '../assets/fireman_icon.png';
 import { IAlert, IArea, IInfo } from '../../../shared/src';
 
 export const drawConfig = {
@@ -170,46 +170,5 @@ export const prepareGeoJSON = (alertMessage: IAlert): FeatureCollection => {
   const alertInfo = alertMessage.info as IInfo;
   const alertArea = alertInfo.area as IArea[];
 
-  let featureCollection: FeatureCollection;
-  if (alertArea[0].areaDesc.includes('polygon')) {
-    featureCollection = {
-      type: 'FeatureCollection',
-      features:
-        [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Polygon',
-              coordinates: [
-                (alertArea[0].polygon as string[]).map((coordinate: string) => {
-                  let splitCoords = coordinate.split(', ');
-                  return [Number(splitCoords[0]), Number(splitCoords[1])];
-                }) as Position[],
-              ],
-            },
-            properties: {},
-          } as Feature<Polygon>,
-        ],
-    } as FeatureCollection;
-  } else {
-    featureCollection = {
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [
-              [[5.477628707885741, 51.443763428806044],
-                [5.4743242263793945, 51.44181075517023],
-                [5.477542877197266, 51.43921597746186],
-                [5.477628707885741, 51.443763428806044]],
-            ],
-          },
-          properties: {},
-        } as Feature<Polygon>,
-      ],
-    } as FeatureCollection;
-  }
-  return featureCollection;
+  return JSON.parse(alertArea[0].areaDesc);
 };

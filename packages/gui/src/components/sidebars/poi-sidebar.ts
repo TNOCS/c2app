@@ -23,7 +23,7 @@ export const poiSidebar: FactoryComponent<{
           }, m('i.material-icons', 'clear')),
           m('h5', 'Clicked POI'),
           m(
-            'button.button[type=button]',
+            'a.btn.waves-effect.waves-light',
             {
               onclick: () => {
                 vnode.attrs.actions.resetClickedFeature();
@@ -31,17 +31,20 @@ export const poiSidebar: FactoryComponent<{
             },
             'Clear clicked POI',
           ),
-          // If there is a clicked feature
-          vnode.attrs.state.app.clickedFeature ?
-            // Feature === man
-            vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
-              formatMan(vnode.attrs.state.app.clickedFeature?.properties) :
-              vnode.attrs.state.app.clickedFeature?.properties?.type === 'car' ?
-                formatCar(vnode.attrs.state.app.clickedFeature?.properties) :
-                formatUnknown(vnode.attrs.state.app.clickedFeature?.properties)
+          m('div.card-panel', [
+            // If there is a clicked feature
+            vnode.attrs.state.app.clickedFeature ?
+              vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
+                formatMan(vnode.attrs.state.app.clickedFeature) :
+                vnode.attrs.state.app.clickedFeature?.properties?.type === 'car' ?
+                  formatCar(vnode.attrs.state.app.clickedFeature) :
+                  vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter' ?
+                    formatMan(vnode.attrs.state.app.clickedFeature) :
+                    formatUnknown(vnode.attrs.state.app.clickedFeature)
 
-            // If there is no clicked feature
-            : m('p', ''),
+              // If there is no clicked feature
+              : m('p', ''),
+          ]),
           m('div', { style: 'margin: 128px' }),
         ]),
       );

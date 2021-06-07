@@ -1,10 +1,11 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
 // @ts-ignore
-import logo from 'url:../assets/explosion.svg';
+import logo from '../assets/explosion.svg';
 import { profileModal } from './sidebars/modals';
 import M from 'materialize-css';
 import { poiSidebar } from './sidebars/poi-sidebar';
+import { profileSidebar } from './sidebars/profile-sidebar';
 
 export const Layout: FactoryComponent<{
   state: IAppModel;
@@ -14,15 +15,6 @@ export const Layout: FactoryComponent<{
     view: (vnode) => {
       return m('.main', [
         m(profileModal, { state: vnode.attrs.state, actions: vnode.attrs.actions }),
-        m('ul.dropdown-content', {
-          id: 'profile',
-        }, [
-          m('li', m('p', `${'Profile: ' + vnode.attrs.state.app.profile ? vnode.attrs.state.app.profile : 'No Profile'}`)),
-          m('li', m('p', `${'Callsign: ' + vnode.attrs.state.app.callsign ? vnode.attrs.state.app.callsign : 'No Callsign'}`)),
-          m('li', m('a.modal-trigger', {
-            'data-target': 'profileModal'
-          }, m('i.material-icons', 'edit'))),
-        ]),
         m('.navbar',
           { style: 'z-index: 1001; height: 64px' },
           m('nav',
@@ -98,23 +90,21 @@ export const Layout: FactoryComponent<{
                   ),
                 ),
                 m('li',
-                  m('a.dropdown-trigger',
+                  m('a',
                     {
-                      'data-target': 'profile',
+                      onclick: () => {
+                        const instance = M.Sidenav.getInstance(document.getElementById('slide-out-profile') as HTMLElement);
+                        instance.open();
+                      }
                     }, m('i.material-icons', 'account_circle')),
                 ),
               ]),
-              m('a.right.sidenav-trigger.hide.no-autoinit',
-                {
-                  'data-target': 'slide-out-2',
-                  href: m.route.get(),
-                },
-              ),
             ]),
           ),
         ),
         m('.row', vnode.children),
-        m('.row', m(poiSidebar, { state: vnode.attrs.state, actions: vnode.attrs.actions }))
+        m('.row', m(poiSidebar, { state: vnode.attrs.state, actions: vnode.attrs.actions })),
+        m('.row', m(profileSidebar, { state: vnode.attrs.state, actions: vnode.attrs.actions }))
       ]);
     },
     oncreate: () => {

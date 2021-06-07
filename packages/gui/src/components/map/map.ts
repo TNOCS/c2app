@@ -1,13 +1,14 @@
 import m, { FactoryComponent } from 'mithril';
 import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+// @ts-ignore
 import { RulerControl } from 'mapbox-gl-controls';
 import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
 import { IAlert } from '../../../../shared/src';
 import * as MapUtils from '../../models/map-utils';
 // @ts-ignore
-import fireman from 'url:../../assets/fireman_icon.png';
+import fireman from '../../assets/fireman_icon.png';
 
 export const Map: FactoryComponent<{
   state: IAppModel;
@@ -24,6 +25,7 @@ export const Map: FactoryComponent<{
     // Executes once on creation
     oncreate: ({ attrs: { state: appState, actions } }) => {
       // Create map and add controls
+      console.log('test webpacks')
       map = new mapboxgl.Map({
         container: 'mapboxMap',
         style: `mapbox://styles/${appState.app.mapStyle}`,

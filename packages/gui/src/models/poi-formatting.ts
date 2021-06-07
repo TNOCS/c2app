@@ -1,19 +1,22 @@
 import m from 'mithril';
-import { GeoJsonProperties } from 'geojson';
+import { Feature } from 'geojson';
 
-export const formatMan = (props: GeoJsonProperties) => {
+export const formatMan = (ft: Feature) => {
+  const props = ft?.properties;
   return m('div', [
-    m('p', 'Type: ' + JSON.stringify(props?.type)),
-    m('p', 'Callsign: ' + JSON.stringify(props?.name)),
+    m('p', 'Type: ' + props?.type),
+    m('p', 'Callsign: ' + props?.name),
   ]);
 };
-export const formatCar = (props: GeoJsonProperties) => {
+export const formatCar = (ft: Feature) => {
+  const props = ft?.properties;
   return m('div', [
-    m('p', 'Type: ' + JSON.stringify(props?.type)),
+    m('p', 'Type: ' + props?.type),
   ]);
 };
-export const formatUnknown = (props: GeoJsonProperties) => {
+export const formatUnknown = (ft: Feature) => {
+  const props = ft?.properties;
   return m('div', [
-    m('p', 'Type: ' + JSON.stringify(props?.type)),
+    m('p', 'Type: ' + props?.type),
   ]);
 };
