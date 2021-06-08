@@ -14,7 +14,7 @@ import {
   IScenarioDefinition,
 } from '../../../shared/src';
 // @ts-ignore
-import ch from '../ch.json'
+import ch from '../ch.json';
 
 export interface IAppModel {
   app: {
@@ -57,7 +57,7 @@ export interface IAppModel {
     gridLayers: Array<[string, boolean]>;
     sensorLayers: Array<[string, boolean]>;
     customLayers: Array<[string, boolean]>;
-    alertLayers: Array<[string, boolean]>;
+    alertLayers: Array<[string, Array<[string, boolean]>]>;
     gridOptions: IGridOptions;
     customSources: Array<FeatureCollection>;
     editLayer: number;
@@ -103,7 +103,7 @@ export interface IActions {
 
   // Layers/styles
   switchStyle: (style: string) => void;
-  toggleLayer: (selector: string, index: number) => void;
+  toggleLayer: (selector: string, index: number, secondIndex?: number) => void;
   updateGridLocation: (bbox: [number, number, number, number]) => void;
   updateGridOptions: (gridCellSize: number, updateLocation: boolean) => void;
   updateGridDone: () => void;
@@ -204,7 +204,7 @@ export const appStateMgmt = {
       gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
       sensorLayers: [] as Array<[string, boolean]>,
       customLayers: [] as Array<[string, boolean]>,
-      alertLayers: /*[] as Array<[string, boolean]>,*/ [['agent-smith', true]] as Array<[string, boolean]>,
+      alertLayers: /*[] as Array<[string, Array<[string, boolean]>]>;,*/ [['agent-smith', [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true]]]] as Array<[string, Array<[string, boolean]>]>,
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
@@ -219,7 +219,7 @@ export const appStateMgmt = {
         control_parameters: {} as IControlParameters,
       },
       CHTSource: ch as FeatureCollection,
-      CHTLayers: [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true], ] as Array<[string, boolean]>,
+      CHTLayers: [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true]] as Array<[string, boolean]>,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -386,13 +386,13 @@ export const appStateMgmt = {
           },
         });
       },
-      toggleLayer: (selector: string, index: number) => {
+      toggleLayer: (selector: string, index: number, secondIndex?: number) => {
         switch (selector) {
           case 'realtime':
             us({
               app: {
                 realtimeLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]];
+                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
                   return layers;
                 },
               },
@@ -402,7 +402,7 @@ export const appStateMgmt = {
             us({
               app: {
                 gridLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]];
+                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
                   return layers;
                 },
               },
@@ -412,7 +412,7 @@ export const appStateMgmt = {
             us({
               app: {
                 customLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]];
+                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
                   return layers;
                 },
               },
@@ -421,8 +421,12 @@ export const appStateMgmt = {
           case 'alert':
             us({
               app: {
-                alertLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]];
+                alertLayers: (layers: Array<[string, Array<[string, boolean]>]>) => {
+                  // @ts-ignore
+                  let layer = layers[secondIndex][1] as Array<[string, boolean]>;
+                  layer[index] = [layer[index][0], !layer[index][1]] as [string, boolean];
+                  // @ts-ignore
+                  layers[secondIndex] = [layers[secondIndex][0], layer] as [string, Array<[string, boolean]>];
                   return layers;
                 },
               },
@@ -432,7 +436,7 @@ export const appStateMgmt = {
             us({
               app: {
                 CHTLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]];
+                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
                   return layers;
                 },
               },
@@ -544,7 +548,7 @@ export const appStateMgmt = {
           return [dt.toString(), true];
         }) as Array<[string, boolean]>;
 
-        result.features = features.map((feature: Feature) => {
+        result.features.forEach((feature: Feature) => {
           // @ts-ignore
           feature.properties.color = '#' + feature.properties?.color as string;
           return feature;

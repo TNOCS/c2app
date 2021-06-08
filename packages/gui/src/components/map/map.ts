@@ -3,29 +3,24 @@ import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-ignore
 import { RulerControl } from 'mapbox-gl-controls';
-import { Feature } from 'geojson';
 import { IActions, IAppModel } from '../../services/meiosis';
-import { IAlert } from '../../../../shared/src';
-import * as MapUtils from '../../models/map-utils';
-// @ts-ignore
-import fireman from '../../assets/fireman_icon.png';
+import * as MapUtils from './map-utils';
 
 export const Map: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
-  mapboxgl.accessToken = 'pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ';
+  mapboxgl.accessToken = process.env.ACCESSTOKEN || '';
   let map: mapboxgl.Map;
   let draw: MapboxDraw;
 
   return {
     view: () => {
-      return m('div.col.s12.l9.right', { id: 'mapboxMap' });
+      return m('#mapboxMap.col.s12.l9.right');
     },
     // Executes once on creation
     oncreate: ({ attrs: { state: appState, actions } }) => {
       // Create map and add controls
-      console.log('test webpacks')
       map = new mapboxgl.Map({
         container: 'mapboxMap',
         style: `mapbox://styles/${appState.app.mapStyle}`,
@@ -43,67 +38,13 @@ export const Map: FactoryComponent<{
       map.on('load', () => {
         map.on('draw.create', ({ features }) => MapUtils.handleDrawEvent(map, features, actions));
         map.on('draw.update', ({ features }) => MapUtils.handleDrawEvent(map, features, actions));
-        map.on('click', 'firemenPositions', ({ features }) => MapUtils.displayPopup(features as Feature[], actions));
-        map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
-        map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
+
         map.once('styledata', () => {
-          const positionSource = appState.app.positionSource;
-          const gridSource = MapUtils.getGridSource(map, actions, appState);
-          const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
-
-          map.addSource('gridLabelsSource', {
-            type: 'geojson',
-            data: gridLabelsSource,
-          });
-          map.addSource('positionSource', {
-            type: 'geojson',
-            data: positionSource,
-          });
-          map.addSource('gridSource', {
-            type: 'geojson',
-            data: gridSource,
-          });
-
-          map.loadImage(fireman, function(error, image) {
-            if (error) throw error;
-            if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
-            map.addLayer({
-              id: 'firemenPositions',
-              type: 'symbol',
-              source: 'positionSource',
-              layout: {
-                'visibility': appState.app.realtimeLayers[0][1] ? 'visible' : 'none',
-                'icon-image': 'fireman',
-                'icon-size': 0.5,
-                'icon-allow-overlap': true,
-              },
-              filter: ['all', ['in', 'type', 'man', 'firefighter']],
-            });
-          });
-          map.addLayer({
-            id: 'grid',
-            type: 'line',
-            source: 'gridSource',
-            layout: {
-              'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
-            },
-            paint: {
-              'line-opacity': 0.5,
-            },
-          });
-          map.addLayer({
-            id: 'gridLabels',
-            type: 'symbol',
-            source: 'gridLabelsSource',
-            layout: {
-              'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
-              'text-field': '{cellLabel}',
-              'text-allow-overlap': true,
-            },
-            paint: {
-              'text-opacity': 0.5,
-            },
-          });
+          MapUtils.initRealtimeLayers(appState, actions, map);
+          MapUtils.initGridLayers(appState, actions, map);
+          MapUtils.customLayersUpdate(appState, actions, map);
+          MapUtils.alertLayersUpdate(appState, actions, map);
+          MapUtils.CHTLayersUpdate(appState, actions, map);
         });
       });
     },
@@ -111,11 +52,13 @@ export const Map: FactoryComponent<{
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
 
+      // Check if drawings should be removed from the map
       if (appState.app.clearDrawing.delete) {
         draw.delete(appState.app.clearDrawing.id);
         actions.drawingCleared();
       }
 
+      // Update the grid if necessary
       if (appState.app.gridOptions.updateGrid) {
         const gridSource = MapUtils.getGridSource(map, actions, appState);
         const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
@@ -126,98 +69,30 @@ export const Map: FactoryComponent<{
         actions.updateGridDone();
       }
 
+      // Set new positionSource
       (map.getSource('positionSource') as GeoJSONSource).setData(appState.app.positionSource);
 
+      // Check if basemap should be switched
       if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
         MapUtils.switchBasemap(map, appState.app.mapStyle).catch();
       }
 
+      // Toggle visibility of realtime layers
       appState.app.realtimeLayers.forEach((layer: [string, boolean]) => {
         map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
 
+      // Toggle visibility of grid layers
       appState.app.gridLayers.forEach((layer: [string, boolean]) => {
         map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
       });
 
-      appState.app.customLayers.forEach((layer: [string, boolean], index: number) => {
-        // For custom layers, first check if the source for this layer exists
-        if (!map.getSource(layer[0] + 'Source')) {
-          map.addSource(layer[0] + 'Source', {
-            type: 'geojson',
-            data: appState.app.customSources[index],
-          });
-        } else {
-          (map.getSource(layer[0] + 'Source') as GeoJSONSource).setData(appState.app.customSources[index]);
-        }
-        // For custom layers, first check if the layer already exists
-        if (!map.getLayer(layer[0])) {
-          map.addLayer({
-            id: layer[0],
-            type: 'circle',
-            source: layer[0] + 'Source',
-            layout: {
-              'visibility': layer[1] ? 'visible' : 'none',
-            },
-          });
-        }
-        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-      });
-
-      appState.app.alertLayers.forEach((layer: [string, boolean], index: number) => {
-        // For custom layers, first check if the source for this layer exists
-        if (!map.getSource(layer[0] + 'Source')) {
-          map.addSource(layer[0] + 'Source', {
-            type: 'geojson',
-            data: MapUtils.prepareGeoJSON(appState.app.alerts[index] as IAlert),
-          });
-        } else {
-          (map.getSource(layer[0] + 'Source') as GeoJSONSource).setData(MapUtils.prepareGeoJSON(appState.app.alerts[index] as IAlert));
-        }
-        // For custom layers, first check if the layer already exists
-        if (!map.getLayer(layer[0])) {
-          map.addLayer({
-            id: layer[0],
-            type: 'fill',
-            source: layer[0] + 'Source',
-            layout: {
-              'visibility': layer[1] ? 'visible' : 'none',
-            },
-          });
-        }
-        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-      });
-
-      if (appState.app.CHTSource.features) {
-        if (!map.getSource('CHTSource')) {
-          map.addSource('CHTSource', {
-            type: 'geojson',
-            data: appState.app.CHTSource,
-          });
-        } else {
-          (map.getSource('CHTSource') as GeoJSONSource).setData(appState.app.CHTSource);
-        }
-        // For custom layers, first check if the layer already exists
-        appState.app.CHTLayers.forEach((layer: [string, boolean]) => {
-          if (!map.getLayer(layer[0])) {
-            map.addLayer({
-              id: layer[0],
-              type: 'fill',
-              source: 'CHTSource',
-              layout: {},
-              paint: {
-                'fill-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'fill-opacity': 0.5,
-              },
-              filter: ['all', ['in', 'deltaTime', Number(layer[0])]],
-            });
-          }
-          map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-        });
-      }
+      // Update custom layers
+      MapUtils.customLayersUpdate(appState, actions, map);
+      // Update alert layers
+      MapUtils.alertLayersUpdate(appState, actions, map);
+      // Update CHT layers
+      MapUtils.CHTLayersUpdate(appState, actions, map);
     },
   };
 };
