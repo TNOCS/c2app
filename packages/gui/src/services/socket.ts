@@ -3,6 +3,7 @@ import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
 import { IAlert, IGroup, IMessage } from '../../../shared/src';
 import { IChemicalHazard } from '../../../shared/src';
+import M from 'materialize-css';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -42,6 +43,7 @@ export class Socket {
           },
         },
       });
+      M.toast({ html: 'New Alert' });
     });
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
@@ -54,8 +56,13 @@ export class Socket {
             messages.set(message.id, messageList);
             return messages;
           },
+          newMessages: (messages: { [key: string]: number }) => {
+            messages[message.id] += 1;
+            return messages;
+          },
         },
       });
+      M.toast({ html: 'New Chat' });
     });
     this.socket.on('server-notification', (data: string) => {
       const result = JSON.parse(data) as Array<IGroup>;
@@ -64,9 +71,16 @@ export class Socket {
           groups: () => {
             return result;
           },
+          newMessages: (messages: { [key: string]: number }) => {
+            result.forEach((group: IGroup) => {
+              messages[group.id] = 0;
+            })
+            return messages;
+          },
         },
       });
     });
+    M.toast({ html: 'Added to a new group' });
   }
 
   serverInit(s: IAppModel): Promise<Array<IGroup>> {
@@ -77,11 +91,11 @@ export class Socket {
     });
   }
 
-  serverCreate(s: IAppModel): Promise<Array<IGroup>> {
+  serverCreate(s: IAppModel, name: string): Promise<Array<IGroup>> {
     return new Promise((resolve) => {
       this.socket.emit(
         'client-create',
-        { callsign: s.app.callsign, group: s.app.selectedFeatures },
+        { callsign: s.app.callsign, group: s.app.selectedFeatures, name: name },
         (result: string) => {
           resolve(JSON.parse(result));
         },
@@ -89,11 +103,11 @@ export class Socket {
     });
   }
 
-  serverUpdate(s: IAppModel, id: string): Promise<Array<IGroup>> {
+  serverUpdate(s: IAppModel, id: string, name: string): Promise<Array<IGroup>> {
     return new Promise((resolve) => {
       this.socket.emit(
         'client-update',
-        { callsign: s.app.callsign, group: s.app.selectedFeatures, id: id },
+        { callsign: s.app.callsign, id: id, name: name },
         (result: string) => resolve(JSON.parse(result)),
       );
     });
@@ -126,7 +140,7 @@ export class Socket {
 
   shouldUpdate(): boolean {
     let update: boolean = true;
-    var elems = document.querySelectorAll('.modal');
+    const elems = document.querySelectorAll('.modal');
     elems.forEach((elem: Element) => {
       if (M.Modal.getInstance(elem).isOpen) update = false;
     });

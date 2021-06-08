@@ -24,18 +24,21 @@ export interface IGroup {
   id: string;
   callsigns: Array<string>;
   owner: string;
+  name: string;
 }
 
 export interface IServerGroup {
   features: FeatureCollection;
   callsigns: Array<string>;
   owner: string;
+  name: string;
 }
 
 export interface IReturnGroup {
   id: string;
   callsigns: Array<string>;
   owner: string;
+  name: string;
 }
 
 export interface IGroupsInit {
@@ -45,12 +48,20 @@ export interface IGroupsInit {
 export interface IGroupCreate {
   callsign: string;
   group: FeatureCollection;
+  name: string
+}
+
+export interface INameUpdate {
+  callsign: string;
+  id: string;
+  name: string;
 }
 
 export interface IGroupUpdate {
   callsign: string;
   group: FeatureCollection;
   id: string;
+  name: string;
 }
 
 export interface IGroupDelete {

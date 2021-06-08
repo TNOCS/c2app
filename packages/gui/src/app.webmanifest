@@ -1,0 +1,22 @@
+{
+  "name": "SAFR",
+  "short_name": "SAFR",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "An SA and C2 platform for FRs.",
+  "icons": [
+     {
+        "src": "/android-launchericon-192-192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+        "purpose": "any"
+     },
+     {
+        "src": "/android-launchericon-512-512.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any"
+  }]
+}

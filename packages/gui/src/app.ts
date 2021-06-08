@@ -9,4 +9,8 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 import './styles.css';
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+
 m.route(document.body, routingSvc.defaultRoute, routingSvc.routingTable());
