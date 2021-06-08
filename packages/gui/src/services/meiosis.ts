@@ -13,6 +13,8 @@ import {
   IMessage,
   IScenarioDefinition,
 } from '../../../shared/src';
+// @ts-ignore
+import ch from '../ch.json'
 
 export interface IAppModel {
   app: {
@@ -21,6 +23,7 @@ export interface IAppModel {
 
     // Alerts
     alerts: Array<IAlert>;
+    alert?: IAlert;
 
     // Positions
     positionSource: FeatureCollection;
@@ -45,6 +48,7 @@ export interface IAppModel {
     // Chat
     messages: Map<string, Array<IMessage>>;
     chat?: IGroup;
+    newMessages: { [key: string]: number };
 
     // Layers/styles
     mapStyle: string;
@@ -73,6 +77,9 @@ export interface IActions {
   drawingCleared: () => void;
   createPOI: () => void;
 
+  // Alerts
+  openAlert: (alert: IAlert) => void;
+
   // Clicking/selecting
   updateClickedFeature: (feature: Feature) => void;
   updateSelectedFeatures: (features: Array<Feature>) => void;
@@ -81,8 +88,8 @@ export interface IActions {
 
   // Groups
   initGroups: () => void;
-  createGroup: () => void;
-  updateGroup: (group: IGroup) => void;
+  createGroup: (name: string) => void;
+  updateGroup: (index: number, name: string) => void;
   deleteGroup: (group: IGroup) => void;
   setGroupEdit: (index: number) => void;
 
@@ -138,43 +145,7 @@ export const appStateMgmt = {
             certainty: 'Likely',
             area: [
               {
-                areaDesc: 'polygon layer',
-                polygon: [
-                  '5.477628707885741, 51.443763428806044',
-                  '5.4743242263793945, 51.44181075517023',
-                  '5.477542877197266, 51.43921597746186',
-                  '5.485525131225586, 51.440633760869964',
-                  '5.486512184143066, 51.44403091184326',
-                  '5.4817914962768555, 51.447481302560234',
-                  '5.480632781982422, 51.443549441248216',
-                  '5.477628707885741, 51.443763428806044',
-                ],
-              },
-            ],
-          } as IInfo,
-        } as IAlert,
-        {
-          identifier: 'agent-smith-2',
-          sender: 'agent-smith',
-          sent: 'agent-smith',
-          status: 'Exercise',
-          msgType: 'Alert',
-          scope: 'Restricted',
-          info: {
-            category: 'Rescue',
-            event: 'Testing cap messages',
-            urgency: 'Immediate',
-            severity: 'Extreme',
-            certainty: 'Likely',
-            area: [
-              {
-                areaDesc: 'polygon layer',
-                polygon: [
-                  '5.496425628662109, 51.443683183589364',
-                  '5.488529205322266, 51.43972424449905',
-                  '5.496683120727539, 51.43758413453405',
-                  '5.496425628662109, 51.443683183589364',
-                ],
+                areaDesc: JSON.stringify(ch),
               },
             ],
           } as IInfo,
@@ -225,14 +196,15 @@ export const appStateMgmt = {
 
       // Chat
       messages: new Map<string, Array<IMessage>>(),
+      newMessages: {} as { [key: string]: number },
 
       // Layers/styles
       mapStyle: 'mapbox/streets-v11',
-      realtimeLayers: [['firemenPositions', true], ['carPositions', true]] as Array<[string, boolean]>,
+      realtimeLayers: [['firemenPositions', true]] as Array<[string, boolean]>,
       gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
       sensorLayers: [] as Array<[string, boolean]>,
       customLayers: [] as Array<[string, boolean]>,
-      alertLayers: /*[] as Array<[string, boolean]>,*/ [['agent-smith', true], ['agent-smith-2', true]] as Array<[string, boolean]>,
+      alertLayers: /*[] as Array<[string, boolean]>,*/ [['agent-smith', true]] as Array<[string, boolean]>,
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
@@ -246,8 +218,8 @@ export const appStateMgmt = {
         scenario: {} as IScenarioDefinition,
         control_parameters: {} as IControlParameters,
       },
-      CHTSource: {} as FeatureCollection,
-      CHTLayers: [] as Array<[string, boolean]>,
+      CHTSource: ch as FeatureCollection,
+      CHTLayers: [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true], ] as Array<[string, boolean]>,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -265,6 +237,17 @@ export const appStateMgmt = {
         us({
           app: {
             gridOptions: { updateGrid: true },
+          },
+        });
+      },
+
+      // Alerts
+      openAlert: (alert: IAlert) => {
+        us({
+          app: {
+            alert: () => {
+              return alert;
+            },
           },
         });
       },
@@ -291,37 +274,50 @@ export const appStateMgmt = {
             groups: () => {
               return result;
             },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                messages[group.id] = 0;
+              });
+              return messages;
+            },
           },
         });
       },
-      createGroup: async () => {
+      createGroup: async (name: string) => {
         us({
           app: {
             clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
           },
         });
         if (!states()['app'].selectedFeatures) return;
-        const result = await states()['app'].socket.serverCreate(states());
+        const result = await states()['app'].socket.serverCreate(states(), name);
         us({
           app: {
             groups: () => {
               return result;
             },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                if (!messages[group.id]) messages[group.id] = 0;
+              });
+              return messages;
+            },
           },
         });
       },
-      updateGroup: async (group: IGroup) => {
-        us({
-          app: {
-            clearDrawing: { delete: true, id: states()['app'].latestDrawing.id },
-          },
-        });
-        if (!states()['app'].selectedFeatures) return;
-        const result = await states()['app'].socket.serverUpdate(states(), group.id);
+      updateGroup: async (index: number, name: string) => {
+        const group = states()['app'].groups[index];
+        const result = await states()['app'].socket.serverUpdate(states(), group.id, name);
         us({
           app: {
             groups: () => {
               return result;
+            },
+            newMessages: (messages: { [key: string]: number }) => {
+              result.forEach((group: IGroup) => {
+                if (!messages[group.id]) messages[group.id] = 0;
+              });
+              return messages;
             },
           },
         });
@@ -363,6 +359,10 @@ export const appStateMgmt = {
           app: {
             chat: () => {
               return group;
+            },
+            newMessages: (messages: { [key: string]: number }) => {
+              messages[group.id] = 0;
+              return messages;
             },
           },
         });
@@ -537,8 +537,8 @@ export const appStateMgmt = {
         const dts = features.map((feature: Feature) => {
           return feature.properties?.deltaTime;
         }) as number[];
-        // @ts-ignore
-        const uniqueDTs = [...new Set(dts)] as number[];
+
+        const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
 
         const CHTLayers = uniqueDTs.map((dt: number) => {
           return [dt.toString(), true];
@@ -560,6 +560,7 @@ export const appStateMgmt = {
             },
           },
         });
+        m.redraw();
       },
     };
   },

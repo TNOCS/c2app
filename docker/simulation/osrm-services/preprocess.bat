@@ -1,6 +1,6 @@
 @echo off
 setlocal
-SET PWD=C:\TNO\c2app\docker\simulation\osrm-services\data
+SET PWD=D:\TNO\c2app\docker\simulation\osrm-services\data
 SET FILE=netherlands-latest
 echo Processing driving data
 

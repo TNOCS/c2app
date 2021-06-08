@@ -14,7 +14,7 @@ import {
   IGroupsInit,
   IGroupCreate,
   IGroupUpdate,
-  IGroupDelete, ICHT, IReturnGroup,
+  IGroupDelete, ICHT, IReturnGroup, INameUpdate,
 } from '../../../shared/src';
 import { HttpService } from '@nestjs/common';
 
@@ -49,7 +49,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
   @SubscribeMessage('client-create')
   handleClientCreate(client: Socket, data: IGroupCreate): string {
-    const group = this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group });
+    const group = this.setGroupForId({ id: uuid4(), callsign: data.callsign, group: data.group, name: data.name });
 
     group.callsigns.forEach((callsign: string) => {
       this.server
@@ -61,8 +61,8 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-update')
-  handleClientUpdate(client: Socket, data: IGroupUpdate): string {
-    this.setGroupForId(data);
+  handleClientUpdate(client: Socket, data: INameUpdate): string {
+    this.updateGroupNameForId(data)
 
     return this.getGroupIdsForCallsign(data.callsign);
   }
@@ -104,7 +104,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
     this.groups.forEach((group: IServerGroup, uuid: string) => {
       if (group.owner == callsign || group.callsigns.includes(callsign)) {
-        returnArray.push({ id: uuid, callsigns: group.callsigns, owner: group.owner });
+        returnArray.push({ id: uuid, callsigns: group.callsigns, owner: group.owner, name: group.name });
       }
     });
 
@@ -122,7 +122,12 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
       ),
     ];
 
-    this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign });
+    this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign, name: update.name });
     return this.groups.get(update.id);
+  }
+  updateGroupNameForId(data: INameUpdate) {
+    const obj = this.groups.get(data.id);
+    obj.name = data.name;
+    console.log(this.groups.get(data.id));
   }
 }
