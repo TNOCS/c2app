@@ -5,7 +5,7 @@ export const Settings: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
-  let setting: 'Icon Style' | 'No Setting Selected' = 'No Setting Selected';
+  let setting: 'Icon Set' | 'No Setting Selected' = 'No Setting Selected';
 
   return {
     view: (_vnode) => {
@@ -15,15 +15,15 @@ export const Settings: FactoryComponent<{
             m('a.collection-item', {
                 style: 'cursor: pointer;',
                 onclick: () => {
-                  setting = 'Icon Style';
+                  setting = 'Icon Set';
                 },
               },
-              'Icon Style',
+              'Icon Set',
             ),
           ),
         ]),
         m('div.col.s12.l7', [
-          setting === 'Icon Style' ? [
+          setting === 'Icon Set' ? [
             m('h4', setting),
             m('div.card-panel', [
               m('p', m('label', [
