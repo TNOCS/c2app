@@ -1,7 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { formatMan, formatCar, formatUnknown } from '../../models/poi-formatting';
+import { formatMan, formatCar, formatUnknown } from './poi-formatting';
 
 export const poiSidebar: FactoryComponent<{
   state: IAppModel;

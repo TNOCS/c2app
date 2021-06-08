@@ -1,8 +1,7 @@
-import { FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection } from 'geojson';
 import { IAppModel, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert, IGroup, IMessage } from '../../../shared/src';
-import { IChemicalHazard } from '../../../shared/src';
+import { IAlert, IArea, IGroup, IInfo, IMessage, IChemicalHazard } from '../../../shared/src';
 import M from 'materialize-css';
 
 export class Socket {
@@ -18,6 +17,32 @@ export class Socket {
       }
     });
     this.socket.on('alert', (data: IAlert) => {
+      const alertArea = (data.info as IInfo).area as IArea[];
+
+      const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
+      const features = fc.features as Feature[];
+
+      // Find out the necessary layers (DeltaTimes)
+      const dts = features.map((feature: Feature) => {
+        return feature.properties?.deltaTime;
+      }) as number[];
+
+      const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
+
+      const alertLayers = uniqueDTs.map((dt: number) => {
+        return [dt.toString(), true];
+      }) as Array<[string, boolean]>;
+
+      // Fix color formatting
+      fc.features.forEach((feature: Feature) => {
+        // @ts-ignore
+        feature.properties.color = '#' + feature.properties?.color as string;
+        return feature;
+      });
+
+      // Update the fc in the alert
+      ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
+
       us({
         app: {
           alerts: (alerts: Array<IAlert>) => {
@@ -31,14 +56,14 @@ export class Socket {
             alerts.push(data);
             return alerts;
           },
-          alertLayers: (layers: Array<[string, boolean]>) => {
-            const index = layers.findIndex((val: [string, boolean]) => {
+          alertLayers: (layers: Array<[string, Array<[string, boolean]>]>) => {
+            const index = layers.findIndex((val: [string, Array<[string, boolean]>]) => {
               return val[0] === data.identifier;
             });
             if (index > -1) {
               return layers;
             }
-            layers.push([data.identifier, true]);
+            layers.push([data.identifier, alertLayers]);
             return layers;
           },
         },
@@ -74,7 +99,7 @@ export class Socket {
           newMessages: (messages: { [key: string]: number }) => {
             result.forEach((group: IGroup) => {
               messages[group.id] = 0;
-            })
+            });
             return messages;
           },
         },

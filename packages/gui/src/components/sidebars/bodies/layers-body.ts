@@ -142,20 +142,31 @@ export const layersBody: FactoryComponent<{
             m('div.collapsible-header', 'Alert Layers'),
             m('div.collapsible-body', m('div.row',
               m('form',
-                vnode.attrs.state.app.alertLayers.map((layer: [string, boolean], index: number) => {
-                  return m('p.col.s11.right',
-                    m('label', [
-                      m('input', {
-                        type: 'checkbox',
-                        class: 'filled-in',
-                        checked: layer[1],
-                        onclick: () => {
-                          vnode.attrs.actions.toggleLayer('alert', index);
-                        },
-                      }),
-                      m('span', layer[0]),
+                vnode.attrs.state.app.alertLayers.map((layers: [string, Array<[string, boolean]>], layersIndex: number) => {
+                  return m('ul.collapsible', [
+                    m('li', [
+                      m('div.collapsible-header', layers[0]),
+                      m('div.collapsible-body', m('div.row',
+                        m('form',
+                          layers[1].map((layer: [string, boolean], layerIndex: number) => {
+                            return m('p.col.s11.right',
+                              m('label', [
+                                m('input', {
+                                  type: 'checkbox',
+                                  class: 'filled-in',
+                                  checked: layer[1],
+                                  onclick: () => {
+                                    vnode.attrs.actions.toggleLayer('alert', layerIndex, layersIndex);
+                                  },
+                                }),
+                                m('span', layer[0]),
+                              ]),
+                            );
+                          }),
+                        ),
+                      )),
                     ]),
-                  );
+                  ]);
                 }),
               ),
             )),

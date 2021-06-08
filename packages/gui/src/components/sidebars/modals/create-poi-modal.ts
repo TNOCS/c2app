@@ -9,7 +9,7 @@ export const createPOIModal: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
-  let chosenTab: 'Group' | 'POI' | 'Chemical Hazard' | 'Annotation' = 'Annotation';
+  let chosenTab: 'Group' | 'POI' | 'Chemical Hazard' | 'Population' | 'Annotation' = 'Annotation';
   let groupName: string;
   let layerIndex: number;
 
@@ -22,30 +22,36 @@ export const createPOIModal: FactoryComponent<{
         m('div.modal-content', [
           m('div.row', [
             m('div.col.s12', m('ul.tabs', [
-              m('li.tab.col.s3', m('a', {
+              m('li.tab.col.s2', m('a', {
                 href: '#annotation',
                 onclick: () => {
                   chosenTab = 'Annotation';
                 },
               }, m('i.material-icons', 'pin_drop'))),
-              m('li.tab.col.s3', m('a', {
+              m('li.tab.col.s2', m('a', {
                 href: '#group',
                 onclick: () => {
                   chosenTab = 'Group';
                 },
               }, m('i.material-icons', 'group'))),
-              m('li.tab.col.s3', m('a', {
+              m('li.tab.col.s2', m('a', {
                 href: '#POI',
                 onclick: () => {
                   chosenTab = 'POI';
                 },
               }, m('i.material-icons', 'layers'))),
-              m('li.tab.col.s3', m('a', {
+              m('li.tab.col.s2', m('a', {
                 href: '#CHT',
                 onclick: () => {
                   chosenTab = 'Chemical Hazard';
                 },
               }, m('i.material-icons', 'warning'))),
+              m('li.tab.col.s2', m('a', {
+                href: '#populator',
+                onclick: () => {
+                  chosenTab = 'Population';
+                },
+              }, m('i.material-icons', 'holiday_village'))),
             ])),
             ///Annotation
             m('div.col.s12', { id: 'annotation' }, m('div', [
@@ -109,6 +115,10 @@ export const createPOIModal: FactoryComponent<{
                 section: 'source',
               }),
             ])),
+            ///Population
+            m('div.col.s12', { id: 'population' }, m('div', [
+              m('p.col.s12', 'Creates a populator service query for this point on the map'),
+            ])),
           ]),
         ]),
         m('div.modal-footer',
@@ -118,7 +128,8 @@ export const createPOIModal: FactoryComponent<{
               chosenTab === 'Group' ? vnode.attrs.actions.createGroup(groupName)
                 : chosenTab === 'POI' ? vnode.attrs.actions.addDrawingsToLayer(layerIndex)
                 : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.submitCHT(source, (vnode.attrs.state.app.latestDrawing.geometry as Point).coordinates)
-                  : vnode.attrs.actions.createPOI();
+                  : chosenTab === 'Population' ? vnode.attrs.actions.createPOI()
+                    : vnode.attrs.actions.createPOI();
             },
           }, `${'Create ' + chosenTab}`),
         ),
