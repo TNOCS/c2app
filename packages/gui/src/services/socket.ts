@@ -1,8 +1,9 @@
-import { Feature, FeatureCollection } from 'geojson';
-import { IAppModel, UpdateStream } from './meiosis';
+import { /*Feature,*/ FeatureCollection } from 'geojson';
+import { SourceType, IAppModel, Icon, ILayer, ISource, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert, IArea, IGroup, IInfo, IMessage, IChemicalHazard } from '../../../shared/src';
+import { IAlert/*, IArea*/, IGroup,/* IInfo,*/ IMessage, IChemicalHazard } from '../../../shared/src';
 import M from 'materialize-css';
+import mapboxgl from 'mapbox-gl';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -13,11 +14,44 @@ export class Socket {
     this.socket.on('positions', (data: FeatureCollection) => {
       if (!this.shouldUpdate()) {
       } else {
-        us({ app: { positionSource: data } });
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              const index = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'Positions';
+              });
+              if (index > -1) {
+                sources[index].source = data;
+              } else {
+                sources.push({
+                  id: 'testid1',
+                  source: data as FeatureCollection,
+                  sourceName: 'Positions',
+                  sourceCategory: SourceType.realtime,
+                  shared: false,
+                  layers: [{
+                    layerName: 'Firemen',
+                    showLayer: true,
+                    icon: Icon.fireman,
+                    type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                    layout: {
+                      'icon-image': 'fireman',
+                      'icon-size': 0.5,
+                      'icon-allow-overlap': true,
+                    },
+                    filter: ['all', ['in', 'type', 'man', 'firefighter']],
+                  }] as ILayer[],
+                } as ISource);
+              }
+              return sources;
+            },
+          },
+        });
       }
     });
-    this.socket.on('alert', (data: IAlert) => {
-      const alertArea = (data.info as IInfo).area as IArea[];
+
+    this.socket.on('alert', (_data: IAlert) => {
+     /* const alertArea = (data.info as IInfo).area as IArea[];
 
       const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
       const features = fc.features as Feature[];
@@ -28,10 +62,6 @@ export class Socket {
       }) as number[];
 
       const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
-
-      const alertLayers = uniqueDTs.map((dt: number) => {
-        return [dt.toString(), true];
-      }) as Array<[string, boolean]>;
 
       // Fix color formatting
       fc.features.forEach((feature: Feature) => {
@@ -45,6 +75,37 @@ export class Socket {
 
       us({
         app: {
+          sources: (sources: Array<ISource>) => {
+            const index = sources.findIndex((source: ISource) => {
+              return source.sourceName === data.identifier;
+            });
+            if (index > -1) {
+              sources[index].source = fc;
+            } else {
+              sources.push({
+                id: 'testid2',
+                source: fc as FeatureCollection,
+                sourceName: 'Eindhoven Chlorine',
+                sourceCategory: SourceType.alert,
+                shared: false,
+                layers: uniqueDTs.map((dt: number) => {
+                  return {
+                    layerName: dt.toString(),
+                    showLayer: true,
+                    type: { type: 'fill' } as mapboxgl.AnyLayer,
+                    paint: {
+                      'fill-color': {
+                        type: 'identity',
+                        property: 'color',
+                      },
+                      'fill-opacity': 0.5,
+                    },
+                    filter: ['all', ['in', 'deltaTime', dt]],
+                  } as ILayer;
+                }) as Array<ILayer>,
+              } as ISource);
+            }
+          },
           alerts: (alerts: Array<IAlert>) => {
             const index = alerts.findIndex((val: IAlert) => {
               return val.identifier === data.identifier;
@@ -56,19 +117,9 @@ export class Socket {
             alerts.push(data);
             return alerts;
           },
-          alertLayers: (layers: Array<[string, Array<[string, boolean]>]>) => {
-            const index = layers.findIndex((val: [string, Array<[string, boolean]>]) => {
-              return val[0] === data.identifier;
-            });
-            if (index > -1) {
-              return layers;
-            }
-            layers.push([data.identifier, alertLayers]);
-            return layers;
-          },
         },
       });
-      M.toast({ html: 'New Alert' });
+      M.toast({ html: 'New Alert' });*/
     });
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;

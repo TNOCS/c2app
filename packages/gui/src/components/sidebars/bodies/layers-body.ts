@@ -1,5 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../../services/meiosis';
+import { IActions, IAppModel, ILayer, ISource, SourceType } from '../../../services/meiosis';
 import M from 'materialize-css';
 
 export const layersBody: FactoryComponent<{
@@ -8,7 +8,7 @@ export const layersBody: FactoryComponent<{
 }> = () => {
   return {
     view: (vnode) => {
-      return [
+      return m('div', [
         /// BASE LAYERS
         m('ul.collapsible', [
           m('li', [
@@ -38,24 +38,25 @@ export const layersBody: FactoryComponent<{
             m('div.divider'),
             m('div.collapsible-header', 'Realtime Layers'),
             m('div.collapsible-body', m('div.row',
-              m('form', {
-                  onsubmit: function(e: Event) {
-                    e.preventDefault();
-                  },
-                }, vnode.attrs.state.app.realtimeLayers.map((layer: [string, boolean], index: number) => {
-                  return m('p.col.s11.right',
-                    m('label', [
-                      m('input', {
-                        type: 'checkbox',
-                        class: 'filled-in',
-                        checked: layer[1],
-                        onclick: () => {
-                          vnode.attrs.actions.toggleLayer('realtime', index);
-                        },
-                      }),
-                      m('span', layer[0]),
-                    ]),
-                  );
+              m('div.col.s12',
+                vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
+                  if (source.sourceCategory !== SourceType.realtime) return;
+                  return source.layers.map((layer: ILayer, layerIndex: number) => {
+                    return m('div.valign-wrapper', [
+                      m('div.switch.col.s2',
+                        m('label', [
+                          m('input', {
+                            type: 'checkbox',
+                            checked: layer.showLayer,
+                            onclick: () => {
+                              vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
+                            },
+                          }),
+                          m('span.lever'),
+                        ])),
+                      m('p.col.s9', layer.layerName),
+                    ]);
+                  });
                 }),
               ),
             )),
@@ -68,21 +69,26 @@ export const layersBody: FactoryComponent<{
             m('div.collapsible-header', 'Grid Layers'),
             m('div.collapsible-body', m('div.row',
               m('button.btn.modal-trigger.col.s10.offset-s1', { 'data-target': 'gridModal' }, 'Create Grid'),
-              m('form',
-                vnode.attrs.state.app.gridLayers.map((layer: [string, boolean], index: number) => {
-                  return m('p.col.s11.right',
-                    m('label', [
-                      m('input', {
-                        type: 'checkbox',
-                        class: 'filled-in',
-                        checked: layer[1],
-                        onclick: () => {
-                          vnode.attrs.actions.toggleLayer('grid', index);
-                        },
-                      }),
-                      m('span', layer[0]),
-                    ]),
-                  );
+              m('div.col.s12',
+                vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
+                  if (source.sourceCategory !== SourceType.grid) return;
+                  return source.layers.map((layer: ILayer, layerIndex: number) => {
+                    return m('div.valign-wrapper', [
+                      m('div.switch.col.s2',
+                        m('label', [
+                          m('input', {
+                            type: 'checkbox',
+                            class: 'filled-in',
+                            checked: layer.showLayer,
+                            onclick: () => {
+                              vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
+                            },
+                          }),
+                          m('span.lever'),
+                        ])),
+                      m('p.col.s9', layer.layerName),
+                    ]);
+                  });
                 }),
               ),
             )),
@@ -96,44 +102,44 @@ export const layersBody: FactoryComponent<{
             m('div.collapsible-body', m('div.row',
               m('button.btn.modal-trigger.col.s10.offset-s1', { 'data-target': 'customLayerModal' }, 'Create Layer'),
               m('div.col.s12',
-                vnode.attrs.state.app.customLayers.map((layer: [string, boolean], index: number) => {
-                  return m('div.collection-item',
-                    m('label.row',
+                vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
+                  if (source.sourceCategory !== SourceType.custom) return;
+                  return source.layers.map((layer: ILayer, layerIndex: number) => {
+                    return m('div.collection-item',
                       m('div.valign-wrapper', [
-                        m('p.col.s7',
+                        m('div.switch.col.s2.left-align',
                           m('label', [
                             m('input', {
                               type: 'checkbox',
                               class: 'filled-in',
-                              checked: layer[1],
+                              checked: layer.showLayer,
                               onclick: () => {
-                                vnode.attrs.actions.toggleLayer('custom', index);
+                                vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
                               },
                             }),
-                            m('span', layer[0]),
+                            m('span.lever'),
                           ])),
-                        m('a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',
+                        m('p.col.s5.left-align', layer.layerName),
+                        m('a.btn.waves-effect.waves-light.col.s2.offset-s1.right-align.modal-trigger',
                           {
                             'data-target': 'editLayerModal',
                             onclick: () => {
-                              vnode.attrs.actions.setLayerEdit(index);
+                              vnode.attrs.actions.setLayerEdit(sourceIndex);
                             },
                           },
                           m('i.material-icons', 'edit')),
-                        m('a.btn.waves-effect.waves-light.red.col.s2',
+                        m('a.btn.waves-effect.waves-light.red.col.s2.right-align',
                           {
                             onclick: () => {
-                              vnode.attrs.actions.deleteLayer(index);
+                              vnode.attrs.actions.deleteLayer(sourceIndex);
                             },
                           },
                           m('i.material-icons', 'delete')),
                       ]),
-                    ),
-                  );
-                }),
-              ),
-            )),
-          ]),
+                    );
+                  });
+                })),
+            ))]),
         ]),
         /// Alert Layers
         m('ul.collapsible', [
@@ -141,30 +147,34 @@ export const layersBody: FactoryComponent<{
             m('div.divider'),
             m('div.collapsible-header', 'Alert Layers'),
             m('div.collapsible-body', m('div.row',
-              m('form',
-                vnode.attrs.state.app.alertLayers.map((layers: [string, Array<[string, boolean]>], layersIndex: number) => {
+              m('div.col.s12',
+                vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
+                  if (source.sourceCategory !== SourceType.alert) return;
                   return m('ul.collapsible', [
                     m('li', [
-                      m('div.collapsible-header', layers[0]),
+                      m('div.collapsible-header', source.sourceName),
                       m('div.collapsible-body', m('div.row',
-                        m('form',
-                          layers[1].map((layer: [string, boolean], layerIndex: number) => {
-                            return m('p.col.s11.right',
-                              m('label', [
-                                m('input', {
-                                  type: 'checkbox',
-                                  class: 'filled-in',
-                                  checked: layer[1],
-                                  onclick: () => {
-                                    vnode.attrs.actions.toggleLayer('alert', layerIndex, layersIndex);
-                                  },
-                                }),
-                                m('span', layer[0]),
-                              ]),
-                            );
-                          }),
+                        m('p.col.s10.offset-s1', 'Time since release [s]'),
+                        m('div.col.s12',
+                          source.layers.map((layer: ILayer, layerIndex: number) => {
+                            return m('div.valign-wrapper', [
+                              m('div.switch.col.s3',
+                                m('label', [
+                                  m('input', {
+                                    type: 'checkbox',
+                                    class: 'filled-in',
+                                    checked: layer.showLayer,
+                                    onclick: () => {
+                                      vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
+                                    },
+                                  }),
+                                  m('span.lever'),
+                                ])),
+                              m('p.col.s9', layer.layerName),
+                            ]);
+                          })),
                         ),
-                      )),
+                      ),
                     ]),
                   ]);
                 }),
@@ -179,27 +189,32 @@ export const layersBody: FactoryComponent<{
             m('div.collapsible-header', 'CBRN Hazard Layers'),
             m('div.collapsible-body', m('div.row',
               m('p.col.s10.offset-s1', 'Time since release [s]'),
-              m('form',
-                vnode.attrs.state.app.CHTLayers?.map((layer: [string, boolean], index: number) => {
-                  return m('p.col.s11.right',
-                    m('label', [
-                      m('input', {
-                        type: 'checkbox',
-                        class: 'filled-in',
-                        checked: layer[1],
-                        onclick: () => {
-                          vnode.attrs.actions.toggleLayer('CHT', index);
-                        },
-                      }),
-                      m('span', layer[0]),
-                    ]),
-                  );
+              m('div.col.s12',
+                vnode.attrs.state.app.sources?.map((source: ISource, sourceIndex: number) => {
+                  if (source.sourceCategory !== SourceType.cht) return;
+                  return source.layers.map((layer: ILayer, layerIndex: number) => {
+                    return m('div.valign-wrapper', [
+                      m('div.switch.col.s3',
+                        m('label', [
+                          m('input', {
+                            type: 'checkbox',
+                            class: 'filled-in',
+                            checked: layer.showLayer,
+                            onclick: () => {
+                              vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
+                            },
+                          }),
+                          m('span.lever'),
+                        ])),
+                      m('p.col.s9', layer.layerName),
+                    ]);
+                  });
                 }),
               ),
             )),
           ]),
         ]),
-      ];
+      ]);
     },
     oncreate: () => {
       M.AutoInit();

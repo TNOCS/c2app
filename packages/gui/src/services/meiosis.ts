@@ -15,6 +15,40 @@ import {
 } from '../../../shared/src';
 // @ts-ignore
 import ch from '../ch.json';
+import mapboxgl from 'mapbox-gl';
+
+export enum Icon {
+  'fireman',
+  'car'
+}
+
+export interface ILayer {
+  layerName: string;
+  showLayer: boolean;
+  type: mapboxgl.AnyLayer;
+  icon?: Icon;
+  layout?: mapboxgl.AnyLayout;
+  paint?: mapboxgl.AnyPaint;
+  filter?: any[];
+}
+
+export const enum SourceType {
+  'realtime',
+  'grid',
+  'custom',
+  'alert',
+  'cht'
+}
+
+export interface ISource {
+  id: string;
+  source: FeatureCollection;
+  sourceName: string;
+  sourceCategory: SourceType
+  layers: ILayer[];
+  shared: boolean;
+  shareWith?: string[];
+}
 
 export interface IAppModel {
   app: {
@@ -24,9 +58,6 @@ export interface IAppModel {
     // Alerts
     alerts: Array<IAlert>;
     alert?: IAlert;
-
-    // Positions
-    positionSource: FeatureCollection;
 
     // Clicking/Selecting
     clickedFeature?: Feature;
@@ -51,15 +82,10 @@ export interface IAppModel {
     newMessages: { [key: string]: number };
 
     // Layers/styles
+    sources: Array<ISource>;
     mapStyle: string;
     switchStyle: boolean;
-    realtimeLayers: Array<[string, boolean]>;
-    gridLayers: Array<[string, boolean]>;
-    sensorLayers: Array<[string, boolean]>;
-    customLayers: Array<[string, boolean]>;
-    alertLayers: Array<[string, Array<[string, boolean]>]>;
     gridOptions: IGridOptions;
-    customSources: Array<FeatureCollection>;
     editLayer: number;
 
     // CHT
@@ -67,8 +93,6 @@ export interface IAppModel {
       scenario: IScenarioDefinition;
       control_parameters: IControlParameters;
     };
-    CHTSource: FeatureCollection;
-    CHTLayers: Array<[string, boolean]>;
   };
 }
 
@@ -84,7 +108,6 @@ export interface IActions {
   updateClickedFeature: (feature: Feature) => void;
   updateSelectedFeatures: (features: Array<Feature>) => void;
   resetClickedFeature: () => void;
-  resetSelectedFeatures: () => void;
 
   // Groups
   initGroups: () => void;
@@ -103,15 +126,16 @@ export interface IActions {
 
   // Layers/styles
   switchStyle: (style: string) => void;
-  toggleLayer: (selector: string, index: number, secondIndex?: number) => void;
+  toggleLayer: (sourceIndex: number, layerIndex: number) => void;
   updateGridLocation: (bbox: [number, number, number, number]) => void;
   updateGridOptions: (gridCellSize: number, updateLocation: boolean) => void;
-  updateGridDone: () => void;
-  updateCustomLayers: (layerName: string) => void;
+  updateGrid: (gridSource: FeatureCollection, gridLabelSource: FeatureCollection) => void;
+  createCustomLayer: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => void;
+  updateCustomLayers: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => void;
   addDrawingsToLayer: (index: number) => void;
   updateDrawings: (feature: Feature) => void;
-  deleteLayer: (index: number) => void;
-  setLayerEdit: (index: number) => void;
+  deleteLayer: (sourceIndex: number) => void;
+  setLayerEdit: (sourceIndex: number) => void;
 
   // CHT
   submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
@@ -152,35 +176,6 @@ export const appStateMgmt = {
         } as IAlert,
       ] as Array<IAlert>,
 
-      // Positions
-      positionSource: /*{} as FeatureCollection,*/ {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              name: '123',
-              type: 'firefighter',
-            },
-            geometry: {
-              type: 'Point',
-              coordinates: [5.48, 51.442],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              name: '111',
-              type: 'firefighter',
-            },
-            geometry: {
-              type: 'Point',
-              coordinates: [5.48, 51.441],
-            },
-          },
-        ],
-      } as FeatureCollection,
-
       // Clicking/Selecting
       latestDrawing: {} as Feature,
       clearDrawing: {
@@ -199,27 +194,307 @@ export const appStateMgmt = {
       newMessages: {} as { [key: string]: number },
 
       // Layers/styles
+
+      sources: [{
+        id: 'testid1',
+        source: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {
+                name: '123',
+                type: 'firefighter',
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: [5.48, 51.442],
+              },
+            },
+            {
+              type: 'Feature',
+              properties: {
+                name: '111',
+                type: 'firefighter',
+              },
+              geometry: {
+                type: 'Point',
+                coordinates: [5.48, 51.441],
+              },
+            },
+          ],
+        } as FeatureCollection,
+        sourceName: 'Positions',
+        sourceCategory: SourceType.realtime,
+        layers: [{
+          layerName: 'Firemen',
+          showLayer: true,
+          icon: Icon.fireman,
+          type: { type: 'symbol' } as mapboxgl.AnyLayer,
+          layout: {
+            'icon-image': 'fireman',
+            'icon-size': 0.5,
+            'icon-allow-overlap': true,
+          },
+          filter: ['all', ['in', 'type', 'man', 'firefighter']],
+        }] as Array<ILayer>,
+        shared: false,
+      } as ISource,
+        {
+          id: 'testid2',
+          source: ch as FeatureCollection,
+          sourceName: 'Eindhoven Chlorine',
+          sourceCategory: SourceType.alert,
+          layers: [{
+            layerName: '300ms',
+            showLayer: true,
+            type: { type: 'fill' } as mapboxgl.AnyLayer,
+            paint: {
+              'fill-color': {
+                type: 'identity',
+                property: 'color',
+              },
+              'fill-opacity': 0.5,
+            },
+            filter: ['all', ['in', 'deltaTime', 300]],
+          },
+            {
+              layerName: '600ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 600]],
+            },
+            {
+              layerName: '900ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 900]],
+            },
+            {
+              layerName: '1200ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 1200]],
+            },
+            {
+              layerName: '1500ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 1500]],
+            },
+            {
+              layerName: '2400ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 2400]],
+            }, {
+              layerName: '3600ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 3600]],
+            }, {
+              layerName: '5400ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 5400]],
+            }, {
+              layerName: '7200ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 7200]],
+            }] as Array<ILayer>,
+          shared: false,
+        } as ISource,
+        {
+          id: 'testid6',
+          source: ch as FeatureCollection,
+          sourceName: 'Eindhoven Chlorine 2',
+          sourceCategory: SourceType.cht,
+          shared: false,
+          layers: [{
+            layerName: '300ms',
+            showLayer: true,
+            type: { type: 'fill' } as mapboxgl.AnyLayer,
+            paint: {
+              'fill-color': {
+                type: 'identity',
+                property: 'color',
+              },
+              'fill-opacity': 0.5,
+            },
+            filter: ['all', ['in', 'deltaTime', 300]],
+          },
+            {
+              layerName: '600ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 600]],
+            },
+            {
+              layerName: '900ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 900]],
+            },
+            {
+              layerName: '1200ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 1200]],
+            },
+            {
+              layerName: '1500ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 1500]],
+            },
+            {
+              layerName: '2400ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 2400]],
+            }, {
+              layerName: '3600ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 3600]],
+            }, {
+              layerName: '5400ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 5400]],
+            }, {
+              layerName: '7200ms',
+              showLayer: true,
+              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              paint: {
+                'fill-color': {
+                  type: 'identity',
+                  property: 'color',
+                },
+                'fill-opacity': 0.5,
+              },
+              filter: ['all', ['in', 'deltaTime', 7200]],
+            }] as Array<ILayer>,
+        } as ISource] as Array<ISource>,
       mapStyle: 'mapbox/streets-v11',
-      realtimeLayers: [['firemenPositions', true]] as Array<[string, boolean]>,
-      gridLayers: [['grid', false], ['gridLabels', false]] as Array<[string, boolean]>,
-      sensorLayers: [] as Array<[string, boolean]>,
-      customLayers: [] as Array<[string, boolean]>,
-      alertLayers: /*[] as Array<[string, Array<[string, boolean]>]>;,*/ [['agent-smith', [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true]]]] as Array<[string, Array<[string, boolean]>]>,
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
         gridLocation: [5.46, 51.42, 5.50, 51.46],
         updateGrid: true,
       } as IGridOptions,
-      customSources: [] as Array<FeatureCollection>,
 
       // CHT
       source: {
         scenario: {} as IScenarioDefinition,
         control_parameters: {} as IControlParameters,
       },
-      CHTSource: ch as FeatureCollection,
-      CHTLayers: [['300', true], ['600', true], ['900', true], ['1200', true], ['1500', true], ['2400', true], ['3600', true], ['5400', true], ['7200', true]] as Array<[string, boolean]>,
     },
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
@@ -261,9 +536,6 @@ export const appStateMgmt = {
       },
       resetClickedFeature: () => {
         us({ app: { clickedFeature: undefined } });
-      },
-      resetSelectedFeatures: () => {
-        us({ app: { selectedFeatures: undefined } });
       },
 
       //Groups
@@ -386,63 +658,15 @@ export const appStateMgmt = {
           },
         });
       },
-      toggleLayer: (selector: string, index: number, secondIndex?: number) => {
-        switch (selector) {
-          case 'realtime':
-            us({
-              app: {
-                realtimeLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
-                  return layers;
-                },
-              },
-            });
-            break;
-          case 'grid':
-            us({
-              app: {
-                gridLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
-                  return layers;
-                },
-              },
-            });
-            break;
-          case 'custom':
-            us({
-              app: {
-                customLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
-                  return layers;
-                },
-              },
-            });
-            break;
-          case 'alert':
-            us({
-              app: {
-                alertLayers: (layers: Array<[string, Array<[string, boolean]>]>) => {
-                  // @ts-ignore
-                  let layer = layers[secondIndex][1] as Array<[string, boolean]>;
-                  layer[index] = [layer[index][0], !layer[index][1]] as [string, boolean];
-                  // @ts-ignore
-                  layers[secondIndex] = [layers[secondIndex][0], layer] as [string, Array<[string, boolean]>];
-                  return layers;
-                },
-              },
-            });
-            break;
-          case 'CHT':
-            us({
-              app: {
-                CHTLayers: (layers: Array<[string, boolean]>) => {
-                  layers[index] = [layers[index][0], !layers[index][1]] as [string, boolean];
-                  return layers;
-                },
-              },
-            });
-            break;
-        }
+      toggleLayer: (sourceIndex: number, layerIndex: number) => {
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              sources[sourceIndex].layers[layerIndex].showLayer = !sources[sourceIndex].layers[layerIndex].showLayer;
+              return sources;
+            },
+          },
+        });
       },
       updateGridOptions: (gridCellSize: number, updateLocation: boolean) => {
         us({
@@ -458,14 +682,98 @@ export const appStateMgmt = {
           },
         });
       },
-      updateGridDone: () => {
+      updateGrid: (gridSource: FeatureCollection, gridLabelSource: FeatureCollection) => {
         us({
           app: {
             gridOptions: { updateGrid: false },
+            sources: (sources: Array<ISource>) => {
+              const gridIndex = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'GridSource';
+              });
+              if (gridIndex > -1) {
+                sources[gridIndex].source = gridSource;
+              } else {
+                sources.push({
+                  id: 'testid3',
+                  source: gridSource as FeatureCollection,
+                  sourceName: 'GridSource',
+                  sourceCategory: SourceType.grid,
+                  shared: false,
+                  layers: [{
+                    layerName: 'Grid',
+                    showLayer: true,
+                    type: { type: 'line' } as mapboxgl.AnyLayer,
+                    paint: {
+                      'line-opacity': 0.5,
+                    },
+                  }] as ILayer[],
+                } as ISource);
+              }
+
+              const labelIndex = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'GridLabelSource';
+              });
+              if (labelIndex > -1) {
+                sources[labelIndex].source = gridLabelSource;
+              } else {
+                sources.push({
+                  id: 'testid4',
+                  source: gridLabelSource as FeatureCollection,
+                  sourceName: 'GridLabelSource',
+                  sourceCategory: SourceType.grid,
+                  shared: false,
+                  layers: [{
+                    layerName: 'Grid Labels',
+                    showLayer: true,
+                    type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                    layout: {
+                      'text-field': '{cellLabel}',
+                      'text-allow-overlap': true,
+                    },
+                    paint: {
+                      'text-opacity': 0.5,
+                    },
+                  }] as ILayer[],
+                } as ISource);
+              }
+              return sources;
+            },
           },
         });
       },
-      updateCustomLayers: (layerName: string) => {
+      createCustomLayer: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => {
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              const gridIndex = sources.findIndex((source: ISource) => {
+                return source.sourceName === layerName;
+              });
+              if (gridIndex > -1) return sources;
+              sources.push({
+                id: 'testid5',
+                source: { type: 'FeatureCollection', features: [] } as FeatureCollection,
+                sourceName: layerName,
+                sourceCategory: SourceType.custom,
+                shared: checked,
+                shareWith: shareWith,
+                layers: [{
+                  layerName: layerName,
+                  showLayer: true,
+                  type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                  layout: {
+                    'icon-image': icon,
+                    'icon-size': 0.5,
+                    'icon-allow-overlap': true,
+                  },
+                }] as ILayer[],
+              } as ISource);
+              return sources;
+            },
+          },
+        });
+      },
+      updateCustomLayers: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => {
+        console.log(icon, checked, shareWith);
         us({
           app: {
             customLayers: (layers: Array<[string, boolean]>) => {
@@ -485,17 +793,8 @@ export const appStateMgmt = {
       addDrawingsToLayer: (index: number) => {
         us({
           app: {
-            customSources: (sources: Array<FeatureCollection>) => {
-              if (index < sources.length) {
-                let features = sources[index].features as Feature[];
-                features.push(states()['app'].latestDrawing as Feature);
-                sources[index].features = features;
-              } else {
-                sources.push({
-                  type: 'FeatureCollection',
-                  features: [states()['app'].latestDrawing as Feature],
-                });
-              }
+            sources: (sources: Array<ISource>) => {
+              sources[index].source.features.push(states()['app'].latestDrawing as Feature);
               return sources;
             },
             clearDrawing: {
@@ -508,24 +807,20 @@ export const appStateMgmt = {
       updateDrawings: (feature: Feature) => {
         us({ app: { latestDrawing: feature } });
       },
-      deleteLayer: (index: number) => {
+      deleteLayer: (sourceIndex: number) => {
         us({
           app: {
-            customLayers: (layers: Array<[string, boolean]>) => {
-              layers.splice(index, 1);
-              return layers;
-            },
-            customSources: (layers: Array<FeatureCollection>) => {
-              layers.splice(index, 1);
-              return layers;
+            sources: (sources: Array<ISource>) => {
+              sources.splice(sourceIndex, 1);
+              return sources;
             },
           },
         });
       },
-      setLayerEdit: (index: number) => {
+      setLayerEdit: (sourceIndex: number) => {
         us({
           app: {
-            editLayer: index,
+            editLayer: sourceIndex,
           },
         });
       },
@@ -544,10 +839,6 @@ export const appStateMgmt = {
 
         const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
 
-        const CHTLayers = uniqueDTs.map((dt: number) => {
-          return [dt.toString(), true];
-        }) as Array<[string, boolean]>;
-
         result.features.forEach((feature: Feature) => {
           // @ts-ignore
           feature.properties.color = '#' + feature.properties?.color as string;
@@ -556,11 +847,37 @@ export const appStateMgmt = {
 
         us({
           app: {
-            CHTSource: () => {
-              return result;
-            },
-            CHTLayers: () => {
-              return CHTLayers;
+            sources: (sources: Array<ISource>) => {
+              const index = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'CHTSource';
+              });
+              if (index > -1) {
+                sources[index].source = result;
+              } else {
+                sources.push({
+                  id: 'testid6',
+                  source: result as FeatureCollection,
+                  sourceName: 'Eindhoven Chlorine 2',
+                  sourceCategory: SourceType.cht,
+                  shared: false,
+                  layers: uniqueDTs.map((dt: number) => {
+                    return {
+                      layerName: dt.toString(),
+                      showLayer: true,
+                      type: { type: 'fill' } as mapboxgl.AnyLayer,
+                      paint: {
+                        'fill-color': {
+                          type: 'identity',
+                          property: 'color',
+                        },
+                        'fill-opacity': 0.5,
+                      },
+                      filter: ['all', ['in', 'deltaTime', dt]],
+                    } as ILayer;
+                  }) as Array<ILayer>,
+                } as ISource);
+              }
+              return sources;
             },
           },
         });

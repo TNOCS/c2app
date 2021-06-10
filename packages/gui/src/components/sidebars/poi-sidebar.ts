@@ -22,17 +22,13 @@ export const poiSidebar: FactoryComponent<{
             },
           }, m('i.material-icons', 'clear')),
           m('h5', 'Clicked POI'),
-          m(
-            'a.btn.waves-effect.waves-light',
-            {
-              onclick: () => {
-                vnode.attrs.actions.resetClickedFeature();
-              },
+          m('a.waves-effect.waves-teal.btn-flat.right', {
+            onclick: () => {
+              vnode.attrs.actions.resetClickedFeature();
             },
-            'Clear clicked POI',
-          ),
+          }, m('i.material-icons', 'clear')),
+          // If there is a clicked feature
           m('div.card-panel', [
-            // If there is a clicked feature
             vnode.attrs.state.app.clickedFeature ?
               vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
                 formatMan(vnode.attrs.state.app.clickedFeature) :
