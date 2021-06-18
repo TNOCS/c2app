@@ -1,7 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { formatMan, formatCar, formatUnknown } from './poi-formatting';
+import { formatMan, formatCar, formatUnknown, alertFormatComponent } from './poi-formatting';
 
 export const poiSidebar: FactoryComponent<{
   state: IAppModel;
@@ -19,16 +19,12 @@ export const poiSidebar: FactoryComponent<{
             onclick: () => {
               const elem = document.getElementById('slide-out-2') as HTMLElement;
               M.Sidenav.getInstance(elem).close();
-            },
-          }, m('i.material-icons', 'clear')),
-          m('h5', 'Clicked POI'),
-          m('a.waves-effect.waves-teal.btn-flat.right', {
-            onclick: () => {
               vnode.attrs.actions.resetClickedFeature();
             },
           }, m('i.material-icons', 'clear')),
+          m('h5', 'Details'),
           // If there is a clicked feature
-          m('div.card-panel', [
+          m('div', [
             vnode.attrs.state.app.clickedFeature ?
               vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
                 formatMan(vnode.attrs.state.app.clickedFeature) :
@@ -36,6 +32,8 @@ export const poiSidebar: FactoryComponent<{
                   formatCar(vnode.attrs.state.app.clickedFeature) :
                   vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter' ?
                     formatMan(vnode.attrs.state.app.clickedFeature) :
+                    vnode.attrs.state.app.clickedFeature?.properties?.time_of_validity ?
+                      m(alertFormatComponent, {state: vnode.attrs.state, actions: vnode.attrs.actions}) :
                     formatUnknown(vnode.attrs.state.app.clickedFeature)
 
               // If there is no clicked feature

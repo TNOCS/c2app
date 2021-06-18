@@ -64,7 +64,7 @@ export const customLayerModal: FactoryComponent<{
                     }),
                     m('span.lever'),
                   ])),
-                m('p.col.s10', 'Share this layer'),
+                m('p.col.s9.offset-s1', 'Share this layer'),
               ]),
             ),
             m('div.input-field.col.s6', [

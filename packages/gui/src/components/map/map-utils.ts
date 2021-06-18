@@ -1,5 +1,5 @@
 import m from 'mithril';
-import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
+import mapboxgl, { GeoJSONSource, LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
@@ -20,13 +20,12 @@ export const drawConfig = {
   },
 };
 
-export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
-  actions.updateDrawings(features[0]);
+export const handleDrawEvent = (map: mapboxgl.Map, features: MapboxGeoJSONFeature[], actions: IActions) => {
+  actions.updateDrawings(features[0] as MapboxGeoJSONFeature);
   if (features[0].geometry.type === 'Polygon') {
     getFeaturesInPolygon(map, features, actions);
-  } else if (features[0].geometry.type === 'Point') {
-    actions.updateClickedFeature(features[0]);
   }
+
   const elem = document.getElementById('layerSelect') as HTMLElement;
   M.FormSelect.init(elem);
   const instance = M.Modal.getInstance(document.getElementById('createPOIModal') as HTMLElement);
@@ -50,9 +49,8 @@ const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: I
   actions.updateSelectedFeatures(polyFeatures);
 };
 
-export const displayInfoSidebar = (features: Feature[], actions: IActions, type: SourceType) => {
-  console.log(type);
-  actions.updateClickedFeature(features[0]);
+export const displayInfoSidebar = (features: MapboxGeoJSONFeature[], actions: IActions) => {
+  actions.updateClickedFeature(features[0] as MapboxGeoJSONFeature);
   const instance = M.Sidenav.getInstance(document.getElementById('slide-out-2') as HTMLElement);
   instance.open();
 };
@@ -119,7 +117,7 @@ export const loadImages = (map: mapboxgl.Map) => {
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
   const currentStyle = map.getStyle();
   const newStyle = await m.request(
-    `https://api.mapbox.com/styles/v1/${styleID}?access_token=pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ`,
+    `https://api.mapbox.com/styles/v1/${styleID}?access_token=` + process.env.ACCESSTOKEN,
   ) as mapboxgl.Style;
 
   // ensure any sources from the current style are copied across to the new style
@@ -191,11 +189,12 @@ export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, m
           paint: layer.paint ? layer.paint : {},
           filter: layer.filter ? layer.filter : ['all'],
         });
-        map.on('click', layerName, ({ features }) => displayInfoSidebar(features as Feature[], actions, SourceType.cht));
+        map.on('click', layerName, ({ features}) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
         map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
       }
       map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
+      if(source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity'])
     });
   });
 };

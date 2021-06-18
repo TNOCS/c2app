@@ -138,8 +138,10 @@ export const layersBody: FactoryComponent<{
                       ]),
                     );
                   });
-                })),
-            ))]),
+                }),
+              ),
+            )),
+          ]),
         ]),
         /// Alert Layers
         m('ul.collapsible', [
@@ -150,32 +152,20 @@ export const layersBody: FactoryComponent<{
               m('div.col.s12',
                 vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
                   if (source.sourceCategory !== SourceType.alert) return;
-                  return m('ul.collapsible', [
-                    m('li', [
-                      m('div.collapsible-header', source.sourceName),
-                      m('div.collapsible-body', m('div.row',
-                        m('p.col.s10.offset-s1', 'Time since release [s]'),
-                        m('div.col.s12',
-                          source.layers.map((layer: ILayer, layerIndex: number) => {
-                            return m('div.valign-wrapper', [
-                              m('div.switch.col.s3',
-                                m('label', [
-                                  m('input', {
-                                    type: 'checkbox',
-                                    class: 'filled-in',
-                                    checked: layer.showLayer,
-                                    onclick: () => {
-                                      vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
-                                    },
-                                  }),
-                                  m('span.lever'),
-                                ])),
-                              m('p.col.s9', layer.layerName),
-                            ]);
-                          })),
-                        ),
-                      ),
-                    ]),
+                  return m('div.valign-wrapper', [
+                    m('div.switch.col.s3',
+                      m('label', [
+                        m('input', {
+                          type: 'checkbox',
+                          class: 'filled-in',
+                          checked: source.layers[0].showLayer,
+                          onclick: () => {
+                            vnode.attrs.actions.toggleLayer(sourceIndex, -1);
+                          },
+                        }),
+                        m('span.lever'),
+                      ])),
+                    m('p.col.s9', source.sourceName),
                   ]);
                 }),
               ),
@@ -188,27 +178,24 @@ export const layersBody: FactoryComponent<{
             m('div.divider'),
             m('div.collapsible-header', 'CBRN Hazard Layers'),
             m('div.collapsible-body', m('div.row',
-              m('p.col.s10.offset-s1', 'Time since release [s]'),
               m('div.col.s12',
-                vnode.attrs.state.app.sources?.map((source: ISource, sourceIndex: number) => {
+                vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
                   if (source.sourceCategory !== SourceType.cht) return;
-                  return source.layers.map((layer: ILayer, layerIndex: number) => {
-                    return m('div.valign-wrapper', [
-                      m('div.switch.col.s3',
-                        m('label', [
-                          m('input', {
-                            type: 'checkbox',
-                            class: 'filled-in',
-                            checked: layer.showLayer,
-                            onclick: () => {
-                              vnode.attrs.actions.toggleLayer(sourceIndex, layerIndex);
-                            },
-                          }),
-                          m('span.lever'),
-                        ])),
-                      m('p.col.s9', layer.layerName),
-                    ]);
-                  });
+                  return m('div.valign-wrapper', [
+                    m('div.switch.col.s3',
+                      m('label', [
+                        m('input', {
+                          type: 'checkbox',
+                          class: 'filled-in',
+                          checked: source.layers[0].showLayer,
+                          onclick: () => {
+                            vnode.attrs.actions.toggleLayer(sourceIndex, -1);
+                          },
+                        }),
+                        m('span.lever'),
+                      ])),
+                    m('p.col.s9', source.sourceName),
+                  ]);
                 }),
               ),
             )),

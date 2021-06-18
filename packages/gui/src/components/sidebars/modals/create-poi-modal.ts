@@ -27,6 +27,7 @@ export const createPOIModal: FactoryComponent<{
                 onclick: () => {
                   chosenTab = 'Annotation';
                 },
+                active: true,
               }, m('i.material-icons', 'pin_drop'))),
               m('li.tab.col.s2', m('a', {
                 href: '#group',
@@ -100,7 +101,7 @@ export const createPOIModal: FactoryComponent<{
                   },
                   m('option', { value: '', disabled: true, selected: true }, 'Choose the layer'),
                   vnode.attrs.state.app.sources.map((source: ISource, index: number) => {
-                    if(source.sourceCategory !== SourceType.custom) return;
+                    if (source.sourceCategory !== SourceType.custom) return;
                     return m('option', { value: index }, source.sourceName);
                   }),
                 ),

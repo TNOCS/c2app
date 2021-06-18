@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import { IAlert/*, IArea*/, IGroup,/* IInfo,*/ IMessage, IChemicalHazard } from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
+import m from 'mithril';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
@@ -92,14 +93,15 @@ export class Socket {
                   return {
                     layerName: dt.toString(),
                     showLayer: true,
-                    type: { type: 'fill' } as mapboxgl.AnyLayer,
+                    type: { type: 'line' } as mapboxgl.AnyLayer,
                     paint: {
-                      'fill-color': {
-                        type: 'identity',
-                        property: 'color',
+                        'line-color': {
+                          type: 'identity',
+                          property: 'color',
+                        },
+                        'line-opacity': 0.5,
+                        'line-width': 2,
                       },
-                      'fill-opacity': 0.5,
-                    },
                     filter: ['all', ['in', 'deltaTime', dt]],
                   } as ILayer;
                 }) as Array<ILayer>,
@@ -215,6 +217,8 @@ export class Socket {
   }
 
   shouldUpdate(): boolean {
+    // If we are not on the map page, don't update locations
+    if(m.route.get() !== '/map') return false;
     let update: boolean = true;
     const elems = document.querySelectorAll('.modal');
     elems.forEach((elem: Element) => {

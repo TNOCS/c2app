@@ -15,7 +15,7 @@ import {
 } from '../../../shared/src';
 // @ts-ignore
 import ch from '../ch.json';
-import mapboxgl from 'mapbox-gl';
+import mapboxgl, { LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
 
 export enum Icon {
   'fireman',
@@ -60,7 +60,7 @@ export interface IAppModel {
     alert?: IAlert;
 
     // Clicking/Selecting
-    clickedFeature?: Feature;
+    clickedFeature?: MapboxGeoJSONFeature;
     selectedFeatures?: FeatureCollection;
     latestDrawing: Feature;
     clearDrawing: {
@@ -105,7 +105,7 @@ export interface IActions {
   openAlert: (alert: IAlert) => void;
 
   // Clicking/selecting
-  updateClickedFeature: (feature: Feature) => void;
+  updateClickedFeature: (feature: MapboxGeoJSONFeature) => void;
   updateSelectedFeatures: (features: Array<Feature>) => void;
   resetClickedFeature: () => void;
 
@@ -139,6 +139,7 @@ export interface IActions {
 
   // CHT
   submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
+  setCHOpacities: (val: number, name: string) => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -246,116 +247,125 @@ export const appStateMgmt = {
           sourceName: 'Eindhoven Chlorine',
           sourceCategory: SourceType.alert,
           layers: [{
-            layerName: '300ms',
+            layerName: '300',
             showLayer: true,
-            type: { type: 'fill' } as mapboxgl.AnyLayer,
+            type: { type: 'line' } as mapboxgl.AnyLayer,
             paint: {
-              'fill-color': {
+              'line-color': {
                 type: 'identity',
                 property: 'color',
               },
-              'fill-opacity': 0.5,
+              'line-opacity': 0.5,
+              'line-width': 2,
             },
             filter: ['all', ['in', 'deltaTime', 300]],
           },
             {
-              layerName: '600ms',
+              layerName: '600',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 600]],
             },
             {
-              layerName: '900ms',
+              layerName: '900',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 900]],
             },
             {
-              layerName: '1200ms',
+              layerName: '1200',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 1200]],
             },
             {
-              layerName: '1500ms',
+              layerName: '1500',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 1500]],
             },
             {
-              layerName: '2400ms',
+              layerName: '2400',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 2400]],
             }, {
-              layerName: '3600ms',
+              layerName: '3600',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 3600]],
             }, {
-              layerName: '5400ms',
+              layerName: '5400',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 5400]],
             }, {
-              layerName: '7200ms',
+              layerName: '7200',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 7200]],
             }] as Array<ILayer>,
@@ -368,116 +378,125 @@ export const appStateMgmt = {
           sourceCategory: SourceType.cht,
           shared: false,
           layers: [{
-            layerName: '300ms',
+            layerName: '300',
             showLayer: true,
-            type: { type: 'fill' } as mapboxgl.AnyLayer,
+            type: { type: 'line' } as mapboxgl.AnyLayer,
             paint: {
-              'fill-color': {
+              'line-color': {
                 type: 'identity',
                 property: 'color',
               },
-              'fill-opacity': 0.5,
+              'line-opacity': 0.5,
+              'line-width': 2,
             },
             filter: ['all', ['in', 'deltaTime', 300]],
           },
             {
-              layerName: '600ms',
+              layerName: '600',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 600]],
             },
             {
-              layerName: '900ms',
+              layerName: '900',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 900]],
             },
             {
-              layerName: '1200ms',
+              layerName: '1200',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 1200]],
             },
             {
-              layerName: '1500ms',
+              layerName: '1500',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 1500]],
             },
             {
-              layerName: '2400ms',
+              layerName: '2400',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 2400]],
             }, {
-              layerName: '3600ms',
+              layerName: '3600',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 3600]],
             }, {
-              layerName: '5400ms',
+              layerName: '5400',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 5400]],
             }, {
-              layerName: '7200ms',
+              layerName: '7200',
               showLayer: true,
-              type: { type: 'fill' } as mapboxgl.AnyLayer,
+              type: { type: 'line' } as mapboxgl.AnyLayer,
               paint: {
-                'fill-color': {
+                'line-color': {
                   type: 'identity',
                   property: 'color',
                 },
-                'fill-opacity': 0.5,
+                'line-opacity': 0.5,
+                'line-width': 2,
               },
               filter: ['all', ['in', 'deltaTime', 7200]],
             }] as Array<ILayer>,
@@ -527,9 +546,74 @@ export const appStateMgmt = {
         });
       },
 
+      setCHOpacities: (val: number, name: string) => {
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              sources.forEach((source: ISource) => {
+                if (source.sourceName !== name) return;
+
+                let deltaTime_values = source.layers.map((layer: ILayer) => {
+                  return Number(layer.layerName);
+                });
+
+                const dt_len = deltaTime_values.length;
+                // assign opacities > 0 to the two deltaTimes surrounding v
+                var i1: number = 0;
+                var i2: number = 0;
+                var opacity1: number = 0.1;
+                var opacity2: number = 0.1;
+                if (val <= deltaTime_values[0]) {
+                  i1 = 0;
+                  i2 = -1;
+                  opacity1 = 1;
+                } else if (val >= deltaTime_values[dt_len - 1]) {
+                  i1 = dt_len - 1;
+                  opacity1 = 1;
+                } else {
+                  var i: number;
+                  for (i = 0; i < dt_len - 1; i++) {
+                    if ((val >= deltaTime_values[i]) && (val <= deltaTime_values[i + 1])) {
+                      i1 = i;
+                      i2 = i1 + 1;
+                      const d1 = val - deltaTime_values[i];
+                      const d2 = deltaTime_values[i + 1] - val;
+                      opacity1 = 1 - (d1 / (d1 + d2));
+                      opacity2 = 1 - (d2 / (d1 + d2));
+                    }
+                  }
+                }
+                // assign opacity > 0 to the two deltaTimes surrounding v
+                const opacityCalc = (dt = 0) => {
+                  const index = deltaTime_values.indexOf(dt);
+                  if (index == i1) {
+                    return opacity1;
+                  } else if ((opacity1 < 1) && (index == i2)) {
+                    return opacity2;
+                  } else {
+                    return 0.05;
+                  }
+                };
+
+                source.layers.forEach((layer: ILayer) => {
+                  (layer.paint as LinePaint)['line-opacity'] = opacityCalc(Number(layer.layerName));
+                });
+              });
+              return sources;
+            },
+          },
+        });
+      },
+
       // Clicking/selecting
-      updateClickedFeature: (feature: Feature) => {
-        us({ app: { clickedFeature: feature } });
+      updateClickedFeature: (feature: MapboxGeoJSONFeature) => {
+        us({
+          app: {
+            clickedFeature: () => {
+              return feature;
+            },
+          },
+        });
       },
       updateSelectedFeatures: (features: Array<Feature>) => {
         us({ app: { selectedFeatures: { type: 'FeatureCollection', features: features } } });
@@ -662,8 +746,18 @@ export const appStateMgmt = {
         us({
           app: {
             sources: (sources: Array<ISource>) => {
-              sources[sourceIndex].layers[layerIndex].showLayer = !sources[sourceIndex].layers[layerIndex].showLayer;
-              return sources;
+              // Toggle all layers of a source
+              if (layerIndex === -1) {
+                sources[sourceIndex].layers.forEach((layer: ILayer) => {
+                  layer.showLayer = !layer.showLayer;
+                });
+                return sources;
+              }
+              // Toggle one layer (layerIndex) of a source
+              else {
+                sources[sourceIndex].layers[layerIndex].showLayer = !sources[sourceIndex].layers[layerIndex].showLayer;
+                return sources;
+              }
             },
           },
         });
@@ -864,13 +958,14 @@ export const appStateMgmt = {
                     return {
                       layerName: dt.toString(),
                       showLayer: true,
-                      type: { type: 'fill' } as mapboxgl.AnyLayer,
+                      type: { type: 'line' } as mapboxgl.AnyLayer,
                       paint: {
-                        'fill-color': {
+                        'line-color': {
                           type: 'identity',
                           property: 'color',
                         },
-                        'fill-opacity': 0.5,
+                        'line-opacity': 0.5,
+                        'line-width': 2,
                       },
                       filter: ['all', ['in', 'deltaTime', dt]],
                     } as ILayer;
