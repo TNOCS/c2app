@@ -32,6 +32,7 @@ import roadBlock from '../../assets/Operations/Road block.png';
 import truck from '../../assets/Operations/Truck.png';
 // @ts-ignore
 import chemical from '../../assets/Incidents/Chemical.png';
+import { IAssistanceResource } from '../../../../shared/src';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -142,6 +143,10 @@ export const loadImages = (map: mapboxgl.Map) => {
     if (error) throw error;
     if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
   });
+  map.loadImage(helicopter, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('helicopter')) map.addImage('helicopter', image as ImageBitmap);
+  });
 };
 
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
@@ -219,12 +224,12 @@ export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, m
           paint: layer.paint ? layer.paint : {},
           filter: layer.filter ? layer.filter : ['all'],
         });
-        map.on('click', layerName, ({ features}) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
+        map.on('click', layerName, ({ features }) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
         map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
       }
       map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
-      if(source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity'])
+      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
     });
   });
 };
@@ -234,5 +239,50 @@ export const updateGrid = (appState: IAppModel, actions: IActions, map: mapboxgl
   const gridLabelsSource = getLabelsSource(gridSource);
 
   actions.updateGrid(gridSource, gridLabelsSource);
-}
+};
 
+export const updateResourceLayer = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
+  let features: Feature[] = [];
+  for (const key in appState.app.resourceDict) {
+    let resource = appState.app.resourceDict[key] as IAssistanceResource;
+    features.push({ geometry: resource.geometry } as Feature);
+  }
+  console.log(features);
+
+  const fc = {
+    type: 'FeatureCollection',
+    features: features,
+  } as FeatureCollection;
+
+  // Set source
+  if (!map.getSource('resourcesSource')) {
+    map.addSource('resourcesSource', {
+      type: 'geojson',
+      data: fc,
+    });
+  } else {
+    (map.getSource('resourcesSource') as GeoJSONSource).setData(fc);
+  }
+
+  // Set Layers
+  const layerName = 'uav';
+
+  if (!map.getLayer(layerName)) {
+    map.addLayer({
+      id: layerName,
+      type: 'symbol',
+      source: 'resourcesSource',
+      layout: {
+        'icon-image': 'helicopter',
+        'icon-size': 0.5,
+        'icon-allow-overlap': true,
+      },
+/*      filter: ['all', ['in', 'subType', 'air', 'car']],*/
+    });
+    map.on('click', layerName, ({ features }) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
+    map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
+    map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
+  }
+ // map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
+  //if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
+};

@@ -5,6 +5,7 @@ import { Feature, FeatureCollection } from 'geojson';
 import { Socket } from './socket';
 import {
   IAlert,
+  IAssistanceResource,
   IChemicalHazard,
   IControlParameters,
   IGridOptions,
@@ -87,6 +88,7 @@ export interface IAppModel {
     switchStyle: boolean;
     gridOptions: IGridOptions;
     editLayer: number;
+    resourceDict: {[id: string]: IAssistanceResource };
 
     // CHT
     source: {
@@ -508,6 +510,7 @@ export const appStateMgmt = {
         gridLocation: [5.46, 51.42, 5.50, 51.46],
         updateGrid: true,
       } as IGridOptions,
+      resourceDict: { } as {[id: string]: IAssistanceResource },
 
       // CHT
       source: {

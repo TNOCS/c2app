@@ -1,7 +1,7 @@
 import { /*Feature,*/ FeatureCollection } from 'geojson';
 import { SourceType, IAppModel, Icon, ILayer, ISource, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert/*, IArea*/, IGroup,/* IInfo,*/ IMessage, IChemicalHazard } from '../../../shared/src';
+import { IAlert/*, IArea*/, IGroup,/* IInfo,*/ IMessage, IChemicalHazard, IAssistanceResource } from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
 import m from 'mithril';
@@ -123,6 +123,40 @@ export class Socket {
       });
       M.toast({ html: 'New Alert' });*/
     });
+
+    this.socket.on('resource', (data: IAssistanceResource) => {
+      console.log(data)
+      us({
+        app: {
+          resourceDict: (resources: { [id: string]: IAssistanceResource }) => {
+            resources[data._id] = data;
+            return resources;
+          },
+          /*sources: (sources: ISource[]) => {
+            const index = sources.findIndex((source: ISource) => {
+              return source.sourceName === 'Resources';
+            });
+
+            if (index > -1) {
+
+              const fc = {
+                type: 'FeatureCollection',
+                features: features,
+              } as FeatureCollection;
+
+              sources[index].source = fc;
+            } else {
+              const fc = {
+                type: 'FeatureCollection',
+                features: features,
+              } as FeatureCollection;
+            }
+            return sources;
+          },*/
+        },
+      });
+    });
+
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
       us({

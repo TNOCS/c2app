@@ -66,6 +66,7 @@ export const Map: FactoryComponent<{
       }
 
       MapUtils.updateSourcesAndLayers(appState, actions, map);
+      MapUtils.updateResourceLayer(appState, actions, map);
     },
   };
 };
