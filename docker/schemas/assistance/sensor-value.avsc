@@ -11,39 +11,7 @@
         },
         {
             "name": "type",
-            "type": {
-                "name": "SensorKind",
-                "type": "enum",
-                "symbols": [
-                    "wind_speed",
-                    "wind_direction",
-                    "pressure",
-                    "temperature",
-                    "humidity",
-                    "rain_accumulation",
-                    "rain_duration",
-                    "rain_intensity",
-                    "rain_peak_intensity",
-                    "hail_accumulation",
-                    "hail_duration",
-                    "hail_intensity",
-                    "hail_peak_intensity",
-                    "gray_per_h",
-                    "sivert_per_h",
-                    "PM2_5",
-                    "PM10",
-                    "SO2",
-                    "NO2",
-                    "HCHO",
-                    "CL2",
-                    "CO",
-                    "CO2",
-                    "H2S",
-                    "O3",
-                    "IRCamera",
-                    "visibleCamera"
-                ]
-            },
+            "type": "string",
             "doc": "Type of sensor"
         },
         {
@@ -81,27 +49,27 @@
             "name": "height",
             "type": [
                 "null",
-                "int"
+                "float"
             ],
             "default": null
         },
         {
             "name": "attitude",
             "type": {
-                "name": "attitude",
+                "name": "Attitude",
                 "type": "record",
                 "fields": [
                     {
                         "name": "pitch",
-                        "type": "int"
+                        "type": "float"
                     },
                     {
                         "name": "roll",
-                        "type": "int"
+                        "type": "float"
                     },
                     {
                         "name": "yaw",
-                        "type": "int"
+                        "type": "float"
                     }
                 ]
             }
@@ -110,13 +78,22 @@
             "name": "measurement",
             "doc": "Last measurement data",
             "type": {
-                "name": "measurement",
+                "name": "Measurement",
                 "type": "record",
                 "fields": [
                     {
                         "name": "metricFeature",
-                        "type": "string",
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "default": null,
                         "doc": "Identifier of the MetricFeature object related with this measurement"
+                    },
+                    {
+                        "name": "type",
+                        "type": "string",
+                        "doc": "Measurement type"
                     },
                     {
                         "name": "unit",
