@@ -128,7 +128,8 @@
             "name": "remainingAutonomy",
             "type": [
                 "null",
-                "int"
+                "float",
+                "string"
             ],
             "default": null,
             "doc": "Approximate minutes of battery life remaining"
@@ -158,7 +159,7 @@
             "name": "height",
             "type": [
                 "null",
-                "int"
+                "float"
             ],
             "default": null,
             "doc": "Height above ground at last status"
@@ -167,7 +168,7 @@
             "name": "speed",
             "type": [
                 "null",
-                "int"
+                "float"
             ],
             "default": null,
             "doc": "Speed at last status"
@@ -183,17 +184,17 @@
                     "fields": [
                         {
                             "name": "pitch",
-                            "type": "int",
+                            "type": "float",
                             "doc": "Pitch angle"
                         },
                         {
                             "name": "roll",
-                            "type": "int",
+                            "type": "float",
                             "doc": "roll angle"
                         },
                         {
                             "name": "yaw",
-                            "type": "int",
+                            "type": "float",
                             "doc": "Yaw angle"
                         },
                         {
@@ -245,7 +246,11 @@
                             },
                             {
                                 "name": "photo",
-                                "type": "string",
+                                "type": [
+                                    "null",
+                                    "string"
+                                ],
+                                "default": null,
                                 "doc": "Frame encoded in base64 at time of last status"
                             }
                         ]

@@ -40,7 +40,7 @@ export interface ICamera {
   /** Attitude of the camera at last status */
   attitude?: null | undefined | IAttitude;
   /** Frame encoded in base64 at time of last status */
-  photo: string;
+  photo?: null | undefined | string;
 }
 
 /**
@@ -78,7 +78,7 @@ export interface IResource {
   /** Identifier of the mission (if any) to which the last status is related */
   mission: string;
   /** Approximate minutes of battery life remaining */
-  remainingAutonomy?: null | undefined | number;
+  remainingAutonomy?: null | undefined | number | string;
   /**
    * GeoJSON geometry object to represent the last known location of the resource
    */

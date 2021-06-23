@@ -1,14 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  TestBedAdapter,
-  Logger,
-  LogLevel,
-  IAdapterMessage,
-  ProduceRequest,
-} from 'node-test-bed-adapter';
+import { TestBedAdapter, Logger, LogLevel, IAdapterMessage, ProduceRequest } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert } from '../../../shared/src'
+import { IAlert } from '../../../shared/src';
 
 interface ISendResponse {
   [topic: string]: {
@@ -35,11 +29,19 @@ export class KafkaService {
   public createAdapter(): Promise<TestBedAdapter> {
     return new Promise(async (resolve) => {
       log.info('Init KafkaService');
+      const clientId = 'c2app-server';
       this.adapter = new TestBedAdapter({
-        clientId: 'c2app-server',
+        clientId,
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }],
+        consume: [
+          { topic: SimEntityFeatureCollectionTopic },
+          { topic: capMessage },
+          { topic: 'context' },
+          { topic: 'mission' },
+          { topic: 'resource' },
+          { topic: 'sensor' },
+        ],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
@@ -56,7 +58,7 @@ export class KafkaService {
         this.handleMessage();
       });
       this.adapter.on('ready', () => {
-        log.info('Kafka is connected');
+        log.info(`${clientId} is connected`);
         resolve(this.adapter);
       });
       this.adapter.connect().catch((e) => {
@@ -86,6 +88,8 @@ export class KafkaService {
         case capMessage:
           this.socket.server.emit('alert', message.value as IAlert);
           break;
+        case 'resource':
+          console.log(message.value);
         default:
           log.warn('Unknown topic');
           break;
