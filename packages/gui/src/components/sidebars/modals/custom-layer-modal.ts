@@ -2,9 +2,31 @@ import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
 // @ts-ignore
-import car from '../../../assets/car_icon.png';
+import car from '../../../assets/Operations/Car.png';
 // @ts-ignore
-import fireman from '../../../assets/fireman_icon.png';
+import controlPoint from '../../../assets/Operations/Control point.png';
+// @ts-ignore
+import divisionCommand from '../../../assets/Operations/Division command.png';
+// @ts-ignore
+import evacuation from '../../../assets/Operations/Evacuation.png';
+// @ts-ignore
+import fireman from '../../../assets/Operations/Firemen unit.png';
+// @ts-ignore
+import helicopter from '../../../assets/Operations/Helicopter.png';
+// @ts-ignore
+import media from '../../../assets/Operations/Media.png';
+// @ts-ignore
+import medical from '../../../assets/Operations/Medical services.png';
+// @ts-ignore
+import military from '../../../assets/Operations/Military.png';
+// @ts-ignore
+import police from '../../../assets/Operations/Police unit.png';
+// @ts-ignore
+import roadBlock from '../../../assets/Operations/Road block.png';
+// @ts-ignore
+import truck from '../../../assets/Operations/Truck.png';
+// @ts-ignore
+import chemical from '../../../assets/Incidents/Chemical.png';
 
 export const customLayerModal: FactoryComponent<{
   state: IAppModel;
@@ -45,8 +67,19 @@ export const customLayerModal: FactoryComponent<{
                   },
                 },
                 m('option', { value: '', disabled: true, selected: true }, 'Choose the icon'),
-                m('option.left', { value: 'fireman', 'data-icon': fireman }, 'Firefighter'),
                 m('option.left', { value: 'car', 'data-icon': car }, 'Car'),
+                m('option.left', { value: 'controlPoint', 'data-icon': controlPoint }, 'Control Point'),
+                m('option.left', { value: 'divisionCommand', 'data-icon': divisionCommand }, 'Division Command'),
+                m('option.left', { value: 'evacuation', 'data-icon': evacuation }, 'Evacuation'),
+                m('option.left', { value: 'fireman', 'data-icon': fireman }, 'Firefighter'),
+                m('option.left', { value: 'roadBlock', 'data-icon': roadBlock }, 'Road Block'),
+                m('option.left', { value: 'helicopter', 'data-icon': helicopter }, 'Helicopter'),
+                m('option.left', { value: 'media', 'data-icon': media }, 'Media'),
+                m('option.left', { value: 'medical', 'data-icon': medical }, 'Medical'),
+                m('option.left', { value: 'military', 'data-icon': military }, 'Military'),
+                m('option.left', { value: 'police', 'data-icon': police }, 'Police'),
+                m('option.left', { value: 'truck', 'data-icon': truck }, 'Truck'),
+                m('option.left', { value: 'chemical', 'data-icon': chemical }, 'Chemical Incident'),
               ),
               m('label', 'Choose how this layer gets visualized'),
             ]),

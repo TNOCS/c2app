@@ -9,3 +9,8 @@
 .nav-wrapper{
   background-color: #01689b;
 }
+.dropdown-content {
+  max-height: 350px !important;
+  overflow-y: auto !important;
+  backface-visibility: hidden !important;
+}

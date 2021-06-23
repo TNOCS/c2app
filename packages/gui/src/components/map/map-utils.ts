@@ -7,9 +7,31 @@ import { IActions, IAppModel, ILayer, ISource, SourceType } from '../../services
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
 // @ts-ignore
-import car from '../../assets/car_icon.png';
+import car from '../../assets/Operations/Car.png';
 // @ts-ignore
-import fireman from '../../assets/fireman_icon.png';
+import controlPoint from '../../assets/Operations/Control point.png';
+// @ts-ignore
+import divisionCommand from '../../assets/Operations/Division command.png';
+// @ts-ignore
+import evacuation from '../../assets/Operations/Evacuation.png';
+// @ts-ignore
+import fireman from '../../assets/Operations/Firemen unit.png';
+// @ts-ignore
+import helicopter from '../../assets/Operations/Helicopter.png';
+// @ts-ignore
+import media from '../../assets/Operations/Media.png';
+// @ts-ignore
+import medical from '../../assets/Operations/Medical services.png';
+// @ts-ignore
+import military from '../../assets/Operations/Military.png';
+// @ts-ignore
+import police from '../../assets/Operations/Police unit.png';
+// @ts-ignore
+import roadBlock from '../../assets/Operations/Road block.png';
+// @ts-ignore
+import truck from '../../assets/Operations/Truck.png';
+// @ts-ignore
+import chemical from '../../assets/Incidents/Chemical.png';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -111,6 +133,14 @@ export const loadImages = (map: mapboxgl.Map) => {
   map.loadImage(car, function(error, image) {
     if (error) throw error;
     if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
+  });
+  map.loadImage(chemical, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('chemical')) map.addImage('chemical', image as ImageBitmap);
+  });
+  map.loadImage(roadBlock, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
   });
 };
 
