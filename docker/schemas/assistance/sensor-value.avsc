@@ -1,0 +1,146 @@
+{
+    "name": "Sensor",
+    "type": "record",
+    "doc": "Sensors to measure temperature, gases, etc. Database collection: sensors",
+    "namespace": "nl.tno.assistance",
+    "fields": [
+        {
+            "name": "_id",
+            "type": "string",
+            "doc": "Sensor unique identifier"
+        },
+        {
+            "name": "type",
+            "type": {
+                "name": "SensorKind",
+                "type": "enum",
+                "symbols": [
+                    "wind_speed",
+                    "wind_direction",
+                    "pressure",
+                    "temperature",
+                    "humidity",
+                    "rain_accumulation",
+                    "rain_duration",
+                    "rain_intensity",
+                    "rain_peak_intensity",
+                    "hail_accumulation",
+                    "hail_duration",
+                    "hail_intensity",
+                    "hail_peak_intensity",
+                    "gray_per_h",
+                    "sivert_per_h",
+                    "PM2_5",
+                    "PM10",
+                    "SO2",
+                    "NO2",
+                    "HCHO",
+                    "CL2",
+                    "CO",
+                    "CO2",
+                    "H2S",
+                    "O3",
+                    "IRCamera",
+                    "visibleCamera"
+                ]
+            },
+            "doc": "Type of sensor"
+        },
+        {
+            "name": "context",
+            "type": "string",
+            "doc": "Identifier of the context to which the last measurement is related"
+        },
+        {
+            "name": "mission",
+            "type": "string",
+            "doc": "Identifier of the mission (if any) to which the last measurement is related"
+        },
+        {
+            "name": "geometry",
+            "type": {
+                "name": "Geometry",
+                "type": "record",
+                "doc": "Geographic data as a GeoJSON geometry object",
+                "fields": [
+                    {
+                        "name": "type",
+                        "type": "string"
+                    },
+                    {
+                        "name": "coordinates",
+                        "type": {
+                            "type": "array",
+                            "items": "float"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "height",
+            "type": [
+                "null",
+                "int"
+            ],
+            "default": null
+        },
+        {
+            "name": "attitude",
+            "type": {
+                "name": "attitude",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "pitch",
+                        "type": "int"
+                    },
+                    {
+                        "name": "roll",
+                        "type": "int"
+                    },
+                    {
+                        "name": "yaw",
+                        "type": "int"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "measurement",
+            "doc": "Last measurement data",
+            "type": {
+                "name": "measurement",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "metricFeature",
+                        "type": "string",
+                        "doc": "Identifier of the MetricFeature object related with this measurement"
+                    },
+                    {
+                        "name": "unit",
+                        "type": "string",
+                        "doc": "Measurement units"
+                    },
+                    {
+                        "name": "value",
+                        "type": "float",
+                        "doc": "Measurement value"
+                    },
+                    {
+                        "name": "confidence",
+                        "type": "float",
+                        "doc": "Measurement confidence"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "timestamp",
+            "doc": "Date in ISO 8601 format in which the misson is inserted/updated",
+            "type": "long",
+            "logicalType": "timestamp"
+        }
+    ]
+}
