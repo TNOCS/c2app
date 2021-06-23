@@ -12,7 +12,7 @@ import {
   IGroup,
   IInfo,
   IMessage,
-  IScenarioDefinition,
+  IScenarioDefinition, ISensor,
 } from '../../../shared/src';
 // @ts-ignore
 import ch from '../ch.json';
@@ -88,7 +88,8 @@ export interface IAppModel {
     switchStyle: boolean;
     gridOptions: IGridOptions;
     editLayer: number;
-    resourceDict: {[id: string]: IAssistanceResource };
+    resourceDict: { [id: string]: IAssistanceResource };
+    sensorDict: { [id: string]: ISensor };
 
     // CHT
     source: {
@@ -510,7 +511,8 @@ export const appStateMgmt = {
         gridLocation: [5.46, 51.42, 5.50, 51.46],
         updateGrid: true,
       } as IGridOptions,
-      resourceDict: { } as {[id: string]: IAssistanceResource },
+      resourceDict: {} as { [id: string]: IAssistanceResource },
+      sensorDict: {} as { [id: string]: ISensor },
 
       // CHT
       source: {

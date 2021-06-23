@@ -1,7 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { formatMan, formatCar, formatUnknown, alertFormatComponent } from './poi-formatting';
+import { formatMan, formatCar, alertFormatComponent, resourceFormatComponent } from './poi-formatting';
 
 export const poiSidebar: FactoryComponent<{
   state: IAppModel;
@@ -33,12 +33,14 @@ export const poiSidebar: FactoryComponent<{
                   vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter' ?
                     formatMan(vnode.attrs.state.app.clickedFeature) :
                     vnode.attrs.state.app.clickedFeature?.properties?.time_of_validity ?
-                      m(alertFormatComponent, {state: vnode.attrs.state, actions: vnode.attrs.actions}) :
-                    formatUnknown(vnode.attrs.state.app.clickedFeature)
+                      m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions }) :
+                      m(resourceFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
+              //formatUnknown(vnode.attrs.state.app.clickedFeature)
 
               // If there is no clicked feature
               : m('p', ''),
           ]),
+          m('p', vnode.attrs.state.app.sensorDict),
           m('div', { style: 'margin: 128px' }),
         ]),
       );

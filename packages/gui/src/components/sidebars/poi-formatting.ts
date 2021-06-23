@@ -25,13 +25,15 @@ export const formatUnknown = (ft: MapboxGeoJSONFeature) => {
   console.log(ft);
   return m('div', [
     m('p', 'Layer Name: ' + ft.layer.id),
-    m('p', 'Type: ' + props?.type),
+    m('p', 'ID: ' + props?.id),
+    m('p', 'Height: ' + props?.height),
   ]);
 };
 
 import { FactoryComponent } from 'mithril';
 import { IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
+import { IAssistanceResource, ISensor } from '../../../../shared/src';
 
 export const alertFormatComponent: FactoryComponent<{
   state: IAppModel;
@@ -63,6 +65,43 @@ export const alertFormatComponent: FactoryComponent<{
     oncreate: () => {
       const array_of_dom_elements = document.querySelectorAll('input[type=range]');
       M.Range.init(array_of_dom_elements);
+    },
+  };
+};
+
+export const resourceFormatComponent: FactoryComponent<{
+  state: IAppModel;
+  actions: IActions;
+}> = () => {
+  return {
+    view: (vnode) => {
+      const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
+      let resource = {} as IAssistanceResource;
+      let sensors = [] as ISensor[];
+      for (const key in vnode.attrs.state.app.resourceDict) {
+        const rsc = vnode.attrs.state.app.resourceDict[key];
+        if (rsc._id === ft.properties?.id) resource = rsc as IAssistanceResource;
+      }
+
+      for (const key in vnode.attrs.state.app.sensorDict) {
+        const snsr = vnode.attrs.state.app.sensorDict[key];
+        if (snsr.mission === ft.properties?.mission) sensors.push(snsr as ISensor);
+      }
+
+      return m('div', [
+        m('p', 'Layer Name: ' + ft.layer.id),
+        m('p', 'ID: ' + resource._id),
+        m('p', 'Mission: ' + resource.mission),
+        m('p', 'Height: ' + resource.height),
+        m('div', sensors.map((sens: ISensor) => {
+            return [
+              m('p', sens._id),
+              m('p', sens.type),
+              m('p', sens.measurement.type + ': ' + sens.measurement.value + ' ' + sens.measurement.unit),
+            ]
+          }),
+        ),
+      ]);
     },
   };
 };

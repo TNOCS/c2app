@@ -8,7 +8,7 @@ import {
 } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert, IAssistanceResource } from '../../../shared/src'
+import { IAlert, IAssistanceResource, ISensor } from '../../../shared/src';
 
 interface ISendResponse {
   [topic: string]: {
@@ -97,11 +97,10 @@ export class KafkaService {
           //this.socket.server.emit('alert', message.value as IAlert);
           break;
         case resourceTopic:
-          log.info(message.value as IAssistanceResource)
           this.socket.server.emit('resource', message.value as IAssistanceResource);
           break;
         case sensorTopic:
-          //this.socket.server.emit('alert', message.value as IAlert);
+          this.socket.server.emit('sensor', message.value as ISensor);
           break;
         default:
           log.warn('Unknown topic');

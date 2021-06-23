@@ -241,13 +241,19 @@ export const updateGrid = (appState: IAppModel, actions: IActions, map: mapboxgl
   actions.updateGrid(gridSource, gridLabelsSource);
 };
 
+class GeoJSONProperties {
+}
+
 export const updateResourceLayer = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
   let features: Feature[] = [];
   for (const key in appState.app.resourceDict) {
     let resource = appState.app.resourceDict[key] as IAssistanceResource;
-    features.push({ geometry: resource.geometry } as Feature);
+    features.push({ geometry: resource.geometry, properties: {
+      height: resource.height as number,
+        id: resource._id as string,
+        mission: resource.mission as string,
+      } as GeoJSONProperties } as Feature);
   }
-  console.log(features);
 
   const fc = {
     type: 'FeatureCollection',

@@ -1,7 +1,13 @@
 import { /*Feature,*/ FeatureCollection } from 'geojson';
 import { SourceType, IAppModel, Icon, ILayer, ISource, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
-import { IAlert/*, IArea*/, IGroup,/* IInfo,*/ IMessage, IChemicalHazard, IAssistanceResource } from '../../../shared/src';
+import {
+  IAlert/*, IArea*/,
+  IGroup,/* IInfo,*/
+  IMessage,
+  IChemicalHazard,
+  IAssistanceResource, ISensor,
+} from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
 import m from 'mithril';
@@ -52,80 +58,79 @@ export class Socket {
     });
 
     this.socket.on('alert', (_data: IAlert) => {
-     /* const alertArea = (data.info as IInfo).area as IArea[];
+      /* const alertArea = (data.info as IInfo).area as IArea[];
 
-      const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
-      const features = fc.features as Feature[];
+       const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
+       const features = fc.features as Feature[];
 
-      // Find out the necessary layers (DeltaTimes)
-      const dts = features.map((feature: Feature) => {
-        return feature.properties?.deltaTime;
-      }) as number[];
+       // Find out the necessary layers (DeltaTimes)
+       const dts = features.map((feature: Feature) => {
+         return feature.properties?.deltaTime;
+       }) as number[];
 
-      const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
+       const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
 
-      // Fix color formatting
-      fc.features.forEach((feature: Feature) => {
-        // @ts-ignore
-        feature.properties.color = '#' + feature.properties?.color as string;
-        return feature;
-      });
+       // Fix color formatting
+       fc.features.forEach((feature: Feature) => {
+         // @ts-ignore
+         feature.properties.color = '#' + feature.properties?.color as string;
+         return feature;
+       });
 
-      // Update the fc in the alert
-      ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
+       // Update the fc in the alert
+       ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
 
-      us({
-        app: {
-          sources: (sources: Array<ISource>) => {
-            const index = sources.findIndex((source: ISource) => {
-              return source.sourceName === data.identifier;
-            });
-            if (index > -1) {
-              sources[index].source = fc;
-            } else {
-              sources.push({
-                id: 'testid2',
-                source: fc as FeatureCollection,
-                sourceName: 'Eindhoven Chlorine',
-                sourceCategory: SourceType.alert,
-                shared: false,
-                layers: uniqueDTs.map((dt: number) => {
-                  return {
-                    layerName: dt.toString(),
-                    showLayer: true,
-                    type: { type: 'line' } as mapboxgl.AnyLayer,
-                    paint: {
-                        'line-color': {
-                          type: 'identity',
-                          property: 'color',
-                        },
-                        'line-opacity': 0.5,
-                        'line-width': 2,
-                      },
-                    filter: ['all', ['in', 'deltaTime', dt]],
-                  } as ILayer;
-                }) as Array<ILayer>,
-              } as ISource);
-            }
-          },
-          alerts: (alerts: Array<IAlert>) => {
-            const index = alerts.findIndex((val: IAlert) => {
-              return val.identifier === data.identifier;
-            });
-            if (index > -1) {
-              alerts[index] = data;
-              return alerts;
-            }
-            alerts.push(data);
-            return alerts;
-          },
-        },
-      });
-      M.toast({ html: 'New Alert' });*/
+       us({
+         app: {
+           sources: (sources: Array<ISource>) => {
+             const index = sources.findIndex((source: ISource) => {
+               return source.sourceName === data.identifier;
+             });
+             if (index > -1) {
+               sources[index].source = fc;
+             } else {
+               sources.push({
+                 id: 'testid2',
+                 source: fc as FeatureCollection,
+                 sourceName: 'Eindhoven Chlorine',
+                 sourceCategory: SourceType.alert,
+                 shared: false,
+                 layers: uniqueDTs.map((dt: number) => {
+                   return {
+                     layerName: dt.toString(),
+                     showLayer: true,
+                     type: { type: 'line' } as mapboxgl.AnyLayer,
+                     paint: {
+                         'line-color': {
+                           type: 'identity',
+                           property: 'color',
+                         },
+                         'line-opacity': 0.5,
+                         'line-width': 2,
+                       },
+                     filter: ['all', ['in', 'deltaTime', dt]],
+                   } as ILayer;
+                 }) as Array<ILayer>,
+               } as ISource);
+             }
+           },
+           alerts: (alerts: Array<IAlert>) => {
+             const index = alerts.findIndex((val: IAlert) => {
+               return val.identifier === data.identifier;
+             });
+             if (index > -1) {
+               alerts[index] = data;
+               return alerts;
+             }
+             alerts.push(data);
+             return alerts;
+           },
+         },
+       });
+       M.toast({ html: 'New Alert' });*/
     });
 
     this.socket.on('resource', (data: IAssistanceResource) => {
-      console.log(data)
       us({
         app: {
           resourceDict: (resources: { [id: string]: IAssistanceResource }) => {
@@ -153,6 +158,16 @@ export class Socket {
             }
             return sources;
           },*/
+        },
+      });
+    });
+    this.socket.on('sensor', (data: ISensor) => {
+      us({
+        app: {
+          sensorDict: (sensors: { [id: string]: ISensor }) => {
+            sensors[data._id] = data;
+            return sensors;
+          },
         },
       });
     });
@@ -252,7 +267,7 @@ export class Socket {
 
   shouldUpdate(): boolean {
     // If we are not on the map page, don't update locations
-    if(m.route.get() !== '/map') return false;
+    if (m.route.get() !== '/map') return false;
     let update: boolean = true;
     const elems = document.querySelectorAll('.modal');
     elems.forEach((elem: Element) => {
