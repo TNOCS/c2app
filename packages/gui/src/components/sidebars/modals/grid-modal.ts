@@ -32,17 +32,22 @@ export const gridModal: FactoryComponent<{
                 'Cell Size (km)',
               ),
             ]),
-            m('p.col.s12',
-              m('label', [
-                m('input', {
-                  type: 'checkbox',
-                  class: 'filled-in',
-                  checked: updateLocation,
-                  onclick: () => {
-                    updateLocation = !updateLocation;
-                  },
-                }),
-                m('span', 'Fit Grid to Current Viewport')]),
+            m('div.col.s6',
+              m('div.valign-wrapper', [
+                m('div.switch.col.s2',
+                  m('label', [
+                    m('input', {
+                      type: 'checkbox',
+                      class: 'filled-in',
+                      checked: updateLocation,
+                      onclick: () => {
+                        updateLocation = !updateLocation;
+                      },
+                    }),
+                    m('span.lever'),
+                  ])),
+                m('p.col.s10', 'Fit Grid to Current Viewport'),
+              ]),
             ),
           ]),
         ]),
@@ -54,7 +59,7 @@ export const gridModal: FactoryComponent<{
             },
           }, 'Create Grid'),
         ),
-      )
+      );
     },
     oncreate: () => {
       M.AutoInit();

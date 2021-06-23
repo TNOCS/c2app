@@ -47,7 +47,7 @@ export interface ICamera {
  * This object represents any type of resource whether it be FRs, vehicles,
  * UxVs... Database collection: resources
  */
-export interface IResource {
+export interface IAssistanceResource {
   /** Resource unique identifier */
   _id: string;
   /** Type of resource */

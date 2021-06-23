@@ -1,5 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../../services/meiosis';
+import { SourceType, IActions, IAppModel, ISource } from '../../../services/meiosis';
 import M from 'materialize-css';
 import { Feature, Point } from 'geojson';
 import { LayoutForm } from 'mithril-ui-form';
@@ -27,6 +27,7 @@ export const createPOIModal: FactoryComponent<{
                 onclick: () => {
                   chosenTab = 'Annotation';
                 },
+                active: true,
               }, m('i.material-icons', 'pin_drop'))),
               m('li.tab.col.s2', m('a', {
                 href: '#group',
@@ -99,8 +100,9 @@ export const createPOIModal: FactoryComponent<{
                     },
                   },
                   m('option', { value: '', disabled: true, selected: true }, 'Choose the layer'),
-                  vnode.attrs.state.app.customLayers.map((layer: [string, boolean], index: number) => {
-                    return m('option', { value: index }, layer[0]);
+                  vnode.attrs.state.app.sources.map((source: ISource, index: number) => {
+                    if (source.sourceCategory !== SourceType.custom) return;
+                    return m('option', { value: index }, source.sourceName);
                   }),
                 ),
                 m('label', { for: 'layerSelect' }, 'Choose the layer'),
@@ -116,7 +118,7 @@ export const createPOIModal: FactoryComponent<{
               }),
             ])),
             ///Population
-            m('div.col.s12', { id: 'population' }, m('div', [
+            m('div.col.s12', { id: 'populator' }, m('div', [
               m('p.col.s12', 'Creates a populator service query for this point on the map'),
             ])),
           ]),

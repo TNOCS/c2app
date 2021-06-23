@@ -1,5 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
-import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
+import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-ignore
 import { RulerControl } from 'mapbox-gl-controls';
@@ -27,6 +27,8 @@ export const Map: FactoryComponent<{
         center: [5.48, 51.44] as [number, number],
         zoom: 12,
       });
+      MapUtils.loadImages(map);
+      MapUtils.updateGrid(appState, actions, map);
 
       // Add draw controls
       draw = new MapboxDraw(MapUtils.drawConfig);
@@ -40,18 +42,13 @@ export const Map: FactoryComponent<{
         map.on('draw.update', ({ features }) => MapUtils.handleDrawEvent(map, features, actions));
 
         map.once('styledata', () => {
-          MapUtils.initRealtimeLayers(appState, actions, map);
-          MapUtils.initGridLayers(appState, actions, map);
-          MapUtils.customLayersUpdate(appState, actions, map);
-          MapUtils.alertLayersUpdate(appState, actions, map);
-          MapUtils.CHTLayersUpdate(appState, actions, map);
+          MapUtils.updateSourcesAndLayers(appState, actions, map);
         });
       });
     },
     // Executes on every redraw
     onupdate: ({ attrs: { state: appState, actions } }) => {
       if (!map.loaded()) return;
-
       // Check if drawings should be removed from the map
       if (appState.app.clearDrawing.delete) {
         draw.delete(appState.app.clearDrawing.id);
@@ -60,39 +57,16 @@ export const Map: FactoryComponent<{
 
       // Update the grid if necessary
       if (appState.app.gridOptions.updateGrid) {
-        const gridSource = MapUtils.getGridSource(map, actions, appState);
-        const gridLabelsSource = MapUtils.getLabelsSource(gridSource);
-
-        (map.getSource('gridSource') as GeoJSONSource).setData(gridSource);
-        (map.getSource('gridLabelsSource') as GeoJSONSource).setData(gridLabelsSource);
-
-        actions.updateGridDone();
+        MapUtils.updateGrid(appState, actions, map);
       }
-
-      // Set new positionSource
-      (map.getSource('positionSource') as GeoJSONSource).setData(appState.app.positionSource);
 
       // Check if basemap should be switched
       if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
         MapUtils.switchBasemap(map, appState.app.mapStyle).catch();
       }
 
-      // Toggle visibility of realtime layers
-      appState.app.realtimeLayers.forEach((layer: [string, boolean]) => {
-        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-      });
-
-      // Toggle visibility of grid layers
-      appState.app.gridLayers.forEach((layer: [string, boolean]) => {
-        map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-      });
-
-      // Update custom layers
-      MapUtils.customLayersUpdate(appState, actions, map);
-      // Update alert layers
-      MapUtils.alertLayersUpdate(appState, actions, map);
-      // Update CHT layers
-      MapUtils.CHTLayersUpdate(appState, actions, map);
+      MapUtils.updateSourcesAndLayers(appState, actions, map);
+      MapUtils.updateResourceLayer(appState, actions, map);
     },
   };
 };

@@ -1,16 +1,38 @@
 import m from 'mithril';
-import mapboxgl, { GeoJSONSource } from 'mapbox-gl';
+import mapboxgl, { GeoJSONSource, LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
 import bbox from '@turf/bbox';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
-import { IActions, IAppModel } from '../../services/meiosis';
+import { IActions, IAppModel, ILayer, ISource, SourceType } from '../../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
 // @ts-ignore
-import car from '../../assets/car_icon.png';
+import car from '../../assets/Operations/Car.png';
 // @ts-ignore
-import fireman from '../../assets/fireman_icon.png';
-import { IAlert, IArea, IInfo } from '../../../../shared/src';
+import controlPoint from '../../assets/Operations/Control point.png';
+// @ts-ignore
+import divisionCommand from '../../assets/Operations/Division command.png';
+// @ts-ignore
+import evacuation from '../../assets/Operations/Evacuation.png';
+// @ts-ignore
+import fireman from '../../assets/Operations/Firemen unit.png';
+// @ts-ignore
+import helicopter from '../../assets/Operations/Helicopter.png';
+// @ts-ignore
+import media from '../../assets/Operations/Media.png';
+// @ts-ignore
+import medical from '../../assets/Operations/Medical services.png';
+// @ts-ignore
+import military from '../../assets/Operations/Military.png';
+// @ts-ignore
+import police from '../../assets/Operations/Police unit.png';
+// @ts-ignore
+import roadBlock from '../../assets/Operations/Road block.png';
+// @ts-ignore
+import truck from '../../assets/Operations/Truck.png';
+// @ts-ignore
+import chemical from '../../assets/Incidents/Chemical.png';
+import { IAssistanceResource } from '../../../../shared/src';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -21,21 +43,12 @@ export const drawConfig = {
   },
 };
 
-export const enum ILayerType {
-  'realtime',
-  'grid',
-  'custom',
-  'alert',
-  'cht'
-}
-
-export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
-  actions.updateDrawings(features[0]);
+export const handleDrawEvent = (map: mapboxgl.Map, features: MapboxGeoJSONFeature[], actions: IActions) => {
+  actions.updateDrawings(features[0] as MapboxGeoJSONFeature);
   if (features[0].geometry.type === 'Polygon') {
     getFeaturesInPolygon(map, features, actions);
-  } else if (features[0].geometry.type === 'Point') {
-    actions.updateClickedFeature(features[0]);
   }
+
   const elem = document.getElementById('layerSelect') as HTMLElement;
   M.FormSelect.init(elem);
   const instance = M.Modal.getInstance(document.getElementById('createPOIModal') as HTMLElement);
@@ -43,12 +56,12 @@ export const handleDrawEvent = (map: mapboxgl.Map, features: Feature[], actions:
 };
 
 const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
-  if (!map.getLayer('firemenPositions')) return;
+  if (!map.getLayer('PositionsFiremen')) return;
 
   const bounding = bbox(features[0]);
   let bboxFeatures = map.queryRenderedFeatures(
     [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-    { layers: ['firemenPositions'] },
+    { layers: ['PositionsFiremen'] },
   );
   const polyFeatures = bboxFeatures.filter((element) =>
     booleanPointInPolygon(
@@ -59,9 +72,8 @@ const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: I
   actions.updateSelectedFeatures(polyFeatures);
 };
 
-export const displayInfoSidebar = (features: Feature[], actions: IActions, type: ILayerType) => {
-  console.log(type);
-  actions.updateClickedFeature(features[0]);
+export const displayInfoSidebar = (features: MapboxGeoJSONFeature[], actions: IActions) => {
+  actions.updateClickedFeature(features[0] as MapboxGeoJSONFeature);
   const instance = M.Sidenav.getInstance(document.getElementById('slide-out-2') as HTMLElement);
   instance.open();
 };
@@ -123,12 +135,24 @@ export const loadImages = (map: mapboxgl.Map) => {
     if (error) throw error;
     if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
   });
+  map.loadImage(chemical, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('chemical')) map.addImage('chemical', image as ImageBitmap);
+  });
+  map.loadImage(roadBlock, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
+  });
+  map.loadImage(helicopter, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('helicopter')) map.addImage('helicopter', image as ImageBitmap);
+  });
 };
 
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
   const currentStyle = map.getStyle();
   const newStyle = await m.request(
-    `https://api.mapbox.com/styles/v1/${styleID}?access_token=pk.eyJ1IjoidGltb3ZkayIsImEiOiJja2xrcXFvdjAwYjRxMnFxam9waDhsbzMwIn0.7YMAFBQuqBei0991lnw1sQ`,
+    `https://api.mapbox.com/styles/v1/${styleID}?access_token=` + process.env.ACCESSTOKEN,
   ) as mapboxgl.Style;
 
   // ensure any sources from the current style are copied across to the new style
@@ -174,182 +198,97 @@ export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
   loadImages(map);
 };
 
-export const prepareGeoJSON = (alertMessage: IAlert): FeatureCollection => {
-  return JSON.parse(((alertMessage.info as IInfo).area as IArea[])[0].areaDesc) as FeatureCollection;
-};
+export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
+  appState.app.sources.forEach((source: ISource) => {
+    // Set source
+    if (!map.getSource(source.sourceName)) {
+      map.addSource(source.sourceName, {
+        type: 'geojson',
+        data: source.source,
+      });
+    } else {
+      (map.getSource(source.sourceName) as GeoJSONSource).setData(source.source);
+    }
 
-export const initRealtimeLayers = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
-  const positionSource = appState.app.positionSource;
+    // Set Layers
+    source.layers.forEach((layer: ILayer) => {
+      const layerName = source.sourceName.concat(layer.layerName);
 
-  map.addSource('positionSource', {
-    type: 'geojson',
-    data: positionSource,
-  });
-
-  map.loadImage(fireman, function(error, image) {
-    if (error) throw error;
-    if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
-    map.addLayer({
-      id: 'firemenPositions',
-      type: 'symbol',
-      source: 'positionSource',
-      layout: {
-        'visibility': appState.app.realtimeLayers[0][1] ? 'visible' : 'none',
-        'icon-image': 'fireman',
-        'icon-size': 0.5,
-        'icon-allow-overlap': true,
-      },
-      filter: ['all', ['in', 'type', 'man', 'firefighter']],
+      if (!map.getLayer(layerName)) {
+        map.addLayer({
+          id: layerName,
+          type: layer.type.type,
+          source: source.sourceName,
+          layout: layer.layout ? layer.layout : {},
+          // @ts-ignore
+          paint: layer.paint ? layer.paint : {},
+          filter: layer.filter ? layer.filter : ['all'],
+        });
+        map.on('click', layerName, ({ features }) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
+        map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
+        map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
+      }
+      map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
+      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
     });
   });
-
-  map.on('click', 'firemenPositions', ({ features }) => displayInfoSidebar(features as Feature[], actions, ILayerType.realtime));
-  map.on('mouseenter', 'firemenPositions', () => (map.getCanvas().style.cursor = 'pointer'));
-  map.on('mouseleave', 'firemenPositions', () => (map.getCanvas().style.cursor = ''));
 };
 
-export const initGridLayers = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
+export const updateGrid = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
   const gridSource = getGridSource(map, actions, appState);
   const gridLabelsSource = getLabelsSource(gridSource);
 
-  map.addSource('gridSource', {
-    type: 'geojson',
-    data: gridSource,
-  });
-  map.addSource('gridLabelsSource', {
-    type: 'geojson',
-    data: gridLabelsSource,
-  });
-
-  map.addLayer({
-    id: 'grid',
-    type: 'line',
-    source: 'gridSource',
-    layout: {
-      'visibility': appState.app.gridLayers[0][1] ? 'visible' : 'none',
-    },
-    paint: {
-      'line-opacity': 0.5,
-    },
-  });
-  map.addLayer({
-    id: 'gridLabels',
-    type: 'symbol',
-    source: 'gridLabelsSource',
-    layout: {
-      'visibility': appState.app.gridLayers[1][1] ? 'visible' : 'none',
-      'text-field': '{cellLabel}',
-      'text-allow-overlap': true,
-    },
-    paint: {
-      'text-opacity': 0.5,
-    },
-  });
-  map.on('click', 'grid', ({ features }) => displayInfoSidebar(features as Feature[], actions, ILayerType.grid));
-  map.on('mouseenter', 'grid', () => (map.getCanvas().style.cursor = 'pointer'));
-  map.on('mouseleave', 'grid', () => (map.getCanvas().style.cursor = ''));
+  actions.updateGrid(gridSource, gridLabelsSource);
 };
 
-export const customLayersUpdate = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
-  // The forEach ensures we only update if there is actual data
-  appState.app.customLayers.forEach((layer: [string, boolean], index: number) => {
-    // For custom layers, first check if the source for this layer exists
-    if (!map.getSource(layer[0] + 'Source')) {
-      map.addSource(layer[0] + 'Source', {
-        type: 'geojson',
-        data: appState.app.customSources[index],
-      });
-    } else {
-      (map.getSource(layer[0] + 'Source') as GeoJSONSource).setData(appState.app.customSources[index]);
-    }
-    // For custom layers, first check if the layer already exists
-    if (!map.getLayer(layer[0])) {
-      map.addLayer({
-        id: layer[0],
-        type: 'circle',
-        source: layer[0] + 'Source',
-        layout: {
-          'visibility': layer[1] ? 'visible' : 'none',
-        },
-      });
-      map.on('click', layer[0], ({ features }) => displayInfoSidebar(features as Feature[], actions, ILayerType.custom));
-      map.on('mouseenter', layer[0], () => (map.getCanvas().style.cursor = 'pointer'));
-      map.on('mouseleave', layer[0], () => (map.getCanvas().style.cursor = ''));
-    }
-    map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-  });
-};
+class GeoJSONProperties {
+}
 
-export const alertLayersUpdate = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
-  // The forEach ensures we only update if there is actual data
-  appState.app.alertLayers.forEach((layers: [string, Array<[string, boolean]>], index: number) => {
-    // For custom layers, first check if the source for this layer exists
-    if (!map.getSource(layers[0] + 'Source')) {
-      map.addSource(layers[0] + 'Source', {
-        type: 'geojson',
-        data: prepareGeoJSON(appState.app.alerts[index] as IAlert),
-      });
-    } else {
-      (map.getSource(layers[0] + 'Source') as GeoJSONSource).setData(prepareGeoJSON(appState.app.alerts[index] as IAlert));
-    }
-    // Loop through all DTs of all alerts
-    layers[1].forEach((layer: [string, boolean]) => {
-      if (!map.getLayer(layers[0] + layer[0])) {
-        map.addLayer({
-          id: layers[0] + layer[0],
-          type: 'fill',
-          source: layers[0] + 'Source',
-          layout: {},
-          paint: {
-            'fill-color': {
-              type: 'identity',
-              property: 'color',
-            },
-            'fill-opacity': 0.5,
-          },
-          filter: ['all', ['in', 'deltaTime', Number(layer[0])]],
-        });
-        map.on('click', layers[0] + layer[0], ({ features }) => displayInfoSidebar(features as Feature[], actions, ILayerType.alert));
-        map.on('mouseenter', layers[0] + layer[0], () => (map.getCanvas().style.cursor = 'pointer'));
-        map.on('mouseleave', layers[0] + layer[0], () => (map.getCanvas().style.cursor = ''));
-      }
-      map.setLayoutProperty(layers[0] + layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-    });
-  });
-};
+export const updateResourceLayer = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
+  let features: Feature[] = [];
+  for (const key in appState.app.resourceDict) {
+    let resource = appState.app.resourceDict[key] as IAssistanceResource;
+    features.push({ geometry: resource.geometry, properties: {
+      height: resource.height as number,
+        id: resource._id as string,
+        mission: resource.mission as string,
+      } as GeoJSONProperties } as Feature);
+  }
 
-export const CHTLayersUpdate = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
-  if (!appState.app.CHTSource.features) return;
+  const fc = {
+    type: 'FeatureCollection',
+    features: features,
+  } as FeatureCollection;
 
-  if (!map.getSource('CHTSource')) {
-    map.addSource('CHTSource', {
+  // Set source
+  if (!map.getSource('resourcesSource')) {
+    map.addSource('resourcesSource', {
       type: 'geojson',
-      data: appState.app.CHTSource,
+      data: fc,
     });
   } else {
-    (map.getSource('CHTSource') as GeoJSONSource).setData(appState.app.CHTSource);
+    (map.getSource('resourcesSource') as GeoJSONSource).setData(fc);
   }
-  // For custom layers, first check if the layer already exists
-  appState.app.CHTLayers.forEach((layer: [string, boolean]) => {
-    if (!map.getLayer(layer[0])) {
-      map.addLayer({
-        id: layer[0],
-        type: 'fill',
-        source: 'CHTSource',
-        layout: {},
-        paint: {
-          'fill-color': {
-            type: 'identity',
-            property: 'color',
-          },
-          'fill-opacity': 0.5,
-        },
-        filter: ['all', ['in', 'deltaTime', Number(layer[0])]],
-      });
-      map.on('click', layer[0], ({ features }) => displayInfoSidebar(features as Feature[], actions, ILayerType.cht));
-      map.on('mouseenter', layer[0], () => (map.getCanvas().style.cursor = 'pointer'));
-      map.on('mouseleave', layer[0], () => (map.getCanvas().style.cursor = ''));
-    }
-    map.setLayoutProperty(layer[0], 'visibility', layer[1] ? 'visible' : 'none');
-  });
+
+  // Set Layers
+  const layerName = 'uav';
+
+  if (!map.getLayer(layerName)) {
+    map.addLayer({
+      id: layerName,
+      type: 'symbol',
+      source: 'resourcesSource',
+      layout: {
+        'icon-image': 'helicopter',
+        'icon-size': 0.5,
+        'icon-allow-overlap': true,
+      },
+/*      filter: ['all', ['in', 'subType', 'air', 'car']],*/
+    });
+    map.on('click', layerName, ({ features }) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
+    map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
+    map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
+  }
+ // map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
+  //if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
 };
