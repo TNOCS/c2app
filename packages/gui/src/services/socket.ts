@@ -1,19 +1,21 @@
-import { /*Feature,*/ FeatureCollection } from 'geojson';
+import { Feature, /*Feature,*/ FeatureCollection, GeoJsonProperties } from 'geojson';
 import { SourceType, IAppModel, Icon, ILayer, ISource, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
 import {
   IAlert/*, IArea*/,
   IGroup,/* IInfo,*/
   IMessage,
-  IChemicalHazard,
-  IAssistanceResource, ISensor,
+  IAssistanceResource, ISensor, IMeasurement, IAttitude, ResourceType, IChemicalIncident,
 } from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
 import m from 'mithril';
+import { ResourceSubtype } from '../../../shared/src/models/resource-value';
 
 export class Socket {
   private socket: SocketIOClient.Socket;
+  private resources = {} as { [id: string]: IAssistanceResource };
+  private sensors = {} as { [id: string]: ISensor };
 
   constructor(us: UpdateStream) {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
@@ -56,7 +58,6 @@ export class Socket {
         });
       }
     });
-
     this.socket.on('alert', (_data: IAlert) => {
       /* const alertArea = (data.info as IInfo).area as IArea[];
 
@@ -129,49 +130,128 @@ export class Socket {
        });
        M.toast({ html: 'New Alert' });*/
     });
-
     this.socket.on('resource', (data: IAssistanceResource) => {
+      let features = [] as Feature[];
+
+      this.resources[data._id] = data;
+
+      for (const key in this.resources) {
+        let resource = this.resources[key] as IAssistanceResource;
+        // TODO: A way to put all available fields in properties automatically
+        features.push({
+          geometry: resource.geometry, properties: {
+            type: 'resource',
+            resourceType: resource.type as ResourceType,
+            resourceSubType: resource.subtype as ResourceSubtype,
+            height: resource.height as number,
+            id: resource._id as string,
+            mission: resource.mission as string,
+          } as GeoJsonProperties,
+        } as Feature);
+      }
+      const fc = {
+        type: 'FeatureCollection',
+        features: features,
+      } as FeatureCollection;
+
       us({
         app: {
-          resourceDict: (resources: { [id: string]: IAssistanceResource }) => {
-            resources[data._id] = data;
-            return resources;
-          },
-          /*sources: (sources: ISource[]) => {
+          sources: (sources: ISource[]) => {
             const index = sources.findIndex((source: ISource) => {
               return source.sourceName === 'Resources';
             });
 
             if (index > -1) {
-
-              const fc = {
-                type: 'FeatureCollection',
-                features: features,
-              } as FeatureCollection;
-
               sources[index].source = fc;
             } else {
-              const fc = {
-                type: 'FeatureCollection',
-                features: features,
-              } as FeatureCollection;
+              sources.push({
+                id: 'resourcesID',
+                source: fc as FeatureCollection,
+                sourceName: 'Resources',
+                sourceCategory: SourceType.realtime,
+                shared: false,
+                layers: [{
+                  layerName: 'Resources',
+                  showLayer: true,
+                  icon: Icon.helicopter,
+                  type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                  layout: {
+                    'icon-image': 'helicopter',
+                    'icon-size': 0.5,
+                    'icon-allow-overlap': true,
+                  },
+                }] as ILayer[],
+              } as ISource);
             }
             return sources;
-          },*/
-        },
-      });
-    });
-    this.socket.on('sensor', (data: ISensor) => {
-      us({
-        app: {
-          sensorDict: (sensors: { [id: string]: ISensor }) => {
-            sensors[data._id] = data;
-            return sensors;
           },
         },
       });
     });
+    this.socket.on('sensor', (data: ISensor) => {
+      let features = [] as Feature[];
 
+      this.sensors[data._id] = data;
+
+      for (const key in this.sensors) {
+        let sensor = this.sensors[key] as ISensor;
+        // TODO: A way to put all available fields in properties automatically
+        features.push({
+          geometry: sensor.geometry, properties: {
+            type: 'sensor',
+            measurement: sensor.measurement as IMeasurement,
+            height: sensor.height as number,
+            id: sensor._id as string,
+            mission: sensor.mission as string,
+            context: sensor.context as string,
+            sensorType: sensor.type as string,
+            attitude: sensor.attitude as IAttitude,
+            timestamp: sensor.timestamp as number,
+          } as GeoJsonProperties,
+        } as Feature);
+      }
+      const fc = {
+        type: 'FeatureCollection',
+        features: features,
+      } as FeatureCollection;
+
+      us({
+        app: {
+          sources: (sources: ISource[]) => {
+            const index = sources.findIndex((source: ISource) => {
+              return source.sourceName === 'Sensors';
+            });
+
+            if (index > -1) {
+              sources[index].source = fc;
+            } else {
+              sources.push({
+                id: 'sensorsID',
+                source: fc as FeatureCollection,
+                sourceName: 'Sensors',
+                sourceCategory: SourceType.realtime,
+                shared: false,
+                layers: [{
+                  layerName: 'Sensors',
+                  showLayer: true,
+                  icon: Icon.media,
+                  type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                  layout: {
+                    'icon-image': 'media',
+                    'icon-size': 0.5,
+                    'icon-allow-overlap': true,
+                  },
+                }] as ILayer[],
+              } as ISource);
+            }
+            return sources;
+          },
+        },
+      });
+    });
+    this.socket.on('chemical_incident', (data: IChemicalIncident) => {
+      console.log(data);
+    })
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
       us({
@@ -257,7 +337,7 @@ export class Socket {
     );
   }
 
-  serverCHT(hazard: Partial<IChemicalHazard>): Promise<FeatureCollection> {
+  serverCHT(hazard: Partial<IChemicalIncident>): Promise<FeatureCollection> {
     return new Promise((resolve) => {
       this.socket.emit('client-cht', { hazard: hazard }, (result: string) => {
         resolve(JSON.parse(result));

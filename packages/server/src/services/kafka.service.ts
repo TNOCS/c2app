@@ -22,6 +22,7 @@ const contextTopic = 'context';
 const resourceTopic = 'resource';
 const missionTopic = 'mission';
 const sensorTopic = 'sensor';
+const chemicalIncidentTopic = 'chemical_incident';
 const log = Logger.instance;
 
 @Injectable()
@@ -43,7 +44,7 @@ export class KafkaService {
         clientId: 'c2app-server',
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }],
+        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }, { topic: chemicalIncidentTopic }],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
@@ -101,6 +102,9 @@ export class KafkaService {
           break;
         case sensorTopic:
           this.socket.server.emit('sensor', message.value as ISensor);
+          break;
+        case chemicalIncidentTopic:
+          this.socket.server.emit('chemical_incident', message.value as ISensor);
           break;
         default:
           log.warn('Unknown topic');

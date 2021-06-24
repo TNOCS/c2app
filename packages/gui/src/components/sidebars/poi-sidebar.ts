@@ -1,7 +1,14 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { formatMan, formatCar, alertFormatComponent, resourceFormatComponent } from './poi-formatting';
+import {
+  formatMan,
+  formatCar,
+  alertFormatComponent,
+  resourceFormatComponent,
+  sensorFormatComponent,
+  formatUnknown,
+} from './poi-formatting';
 
 export const poiSidebar: FactoryComponent<{
   state: IAppModel;
@@ -26,16 +33,19 @@ export const poiSidebar: FactoryComponent<{
           // If there is a clicked feature
           m('div', [
             vnode.attrs.state.app.clickedFeature ?
-              vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
-                formatMan(vnode.attrs.state.app.clickedFeature) :
-                vnode.attrs.state.app.clickedFeature?.properties?.type === 'car' ?
-                  formatCar(vnode.attrs.state.app.clickedFeature) :
-                  vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter' ?
+              vnode.attrs.state.app.clickedFeature?.properties?.type === 'resource' ?
+                m(resourceFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions }) :
+                vnode.attrs.state.app.clickedFeature?.properties?.type === 'sensor' ?
+                  m(sensorFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions }) :
+                  vnode.attrs.state.app.clickedFeature?.properties?.type === 'man' ?
                     formatMan(vnode.attrs.state.app.clickedFeature) :
-                    vnode.attrs.state.app.clickedFeature?.properties?.time_of_validity ?
-                      m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions }) :
-                      m(resourceFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-              //formatUnknown(vnode.attrs.state.app.clickedFeature)
+                    vnode.attrs.state.app.clickedFeature?.properties?.type === 'car' ?
+                      formatCar(vnode.attrs.state.app.clickedFeature) :
+                      vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter' ?
+                        formatMan(vnode.attrs.state.app.clickedFeature) :
+                        vnode.attrs.state.app.clickedFeature?.properties?.time_of_validity ?
+                          m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions }) :
+                          formatUnknown(vnode.attrs.state.app.clickedFeature)
 
               // If there is no clicked feature
               : m('p', ''),

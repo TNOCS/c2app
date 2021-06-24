@@ -32,7 +32,6 @@ import roadBlock from '../../assets/Operations/Road block.png';
 import truck from '../../assets/Operations/Truck.png';
 // @ts-ignore
 import chemical from '../../assets/Incidents/Chemical.png';
-import { IAssistanceResource } from '../../../../shared/src';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -239,56 +238,4 @@ export const updateGrid = (appState: IAppModel, actions: IActions, map: mapboxgl
   const gridLabelsSource = getLabelsSource(gridSource);
 
   actions.updateGrid(gridSource, gridLabelsSource);
-};
-
-class GeoJSONProperties {
-}
-
-export const updateResourceLayer = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
-  let features: Feature[] = [];
-  for (const key in appState.app.resourceDict) {
-    let resource = appState.app.resourceDict[key] as IAssistanceResource;
-    features.push({ geometry: resource.geometry, properties: {
-      height: resource.height as number,
-        id: resource._id as string,
-        mission: resource.mission as string,
-      } as GeoJSONProperties } as Feature);
-  }
-
-  const fc = {
-    type: 'FeatureCollection',
-    features: features,
-  } as FeatureCollection;
-
-  // Set source
-  if (!map.getSource('resourcesSource')) {
-    map.addSource('resourcesSource', {
-      type: 'geojson',
-      data: fc,
-    });
-  } else {
-    (map.getSource('resourcesSource') as GeoJSONSource).setData(fc);
-  }
-
-  // Set Layers
-  const layerName = 'uav';
-
-  if (!map.getLayer(layerName)) {
-    map.addLayer({
-      id: layerName,
-      type: 'symbol',
-      source: 'resourcesSource',
-      layout: {
-        'icon-image': 'helicopter',
-        'icon-size': 0.5,
-        'icon-allow-overlap': true,
-      },
-/*      filter: ['all', ['in', 'subType', 'air', 'car']],*/
-    });
-    map.on('click', layerName, ({ features }) => displayInfoSidebar(features as MapboxGeoJSONFeature[], actions));
-    map.on('mouseenter', layerName, () => (map.getCanvas().style.cursor = 'pointer'));
-    map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
-  }
- // map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
-  //if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
 };

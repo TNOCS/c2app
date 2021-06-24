@@ -1,17 +1,17 @@
 // @ts-ignore
 import { Form, padLeft } from 'mithril-ui-form';
 import {
-  CbrnOutput,
-  IChemicalHazard,
-  IControlParameters,
-  IScenarioDefinition,
+  OutputKind,
+  IChemicalIncident,
+  IChemicalIncidentControlParameters,
+  IChemicalIncidentScenario,
   PasquillClass,
 } from '../../../shared/src';
 // @ts-ignore
 import chem_options from './chem_options.json'
 
 /** Additional properties for internal usage */
-export interface IChemicalHazardExt extends IChemicalHazard {
+export interface IChemicalHazardExt extends IChemicalIncident {
   extended?: {
     type_of_release?: string;
   };
@@ -43,9 +43,9 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
       z: 1.5,
       cell_size: 10,
       time_of_interest: 120,
-      output: CbrnOutput.contours,
+      output: OutputKind.contours,
       comment: '',
-    } as IControlParameters;
+    } as IChemicalIncidentControlParameters;
   }
   if (!source.scenario) {
     source.scenario = {
@@ -59,7 +59,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
       pasquill_class: PasquillClass.D,
       roughness_length: 0.1,
       source_height: 2,
-    } as IScenarioDefinition;
+    } as IChemicalIncidentScenario;
   }
   // if (source.scenario.quantity > 0 && source.scenario.release_rate > 0) {
   //   source.scenario.release_rate = 0;

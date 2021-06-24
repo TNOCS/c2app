@@ -1,4 +1,4 @@
-import { IChemicalHazard } from './chemical-hazard-value';
+import { IChemicalIncident } from './chemical_incident-value';
 import { FeatureCollection } from 'geojson'
 
 export interface IGridOptions {
@@ -70,5 +70,5 @@ export interface IGroupDelete {
 }
 
 export interface ICHT {
-  hazard: Partial<IChemicalHazard>
+  hazard: Partial<IChemicalIncident>
 }

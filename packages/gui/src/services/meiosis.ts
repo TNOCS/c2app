@@ -6,13 +6,12 @@ import { Socket } from './socket';
 import {
   IAlert,
   IAssistanceResource,
-  IChemicalHazard,
-  IControlParameters,
+  IChemicalIncident, IChemicalIncidentControlParameters, IChemicalIncidentScenario,
   IGridOptions,
   IGroup,
   IInfo,
   IMessage,
-  IScenarioDefinition, ISensor,
+  ISensor,
 } from '../../../shared/src';
 // @ts-ignore
 import ch from '../ch.json';
@@ -20,7 +19,9 @@ import mapboxgl, { LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
 
 export enum Icon {
   'fireman',
-  'car'
+  'car',
+  'helicopter',
+  'media'
 }
 
 export interface ILayer {
@@ -93,8 +94,8 @@ export interface IAppModel {
 
     // CHT
     source: {
-      scenario: IScenarioDefinition;
-      control_parameters: IControlParameters;
+      scenario: IChemicalIncidentScenario;
+      control_parameters: IChemicalIncidentControlParameters;
     };
   };
 }
@@ -141,7 +142,7 @@ export interface IActions {
   setLayerEdit: (sourceIndex: number) => void;
 
   // CHT
-  submitCHT: (hazard: Partial<IChemicalHazard>, location: number[]) => void;
+  submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => void;
   setCHOpacities: (val: number, name: string) => void;
 }
 
@@ -516,8 +517,8 @@ export const appStateMgmt = {
 
       // CHT
       source: {
-        scenario: {} as IScenarioDefinition,
-        control_parameters: {} as IControlParameters,
+        scenario: {} as IChemicalIncidentScenario,
+        control_parameters: {} as IChemicalIncidentControlParameters,
       },
     },
   },
@@ -564,10 +565,10 @@ export const appStateMgmt = {
 
                 const dt_len = deltaTime_values.length;
                 // assign opacities > 0 to the two deltaTimes surrounding v
-                var i1: number = 0;
-                var i2: number = 0;
-                var opacity1: number = 0.1;
-                var opacity2: number = 0.1;
+                let i1: number = 0;
+                let i2: number = 0;
+                let opacity1: number = 0.1;
+                let opacity2: number = 0.1;
                 if (val <= deltaTime_values[0]) {
                   i1 = 0;
                   i2 = -1;
@@ -576,7 +577,7 @@ export const appStateMgmt = {
                   i1 = dt_len - 1;
                   opacity1 = 1;
                 } else {
-                  var i: number;
+                  let i: number;
                   for (i = 0; i < dt_len - 1; i++) {
                     if ((val >= deltaTime_values[i]) && (val <= deltaTime_values[i + 1])) {
                       i1 = i;
@@ -925,9 +926,9 @@ export const appStateMgmt = {
       },
 
       //CHT
-      submitCHT: async (hazard: Partial<IChemicalHazard>, location: number[]) => {
-        (hazard.scenario as IScenarioDefinition).source_location = location;
-        (hazard.scenario as IScenarioDefinition).source_location[2] = 0;
+      submitCHT: async (hazard: Partial<IChemicalIncident>, location: number[]) => {
+        (hazard.scenario as IChemicalIncidentScenario).source_location = location;
+        (hazard.scenario as IChemicalIncidentScenario).source_location[2] = 0;
 
         const result = await states()['app'].socket.serverCHT(hazard) as FeatureCollection;
         const features = result.features as Feature[];

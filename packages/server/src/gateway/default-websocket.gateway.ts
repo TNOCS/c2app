@@ -17,17 +17,18 @@ import {
   IGroupDelete, ICHT, IReturnGroup, INameUpdate,
 } from '../../../shared/src';
 import { HttpService } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway()
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private httpService: HttpService) {
+  constructor(private httpService: HttpService, private configService: ConfigService) {
   }
 
   @WebSocketServer() server: Server;
   private clients: number = 0;
   private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   private callsignToSocketId: Map<string, string> = new Map<string, string>();
-  private URL: string = process.env.DISPERSION_SERVICE ? `${ process.env.DISPERSION_SERVICE + '/process'}` : 'http://localhost:8080/process';
+  private URL: string = this.configService.get<string>('DISPERSION_SERVICE') ? `${ this.configService.get<string>('DISPERSION_SERVICE') + '/process'}` : 'http://localhost:8080/process';
 
   /** Handlers */
   async handleConnection(client: Socket) {
