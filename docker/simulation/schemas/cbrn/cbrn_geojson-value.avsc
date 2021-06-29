@@ -1,13 +1,22 @@
 {
+  "name": "CbrnFeatureCollection",
+  "doc": "A GeoJSON FeatureCollection object where the properties represent CBRN plumes.",
   "type": "record",
-  "name": "FeatureCollection",
-  "namespace": "eu.driver.model.geojson",
-  "doc": "A GeoJSON FeatureCollection object. As the properties are generic, it should be replaced by a record with named properties.",
+  "namespace": "nl.tno.assistance",
   "fields": [
+    {
+      "name": "_id",
+      "type": "string"
+    },
+    {
+      "name": "context",
+      "type": "string"
+    },
     {
       "name": "type",
       "type": {
         "type": "enum",
+        "namespace": "nl.tno.assistance.geojson",
         "name": "FeatureCollectionType",
         "symbols": [
           "FeatureCollection"
@@ -35,6 +44,7 @@
           "items": {
             "type": "record",
             "name": "Feature",
+            "namespace": "nl.tno.assistance.geojson",
             "doc": "A GeoJSON Feature object",
             "fields": [
               {
@@ -42,6 +52,7 @@
                 "type": {
                   "type": "enum",
                   "name": "FeatureType",
+                  "namespace": "nl.tno.assistance.geojson",
                   "symbols": [
                     "Feature"
                   ]
@@ -65,6 +76,7 @@
                   {
                     "type": "record",
                     "name": "Point",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
                     "doc": "Describes a point geometry",
                     "fields": [
                       {
@@ -72,6 +84,7 @@
                         "type": {
                           "type": "enum",
                           "name": "PointType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
                           "symbols": [
                             "Point"
                           ]
@@ -89,7 +102,38 @@
                   },
                   {
                     "type": "record",
+                    "name": "MultiPoint",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a collection of points geometry",
+                    "fields": [
+                      {
+                        "name": "type",
+                        "type": {
+                          "type": "enum",
+                          "name": "MultiPointType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
+                          "symbols": [
+                            "MultiPoint"
+                          ]
+                        },
+                        "default": "MultiPoint"
+                      },
+                      {
+                        "name": "coordinates",
+                        "type": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": "double"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "record",
                     "name": "LineString",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
                     "doc": "Describes a LineString geometry",
                     "fields": [
                       {
@@ -97,6 +141,7 @@
                         "type": {
                           "type": "enum",
                           "name": "LineStringType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
                           "symbols": [
                             "LineString"
                           ]
@@ -118,6 +163,7 @@
                   {
                     "type": "record",
                     "name": "MultiLineString",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
                     "doc": "Describes a MultiLineString geometry",
                     "fields": [
                       {
@@ -125,6 +171,7 @@
                         "type": {
                           "type": "enum",
                           "name": "MultiLineStringType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
                           "symbols": [
                             "MultiLineString"
                           ]
@@ -149,6 +196,7 @@
                   {
                     "type": "record",
                     "name": "Polygon",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
                     "doc": "Describes a Polygon geometry",
                     "fields": [
                       {
@@ -156,6 +204,7 @@
                         "type": {
                           "type": "enum",
                           "name": "PolygonType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
                           "symbols": [
                             "Polygon"
                           ]
@@ -180,6 +229,7 @@
                   {
                     "type": "record",
                     "name": "MultiPolygon",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
                     "doc": "Describes a MultiPolygon geometry",
                     "fields": [
                       {
@@ -187,6 +237,7 @@
                         "type": {
                           "type": "enum",
                           "name": "MultiPolygonType",
+                          "namespace": "nl.tno.assistance.geojson.geometry",
                           "symbols": [
                             "MultiPolygon"
                           ]
@@ -216,27 +267,61 @@
               {
                 "name": "properties",
                 "type": {
+                  "name": "properties",
+                  "namespace": "nl.tno.assistance.geojson.geometry",
                   "type": "record",
-                  "name": "CbrnProperties",
                   "fields": [
                     {
-                      "name": "index",
-                      "type": "int"
+                      "name": "comments",
+                      "type": [
+                        "null", 
+                        "string"
+                      ],
+                      "default": null
                     },
                     {
-                      "name": "time_of_interest",
-                      "type": "int",
-                      "doc": "Time in seconds since the start."
+                      "name": "time_of_validity",
+                      "type": [
+                        "null", 
+                        "string"
+                      ],
+                      "default": null,
+                      "doc": "Date in ISO 8601 format in which the resource is inserted/updated, e.g. 2020-01-01T10:00:00.000Z"
                     },
                     {
-                      "name": "level",
-                      "type": "float",
-                      "doc": "Toxicity level?"
+                      "name": "deltaTime",
+                      "type": [
+                        "null", 
+                        "int"
+                      ],
+                      "default": null
+                    },
+                    {
+                      "name": "color",
+                      "type": [
+                        "null", 
+                        "string"
+                      ],
+                      "default": null
+                    },
+                    {
+                      "name": "fillOpacity",
+                      "type": [
+                        "null", 
+                        "float"
+                      ],
+                      "default": null
+                    },
+                    {
+                      "name": "timestamp",
+                      "type": [
+                        "null", 
+                        "float"
+                      ],
+                      "default": null
                     }
                   ]
-                },
-                "doc": "Specific CBRN properties.",
-                "namespace": "eu.driver.model.geojson"
+                }
               }
             ]
           }

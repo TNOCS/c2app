@@ -5,3 +5,4 @@ export { ISensor, IMeasurement } from './sensor-value';
 export { IContext } from './context-value';
 export { IMission, IAction } from './mission-value';
 export * from './chemical_incident-value';
+export * from './cbrn_geojson-value';

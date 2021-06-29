@@ -228,7 +228,7 @@ export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, m
         map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
       }
       map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
-      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.cht) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
+      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.plume) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
     });
   });
 };

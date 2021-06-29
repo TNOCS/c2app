@@ -21,7 +21,8 @@ export enum Icon {
   'fireman',
   'car',
   'helicopter',
-  'media'
+  'media',
+  'chemical_incident'
 }
 
 export interface ILayer {
@@ -39,7 +40,8 @@ export const enum SourceType {
   'grid',
   'custom',
   'alert',
-  'cht'
+  'chemical_incident',
+  'plume'
 }
 
 export interface ISource {
@@ -143,6 +145,7 @@ export interface IActions {
 
   // CHT
   submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => void;
+  submitCHT2: (chemicalIncident: IChemicalIncident) => void;
   setCHOpacities: (val: number, name: string) => void;
 }
 
@@ -245,266 +248,7 @@ export const appStateMgmt = {
         }] as Array<ILayer>,
         shared: false,
       } as ISource,
-        {
-          id: 'testid2',
-          source: ch as FeatureCollection,
-          sourceName: 'Eindhoven Chlorine',
-          sourceCategory: SourceType.alert,
-          layers: [{
-            layerName: '300',
-            showLayer: true,
-            type: { type: 'line' } as mapboxgl.AnyLayer,
-            paint: {
-              'line-color': {
-                type: 'identity',
-                property: 'color',
-              },
-              'line-opacity': 0.5,
-              'line-width': 2,
-            },
-            filter: ['all', ['in', 'deltaTime', 300]],
-          },
-            {
-              layerName: '600',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 600]],
-            },
-            {
-              layerName: '900',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 900]],
-            },
-            {
-              layerName: '1200',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 1200]],
-            },
-            {
-              layerName: '1500',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 1500]],
-            },
-            {
-              layerName: '2400',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 2400]],
-            }, {
-              layerName: '3600',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 3600]],
-            }, {
-              layerName: '5400',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 5400]],
-            }, {
-              layerName: '7200',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 7200]],
-            }] as Array<ILayer>,
-          shared: false,
-        } as ISource,
-        {
-          id: 'testid6',
-          source: ch as FeatureCollection,
-          sourceName: 'Eindhoven Chlorine 2',
-          sourceCategory: SourceType.cht,
-          shared: false,
-          layers: [{
-            layerName: '300',
-            showLayer: true,
-            type: { type: 'line' } as mapboxgl.AnyLayer,
-            paint: {
-              'line-color': {
-                type: 'identity',
-                property: 'color',
-              },
-              'line-opacity': 0.5,
-              'line-width': 2,
-            },
-            filter: ['all', ['in', 'deltaTime', 300]],
-          },
-            {
-              layerName: '600',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 600]],
-            },
-            {
-              layerName: '900',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 900]],
-            },
-            {
-              layerName: '1200',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 1200]],
-            },
-            {
-              layerName: '1500',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 1500]],
-            },
-            {
-              layerName: '2400',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 2400]],
-            }, {
-              layerName: '3600',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 3600]],
-            }, {
-              layerName: '5400',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 5400]],
-            }, {
-              layerName: '7200',
-              showLayer: true,
-              type: { type: 'line' } as mapboxgl.AnyLayer,
-              paint: {
-                'line-color': {
-                  type: 'identity',
-                  property: 'color',
-                },
-                'line-opacity': 0.5,
-                'line-width': 2,
-              },
-              filter: ['all', ['in', 'deltaTime', 7200]],
-            }] as Array<ILayer>,
-        } as ISource] as Array<ISource>,
+      ] as Array<ISource>,
       mapStyle: 'mapbox/streets-v11',
       gridOptions: {
         gridCellSize: 0.5,
@@ -926,63 +670,15 @@ export const appStateMgmt = {
       },
 
       //CHT
-      submitCHT: async (hazard: Partial<IChemicalIncident>, location: number[]) => {
+      submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => {
         (hazard.scenario as IChemicalIncidentScenario).source_location = location;
         (hazard.scenario as IChemicalIncidentScenario).source_location[2] = 0;
 
-        const result = await states()['app'].socket.serverCHT(hazard) as FeatureCollection;
-        const features = result.features as Feature[];
+        states()['app'].socket.serverCHT(hazard);
+      },
 
-        const dts = features.map((feature: Feature) => {
-          return feature.properties?.deltaTime;
-        }) as number[];
-
-        const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
-
-        result.features.forEach((feature: Feature) => {
-          // @ts-ignore
-          feature.properties.color = '#' + feature.properties?.color as string;
-          return feature;
-        });
-
-        us({
-          app: {
-            sources: (sources: Array<ISource>) => {
-              const index = sources.findIndex((source: ISource) => {
-                return source.sourceName === 'CHTSource';
-              });
-              if (index > -1) {
-                sources[index].source = result;
-              } else {
-                sources.push({
-                  id: 'testid6',
-                  source: result as FeatureCollection,
-                  sourceName: 'Eindhoven Chlorine 2',
-                  sourceCategory: SourceType.cht,
-                  shared: false,
-                  layers: uniqueDTs.map((dt: number) => {
-                    return {
-                      layerName: dt.toString(),
-                      showLayer: true,
-                      type: { type: 'line' } as mapboxgl.AnyLayer,
-                      paint: {
-                        'line-color': {
-                          type: 'identity',
-                          property: 'color',
-                        },
-                        'line-opacity': 0.5,
-                        'line-width': 2,
-                      },
-                      filter: ['all', ['in', 'deltaTime', dt]],
-                    } as ILayer;
-                  }) as Array<ILayer>,
-                } as ISource);
-              }
-              return sources;
-            },
-          },
-        });
-        m.redraw();
+      submitCHT2: (chemicalIncident: IChemicalIncident) => {
+        states()['app'].socket.serverCHT(chemicalIncident);
       },
     };
   },

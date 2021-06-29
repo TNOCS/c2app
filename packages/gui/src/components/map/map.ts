@@ -24,7 +24,7 @@ export const Map: FactoryComponent<{
       map = new mapboxgl.Map({
         container: 'mapboxMap',
         style: `mapbox://styles/${appState.app.mapStyle}`,
-        center: [5.48, 51.44] as [number, number],
+        center: [4.350, 51.911] as [number, number],
         zoom: 12,
       });
       MapUtils.loadImages(map);

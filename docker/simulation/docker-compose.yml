@@ -86,6 +86,7 @@ services:
     environment:
       SCHEMAREGISTRY_URL: 'http://schema_registry:3502'
       PROXY: 'true'
+      MAX_BYTES: 10485760
 
   bootstrapper:
     image: drivereu/silent-producer:latest
@@ -95,29 +96,16 @@ services:
     environment:
       KAFKA_HOST: broker:9092
       SCHEMA_REGISTRY: http://schema_registry:3502
-      PRODUCE_TOPICS: chemical_hazard,cbrn_geojson,simulation_entity_item,simulation_time_mgmt,system_topic_access_invite,simulation_request_startinject,simulation_entity_post,standard_named_geojson,system_heartbeat,simulation_entity_featurecollection,system_logging,standard_cap
-      # simulation_request_transport,lcms_plots,simulation_affected_area,simulation_sumo_configuration,standard_cap,chain_power,chain_care,chain_flood,chain,flood_prediction_geojson,flood_actual,system_timing
+      PRODUCE_TOPICS: chemical_incident,context,mission,resource,sensor,chemical_hazard,cbrn_geojson,simulation_entity_item,simulation_time_mgmt,system_topic_access_invite,simulation_request_startinject,simulation_entity_post,standard_named_geojson,system_heartbeat,simulation_entity_featurecollection,system_logging,standard_cap
+      # simulation_request_transport,lcms_plots,simulation_affected_area,simulation_sumo_configuration,chain_power,chain_care,chain_flood,chain,flood_prediction_geojson,flood_actual,system_timing
     volumes:
       - ./schemas:/app/src/schemas
-    restart: on-failure 
-    
-  time_service:
-    image: drivereu/test-bed-time-service:latest
-    depends_on:
-      - broker
-      - schema_registry
-    ports:
-      - "8100:8100"
-    environment:
-      KAFKA_BROKER_URL: broker:9092
-      SCHEMA_REGISTRY_URL: http://schema_registry:3502
-      AUTO_REGISTER_SCHEMAS: "true"
     restart: on-failure
-    
+
   driving:
     image: osrm/osrm-backend
     ports:
-      - "5000:5000"
+      - '5000:5000'
     command:
       - osrm-routed
       - --algorithm
@@ -129,7 +117,7 @@ services:
   cycling:
     image: osrm/osrm-backend
     ports:
-      - "5001:5000"
+      - '5001:5000'
     command:
       - osrm-routed
       - --algorithm
@@ -141,7 +129,7 @@ services:
   walking:
     image: osrm/osrm-backend
     ports:
-      - "5002:5000"
+      - '5002:5000'
     command:
       - osrm-routed
       - --algorithm
@@ -150,32 +138,17 @@ services:
     volumes:
       - ${DATA_FOLDER}/walking:/data
 
-  meteoservice:
-    image: assistanceeu/meteoservice:latest
-    ports:
-      - 8081:8081
-
-  dispersionservice:
-    image: assistanceeu/dispersionservice:latest
-    depends_on:
-      - broker
-      - schema_registry
-    ports:
-      - 8080:8080
-    environment:
-      METEO_SERVICE: http://meteoservice:8081
-
-  #c2app:
-  #  image: timovdk/c2app:latest
-  #  depends_on:
-  #    - broker
-  #    - schema_registry
-  #    - dispersionservice
-  #  ports:
-  #    - 3000:3000
-  #  environment:
-  #    KAFKA_HOST: broker:9092
-  #    SCHEMA_REGISTRY: http://schema_registry:3502
-  #    PORT: 3000
-  #    SERVER: http://localhost:3000
-  #    DISPERSION_SERVICE: http://dispersionservice:8080
+#c2app:
+#  image: timovdk/c2app:latest
+#  depends_on:
+#    - broker
+#    - schema_registry
+#    - dispersionservice
+#  ports:
+#    - 3000:3000
+#  environment:
+#    KAFKA_HOST: broker:9092
+#    SCHEMA_REGISTRY: http://schema_registry:3502
+#    PORT: 3000
+#    SERVER: http://localhost:3000
+#    DISPERSION_SERVICE: http://dispersionservice:8080
