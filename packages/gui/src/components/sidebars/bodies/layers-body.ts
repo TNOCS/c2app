@@ -180,7 +180,7 @@ export const layersBody: FactoryComponent<{
             m('div.collapsible-body', m('div.row',
               m('div.col.s12',
                 vnode.attrs.state.app.sources.map((source: ISource, sourceIndex: number) => {
-                  if (source.sourceCategory !== SourceType.cht) return;
+                  if (source.sourceCategory !== SourceType.chemical_incident && source.sourceCategory !== SourceType.plume) return;
                   return m('div.valign-wrapper', [
                     m('div.switch.col.s3',
                       m('label', [

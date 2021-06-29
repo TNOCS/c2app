@@ -8,7 +8,7 @@ import {
 } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert, IAssistanceResource, ISensor } from '../../../shared/src';
+import { IAlert, IAssistanceResource, ICbrnFeatureCollection, ISensor } from '../../../shared/src';
 
 interface ISendResponse {
   [topic: string]: {
@@ -22,6 +22,8 @@ const contextTopic = 'context';
 const resourceTopic = 'resource';
 const missionTopic = 'mission';
 const sensorTopic = 'sensor';
+const chemicalIncidentTopic = 'chemical_incident';
+const plumeTopic = 'cbrn_geojson';
 const log = Logger.instance;
 
 @Injectable()
@@ -43,7 +45,7 @@ export class KafkaService {
         clientId: 'c2app-server',
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }],
+        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }, { topic: chemicalIncidentTopic }, { topic: plumeTopic }],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
@@ -85,7 +87,7 @@ export class KafkaService {
 
       switch (message.topic) {
         case SimEntityFeatureCollectionTopic:
-          this.socket.server.emit('positions', KafkaService.prepareGeoJSONLayer(message.value as FeatureCollection));
+          this.socket.server.emit('positions', KafkaService.preparePositions(message.value as FeatureCollection));
           break;
         case capMessage:
           this.socket.server.emit('alert', message.value as IAlert);
@@ -102,6 +104,12 @@ export class KafkaService {
         case sensorTopic:
           this.socket.server.emit('sensor', message.value as ISensor);
           break;
+        case chemicalIncidentTopic:
+          this.socket.server.emit('chemical_incident', message.value as ISensor);
+          break;
+        case plumeTopic:
+          this.socket.server.emit('plume', KafkaService.preparePlume(message.value as ICbrnFeatureCollection));
+          break;
         default:
           log.warn('Unknown topic');
           break;
@@ -110,10 +118,33 @@ export class KafkaService {
     this.busy = false;
   }
 
-  private static prepareGeoJSONLayer(collection: FeatureCollection) {
+  private static preparePositions(collection: FeatureCollection) {
     for (const feature of collection.features) {
       feature.geometry = feature.geometry['eu.driver.model.sim.support.geojson.geometry.Point'];
     }
     return collection as FeatureCollection;
+  }
+  private static preparePlume(collection: ICbrnFeatureCollection) {
+    for (const feature of collection.features) {
+      if(feature.geometry[`nl.tno.assistance.geojson.geometry.Point`]) {
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Point`];
+      }
+      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`]) {
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`];
+      }
+      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`]) {
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`];
+      }
+      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`]) {
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`];
+      }
+      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]){
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`];
+      }
+      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
+        feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`];
+      }
+    }
+    return collection as ICbrnFeatureCollection;
   }
 }

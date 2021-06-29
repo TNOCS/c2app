@@ -1,6 +1,10 @@
-import m from 'mithril';
+import m, { FactoryComponent } from 'mithril';
 import { MapboxGeoJSONFeature } from 'mapbox-gl';
-import { IActions, ISource } from '../../services/meiosis';
+import { IActions, ISource, IAppModel } from '../../services/meiosis';
+import M from 'materialize-css';
+import { IChemicalIncident, IChemicalIncidentControlParameters, IChemicalIncidentScenario } from '../../../../shared/src';
+import { LayoutForm } from 'mithril-ui-form';
+import { formGenerator } from '../../template/form';
 
 export const formatMan = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
@@ -29,11 +33,6 @@ export const formatUnknown = (ft: MapboxGeoJSONFeature) => {
     m('p', 'Height: ' + props?.height),
   ]);
 };
-
-import { FactoryComponent } from 'mithril';
-import { IAppModel } from '../../services/meiosis';
-import M from 'materialize-css';
-import { IAssistanceResource, ISensor } from '../../../../shared/src';
 
 export const alertFormatComponent: FactoryComponent<{
   state: IAppModel;
@@ -76,32 +75,76 @@ export const resourceFormatComponent: FactoryComponent<{
   return {
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
-      let resource = {} as IAssistanceResource;
-      let sensors = [] as ISensor[];
-      for (const key in vnode.attrs.state.app.resourceDict) {
-        const rsc = vnode.attrs.state.app.resourceDict[key];
-        if (rsc._id === ft.properties?.id) resource = rsc as IAssistanceResource;
-      }
+      return m('div', [
+        m('p', 'ID: ' + ft.properties?.id),
+        m('p', 'Type: ' + ft.properties?.resourceType),
+        m('p', 'Sub Type: ' + ft.properties?.resourceSubType),
+        m('p', 'Height: ' + ft.properties?.height),
+      ]);
+    },
+  };
+};
 
-      for (const key in vnode.attrs.state.app.sensorDict) {
-        const snsr = vnode.attrs.state.app.sensorDict[key];
-        if (snsr.mission === ft.properties?.mission) sensors.push(snsr as ISensor);
-      }
+export const sensorFormatComponent: FactoryComponent<{
+  state: IAppModel;
+  actions: IActions;
+}> = () => {
+  return {
+    view: (vnode) => {
+      const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
 
       return m('div', [
-        m('p', 'Layer Name: ' + ft.layer.id),
-        m('p', 'ID: ' + resource._id),
-        m('p', 'Mission: ' + resource.mission),
-        m('p', 'Height: ' + resource.height),
-        m('div', sensors.map((sens: ISensor) => {
-            return [
-              m('p', sens._id),
-              m('p', sens.type),
-              m('p', sens.measurement.type + ': ' + sens.measurement.value + ' ' + sens.measurement.unit),
-            ]
-          }),
-        ),
+        m('p', 'ID: ' + ft.properties?.id),
+        m('p', 'Type: ' + ft.properties?.sensorType),
+        m('p', 'Height: ' + ft.properties?.height),
+        m('p', ft.properties?.measurement.type + ': ' + ft.properties?.measurement.value + ' ' + ft.properties?.measurement.unit),
       ]);
+    },
+  };
+};
+
+export const incidentLocationFormatComponent: FactoryComponent<{
+  state: IAppModel;
+  actions: IActions;
+}> = () => {
+  let source = { scenario: {} as IChemicalIncidentScenario, control_parameters: {} as IChemicalIncidentControlParameters};
+  return {
+    view: (vnode) => {
+      const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
+      const scenario = JSON.parse(ft.properties?.scenario) as IChemicalIncidentScenario;
+      const control_parameters = JSON.parse(ft.properties?.control_parameters) as IChemicalIncidentControlParameters;
+      const form = formGenerator({});
+
+      return [
+          m('p', 'ID: ' + ft.properties?.id),
+          m('p', 'Chemical: ' + scenario.chemical),
+          m('p', 'Start of release: ' + scenario.start_of_release),
+          m('p', 'Toxicity: ' + scenario.toxicity),
+          m('p', 'Height: ' + control_parameters.z + 'm'),
+          m('button.btn', {
+            onclick: () => {
+              source.scenario.source_location = scenario.source_location;
+              const chemicalIncident = {
+                context: ft.properties?.context,
+                _id: ft.properties?.id,
+                scenario: source.scenario,
+                control_parameters: source.control_parameters,
+                timestamp: new Date().valueOf()
+              } as IChemicalIncident;
+              
+              vnode.attrs.actions.submitCHT2(chemicalIncident);
+            },
+          }, 'Recalculate'),
+          m(LayoutForm, {
+            form,
+            obj: source,
+            section: 'source',
+          }),
+          m('p', 'test text')
+      ];
+    },
+    oncreate: () => {
+      M.AutoInit();
     },
   };
 };

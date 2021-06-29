@@ -1,6 +1,6 @@
 import { envServices, updateAgent } from './env-services';
 import { TestBedAdapter, LogLevel, IAlert, IInfo } from 'node-test-bed-adapter';
-import { IAgent } from './models/agent';
+import { IAgent } from './models';
 import { uuid4, simTime, log, sleep, generateAgents, agentToFeature } from './utils';
 
 // const SimEntityItemTopic = 'simulation_entity_item';
