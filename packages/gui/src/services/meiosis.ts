@@ -6,7 +6,9 @@ import { Socket } from './socket';
 import {
   IAlert,
   IAssistanceResource,
-  IChemicalIncident, IChemicalIncidentControlParameters, IChemicalIncidentScenario,
+  IChemicalIncident, 
+  IChemicalIncidentControlParameters, 
+  IChemicalIncidentScenario,
   IGridOptions,
   IGroup,
   IInfo,

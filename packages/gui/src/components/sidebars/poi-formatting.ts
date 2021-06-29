@@ -75,7 +75,6 @@ export const resourceFormatComponent: FactoryComponent<{
   return {
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
-
       return m('div', [
         m('p', 'ID: ' + ft.properties?.id),
         m('p', 'Type: ' + ft.properties?.resourceType),
@@ -149,4 +148,3 @@ export const incidentLocationFormatComponent: FactoryComponent<{
     },
   };
 };
-

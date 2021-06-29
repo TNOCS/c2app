@@ -52,6 +52,7 @@ export const poiSidebar: FactoryComponent<{
               // If there is no clicked feature
               : m('p', ''),
           ]),
+          m('p', vnode.attrs.state.app.sensorDict),
           m('div', { style: 'margin: 128px' }),
         ]),
       );

@@ -227,6 +227,7 @@ export class Socket {
         features: features,
       } as FeatureCollection;
 
+    this.socket.on('resource', (data: IAssistanceResource) => {
       us({
         app: {
           sources: (sources: ISource[]) => {
@@ -390,6 +391,7 @@ export class Socket {
         },
       });
     });
+
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
       us({
