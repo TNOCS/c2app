@@ -1,7 +1,7 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
 // @ts-ignore
-import logo from '../assets/explosion.svg';
+import logo from '../assets/safr.svg';
 import { profileModal } from './sidebars/modals';
 import M from 'materialize-css';
 import { poiSidebar } from './sidebars/poi-sidebar';
@@ -25,8 +25,8 @@ export const Layout: FactoryComponent<{
                   m.route.set('/map');
                 },
               }, [
-                m(`img[width=100][height=45][src=${logo}].hide-on-med-and-down`, {
-                  style: 'margin: 7px 0 0 5px;',
+                m(`img[width=45][height=45][src=${logo}].hide-on-med-and-down`, {
+                  style: 'margin: 7px 0 0 25px;',
                 }),
                 m('div',
                   {
@@ -34,7 +34,7 @@ export const Layout: FactoryComponent<{
                   },
                   m('h4.center.hide-on-med-and-down',
                     {
-                      style: 'text-align: left; margin: -7px 0 0 60px; background: #01689B',
+                      style: 'text-align: left; margin: -7px 0 0 60px; background: #314443',
                     },
                     'SAFR',
                   ),

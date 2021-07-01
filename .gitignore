@@ -5,6 +5,7 @@ tsconfig.tsbuildinfo
 .env
 .dev
 .vscode
+.idea
 # schemas
 docker/traccar/logs/*.log*
 docker/traccar/data/*.db

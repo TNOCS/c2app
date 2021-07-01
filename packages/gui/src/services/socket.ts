@@ -1,5 +1,5 @@
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
-import { SourceType, IAppModel, Icon, ILayer, ISource, UpdateStream } from './meiosis';
+import { SourceType, IAppModel, ILayer, ISource, UpdateStream } from './meiosis';
 import io from 'socket.io-client';
 import {
   IAlert,
@@ -50,7 +50,6 @@ export class Socket {
                     {
                       layerName: 'Firemen',
                       showLayer: true,
-                      icon: Icon.fireman,
                       type: { type: 'symbol' } as mapboxgl.AnyLayer,
                       layout: {
                         'icon-image': 'fireman',
@@ -142,11 +141,15 @@ export class Socket {
     });
     this.socket.on('resource', (data: IAssistanceResource) => {
       let features = [] as Feature[];
+      let resourceTypes: Array<string> = [];
 
       this.resources[data._id] = data;
 
       for (const key in this.resources) {
         let resource = this.resources[key] as IAssistanceResource;
+
+        resourceTypes.push(resource.subtype);
+
         features.push({
           geometry: resource.geometry,
           properties: {
@@ -164,6 +167,8 @@ export class Socket {
         features: features,
       } as FeatureCollection;
 
+      const uniqueTypes = resourceTypes.filter((v, i, a) => a.indexOf(v) === i) as Array<string>;
+
       us({
         app: {
           sources: (sources: ISource[]) => {
@@ -180,19 +185,18 @@ export class Socket {
                 sourceName: 'Resources',
                 sourceCategory: SourceType.realtime,
                 shared: false,
-                layers: [
-                  {
-                    layerName: 'Resources',
+                layers: uniqueTypes.map((type: string) => {
+                  return {
+                    layerName: type + 'Resources',
                     showLayer: true,
-                    icon: Icon.helicopter,
                     type: { type: 'symbol' } as mapboxgl.AnyLayer,
                     layout: {
-                      'icon-image': 'helicopter',
-                      'icon-size': 0.5,
+                      'icon-image': type,
+                      'icon-size': type === 'ground' ? 0.1 : type === 'air' ? 0.25 : 0.5,
                       'icon-allow-overlap': true,
                     },
-                  },
-                ] as ILayer[],
+                  } as ILayer
+                }) as ILayer[],
               } as ISource);
             }
             return sources;
@@ -247,7 +251,6 @@ export class Socket {
                   {
                     layerName: 'Sensors',
                     showLayer: true,
-                    icon: Icon.media,
                     type: { type: 'symbol' } as mapboxgl.AnyLayer,
                     layout: {
                       'icon-image': 'media',
@@ -304,7 +307,6 @@ export class Socket {
                   {
                     layerName: 'Incident',
                     showLayer: true,
-                    icon: Icon.chemical_incident,
                     type: { type: 'symbol' } as mapboxgl.AnyLayer,
                     layout: {
                       'icon-image': 'chemical',
@@ -335,6 +337,7 @@ export class Socket {
         feature.properties.color = ('#' + feature.properties?.color) as string;
         return feature;
       });
+      uniqueDTs.sort((a, b) => a - b);
 
       us({
         app: {
@@ -344,6 +347,7 @@ export class Socket {
             });
             if (index > -1) {
               sources[index].source = data as FeatureCollection;
+              sources[index].dts = uniqueDTs as Array<number>;
               sources[index].layers = uniqueDTs.map((dt: number) => {
                 return {
                   layerName: dt.toString(),
@@ -364,6 +368,7 @@ export class Socket {
               sources.push({
                 id: data._id,
                 source: data as FeatureCollection,
+                dts: uniqueDTs as Array<number>,
                 sourceName: 'Incident',
                 sourceCategory: SourceType.plume,
                 shared: false,
@@ -424,8 +429,8 @@ export class Socket {
           },
         },
       });
+      M.toast({ html: 'Added to a new group' });
     });
-    M.toast({ html: 'Added to a new group' });
   }
 
   serverInit(s: IAppModel): Promise<Array<IGroup>> {

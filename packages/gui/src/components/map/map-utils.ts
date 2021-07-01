@@ -9,6 +9,8 @@ import polylabel from 'polylabel';
 // @ts-ignore
 import car from '../../assets/Operations/Car.png';
 // @ts-ignore
+import van from '../../assets/Operations/Car.png';
+// @ts-ignore
 import controlPoint from '../../assets/Operations/Control point.png';
 // @ts-ignore
 import divisionCommand from '../../assets/Operations/Division command.png';
@@ -21,17 +23,23 @@ import helicopter from '../../assets/Operations/Helicopter.png';
 // @ts-ignore
 import media from '../../assets/Operations/Media.png';
 // @ts-ignore
-import medical from '../../assets/Operations/Medical services.png';
+import sanitary from '../../assets/Operations/Medical services.png';
 // @ts-ignore
 import military from '../../assets/Operations/Military.png';
 // @ts-ignore
-import police from '../../assets/Operations/Police unit.png';
+import policeman from '../../assets/Operations/Police unit.png';
 // @ts-ignore
 import roadBlock from '../../assets/Operations/Road block.png';
 // @ts-ignore
 import truck from '../../assets/Operations/Truck.png';
 // @ts-ignore
 import chemical from '../../assets/Incidents/Chemical.png';
+// @ts-ignore
+import air from '../../assets/Operations/air.png';
+// @ts-ignore
+import ground from '../../assets/Operations/ground.png';
+// @ts-ignore
+import first_responder from '../../assets/Operations/Medical services.png';
 
 export const drawConfig = {
   displayControlsDefault: false,
@@ -126,13 +134,42 @@ export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): Feature
 };
 
 export const loadImages = (map: mapboxgl.Map) => {
+
   map.loadImage(fireman, function(error, image) {
     if (error) throw error;
     if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
   });
+  map.loadImage(policeman, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('policeman')) map.addImage('policeman', image as ImageBitmap);
+  });
+  map.loadImage(first_responder, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('first_responder')) map.addImage('first_responder', image as ImageBitmap);
+  });
+  map.loadImage(sanitary, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('sanitary')) map.addImage('sanitary', image as ImageBitmap);
+  });
   map.loadImage(car, function(error, image) {
     if (error) throw error;
     if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
+  });
+  map.loadImage(van, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('van')) map.addImage('van', image as ImageBitmap);
+  });
+  map.loadImage(truck, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('truck')) map.addImage('truck', image as ImageBitmap);
+  });
+  map.loadImage(air, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('air')) map.addImage('air', image as ImageBitmap);
+  });
+  map.loadImage(ground, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('ground')) map.addImage('ground', image as ImageBitmap);
   });
   map.loadImage(chemical, function(error, image) {
     if (error) throw error;
@@ -141,10 +178,6 @@ export const loadImages = (map: mapboxgl.Map) => {
   map.loadImage(roadBlock, function(error, image) {
     if (error) throw error;
     if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
-  });
-  map.loadImage(helicopter, function(error, image) {
-    if (error) throw error;
-    if (!map.hasImage('helicopter')) map.addImage('helicopter', image as ImageBitmap);
   });
 };
 
@@ -200,24 +233,25 @@ export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
 export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, map: mapboxgl.Map) => {
   appState.app.sources.forEach((source: ISource) => {
     // Set source
-    if (!map.getSource(source.sourceName)) {
-      map.addSource(source.sourceName, {
+    const sourceName = source.sourceName.concat(source.id);
+    if (!map.getSource(sourceName)) {
+      map.addSource(sourceName, {
         type: 'geojson',
         data: source.source,
       });
     } else {
-      (map.getSource(source.sourceName) as GeoJSONSource).setData(source.source);
+      (map.getSource(sourceName) as GeoJSONSource).setData(source.source);
     }
 
     // Set Layers
     source.layers.forEach((layer: ILayer) => {
-      const layerName = source.sourceName.concat(layer.layerName);
+      const layerName = sourceName.concat(layer.layerName);
 
       if (!map.getLayer(layerName)) {
         map.addLayer({
           id: layerName,
           type: layer.type.type,
-          source: source.sourceName,
+          source: sourceName,
           layout: layer.layout ? layer.layout : {},
           // @ts-ignore
           paint: layer.paint ? layer.paint : {},

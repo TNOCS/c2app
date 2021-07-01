@@ -42,7 +42,7 @@ export const alertFormatComponent: FactoryComponent<{
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
       const alert = vnode.attrs.state.app.sources.find((v: ISource) => {
-        return v.sourceName === ft.source;
+        return (v.sourceName+v.id) === ft.source;
       }) as ISource;
       return m('div', [
         m('p', 'Layer Name: ' + ft.layer.id),
@@ -51,9 +51,9 @@ export const alertFormatComponent: FactoryComponent<{
             m('input', {
               type: 'range',
               min: '0',
-              max: alert.layers[alert.layers.length - 1].layerName,
+              max: Math.max(...alert.dts as Array<number>),
               onchange: (event: Event) => {
-                vnode.attrs.actions.setCHOpacities(Number((event.target as HTMLInputElement).value), alert.sourceName);
+                vnode.attrs.actions.setCHOpacities(Number((event.target as HTMLInputElement).value), (alert.sourceName+alert.id));
               },
             }),
             m('label', 'Delta time [s]'),

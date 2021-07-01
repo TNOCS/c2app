@@ -70,7 +70,7 @@ module.exports = (env) => {
             },
           },
           {
-            path: './src/assets/explosion.svg',
+            path: './src/assets/safr.svg',
             attributes: {
               property: 'og:image',
             },
@@ -117,8 +117,8 @@ module.exports = (env) => {
       new CopyPlugin({
         patterns: [
           { from: "src/app.webmanifest" },
-          { from: "src/assets/android-launchericon-192-192.png"},
-          { from: "src/assets/android-launchericon-512-512.png"}
+          { from: "src/assets/pwa-192x192.png"},
+          { from: "src/assets/pwa-512x512.png"}
         ]
       }),
     ],

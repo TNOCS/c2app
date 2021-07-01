@@ -28,7 +28,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   private clients: number = 0;
   private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   private callsignToSocketId: Map<string, string> = new Map<string, string>();
-  private URL: string = this.configService.get<string>('DISPERSION_SERVICE2') ? `${ this.configService.get<string>('DISPERSION_SERVICE2') + '/process'}` : 'http://localhost:8080/process';
+  private URL: string = this.configService.get<string>('DISPERSION_SERVICE') ? `${ this.configService.get<string>('DISPERSION_SERVICE') + '/process'}` : 'http://localhost:8080/process';
 
   /** Handlers */
   async handleConnection(client: Socket) {

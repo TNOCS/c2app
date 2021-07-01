@@ -16,17 +16,21 @@ import helicopter from '../../../assets/Operations/Helicopter.png';
 // @ts-ignore
 import media from '../../../assets/Operations/Media.png';
 // @ts-ignore
-import medical from '../../../assets/Operations/Medical services.png';
+import sanitary from '../../../assets/Operations/Medical services.png';
 // @ts-ignore
 import military from '../../../assets/Operations/Military.png';
 // @ts-ignore
-import police from '../../../assets/Operations/Police unit.png';
+import policeman from '../../../assets/Operations/Police unit.png';
 // @ts-ignore
 import roadBlock from '../../../assets/Operations/Road block.png';
 // @ts-ignore
 import truck from '../../../assets/Operations/Truck.png';
 // @ts-ignore
 import chemical from '../../../assets/Incidents/Chemical.png';
+// @ts-ignore
+import air from '../../../assets/Operations/air.png';
+// @ts-ignore
+import ground from '../../../assets/Operations/ground.png';
 
 export const customLayerModal: FactoryComponent<{
   state: IAppModel;
@@ -75,11 +79,13 @@ export const customLayerModal: FactoryComponent<{
                 m('option.left', { value: 'roadBlock', 'data-icon': roadBlock }, 'Road Block'),
                 m('option.left', { value: 'helicopter', 'data-icon': helicopter }, 'Helicopter'),
                 m('option.left', { value: 'media', 'data-icon': media }, 'Media'),
-                m('option.left', { value: 'medical', 'data-icon': medical }, 'Medical'),
+                m('option.left', { value: 'medical', 'data-icon': sanitary }, 'Medical'),
                 m('option.left', { value: 'military', 'data-icon': military }, 'Military'),
-                m('option.left', { value: 'police', 'data-icon': police }, 'Police'),
+                m('option.left', { value: 'police', 'data-icon': policeman }, 'Police'),
                 m('option.left', { value: 'truck', 'data-icon': truck }, 'Truck'),
                 m('option.left', { value: 'chemical', 'data-icon': chemical }, 'Chemical Incident'),
+                m('option.left', { value: 'air', 'data-icon': air }, 'UAV'),
+                m('option.left', { value: 'ground', 'data-icon': ground }, 'UGV'),
               ),
               m('label', 'Choose how this layer gets visualized'),
             ]),

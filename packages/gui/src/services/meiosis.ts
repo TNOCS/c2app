@@ -11,7 +11,6 @@ import {
   IChemicalIncidentScenario,
   IGridOptions,
   IGroup,
-  IInfo,
   IMessage,
   ISensor,
 } from '../../../shared/src';
@@ -19,19 +18,10 @@ import {
 import ch from '../ch.json';
 import mapboxgl, { LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
 
-export enum Icon {
-  'fireman',
-  'car',
-  'helicopter',
-  'media',
-  'chemical_incident'
-}
-
 export interface ILayer {
   layerName: string;
   showLayer: boolean;
   type: mapboxgl.AnyLayer;
-  icon?: Icon;
   layout?: mapboxgl.AnyLayout;
   paint?: mapboxgl.AnyPaint;
   filter?: any[];
@@ -50,6 +40,7 @@ export interface ISource {
   id: string;
   source: FeatureCollection;
   sourceName: string;
+  dts?: Array<number>;
   sourceCategory: SourceType
   layers: ILayer[];
   shared: boolean;
@@ -163,28 +154,7 @@ export const appStateMgmt = {
       socket: new Socket(update),
 
       // Alerts
-      alerts: /*[] as Array<IAlert>,*/ [
-        {
-          identifier: 'agent-smith',
-          sender: 'agent-smith',
-          sent: 'agent-smith',
-          status: 'Exercise',
-          msgType: 'Alert',
-          scope: 'Restricted',
-          info: {
-            category: 'Rescue',
-            event: 'Testing cap messages',
-            urgency: 'Immediate',
-            severity: 'Extreme',
-            certainty: 'Likely',
-            area: [
-              {
-                areaDesc: JSON.stringify(ch),
-              },
-            ],
-          } as IInfo,
-        } as IAlert,
-      ] as Array<IAlert>,
+      alerts: [] as Array<IAlert>,
 
       // Clicking/Selecting
       latestDrawing: {} as Feature,
@@ -205,52 +175,7 @@ export const appStateMgmt = {
 
       // Layers/styles
 
-      sources: [{
-        id: 'testid1',
-        source: {
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: {
-                name: '123',
-                type: 'firefighter',
-              },
-              geometry: {
-                type: 'Point',
-                coordinates: [5.48, 51.442],
-              },
-            },
-            {
-              type: 'Feature',
-              properties: {
-                name: '111',
-                type: 'firefighter',
-              },
-              geometry: {
-                type: 'Point',
-                coordinates: [5.48, 51.441],
-              },
-            },
-          ],
-        } as FeatureCollection,
-        sourceName: 'Positions',
-        sourceCategory: SourceType.realtime,
-        layers: [{
-          layerName: 'Firemen',
-          showLayer: true,
-          icon: Icon.fireman,
-          type: { type: 'symbol' } as mapboxgl.AnyLayer,
-          layout: {
-            'icon-image': 'fireman',
-            'icon-size': 0.5,
-            'icon-allow-overlap': true,
-          },
-          filter: ['all', ['in', 'type', 'man', 'firefighter']],
-        }] as Array<ILayer>,
-        shared: false,
-      } as ISource,
-      ] as Array<ISource>,
+      sources: [] as Array<ISource>,
       mapStyle: 'mapbox/streets-v11',
       gridOptions: {
         gridCellSize: 0.5,
@@ -303,11 +228,9 @@ export const appStateMgmt = {
           app: {
             sources: (sources: Array<ISource>) => {
               sources.forEach((source: ISource) => {
-                if (source.sourceName !== name) return;
+                if ((source.sourceName + source.id) !== name) return;
 
-                let deltaTime_values = source.layers.map((layer: ILayer) => {
-                  return Number(layer.layerName);
-                });
+                let deltaTime_values = source.dts as Array<number>;
 
                 const dt_len = deltaTime_values.length;
                 // assign opacities > 0 to the two deltaTimes surrounding v
@@ -347,8 +270,8 @@ export const appStateMgmt = {
                   }
                 };
 
-                source.layers.forEach((layer: ILayer) => {
-                  (layer.paint as LinePaint)['line-opacity'] = opacityCalc(Number(layer.layerName));
+                source.layers.forEach((layer: ILayer, index: number) => {
+                  (layer.paint as LinePaint)['line-opacity'] = opacityCalc((source.dts as Array<number>)[index]);
                 });
               });
               return sources;
@@ -540,14 +463,14 @@ export const appStateMgmt = {
                 sources[gridIndex].source = gridSource;
               } else {
                 sources.push({
-                  id: 'testid3',
+                  id: 'customGrid',
                   source: gridSource as FeatureCollection,
                   sourceName: 'GridSource',
                   sourceCategory: SourceType.grid,
                   shared: false,
                   layers: [{
                     layerName: 'Grid',
-                    showLayer: true,
+                    showLayer: false,
                     type: { type: 'line' } as mapboxgl.AnyLayer,
                     paint: {
                       'line-opacity': 0.5,
@@ -563,14 +486,14 @@ export const appStateMgmt = {
                 sources[labelIndex].source = gridLabelSource;
               } else {
                 sources.push({
-                  id: 'testid4',
+                  id: 'customGrid',
                   source: gridLabelSource as FeatureCollection,
                   sourceName: 'GridLabelSource',
                   sourceCategory: SourceType.grid,
                   shared: false,
                   layers: [{
                     layerName: 'Grid Labels',
-                    showLayer: true,
+                    showLayer: false,
                     type: { type: 'symbol' } as mapboxgl.AnyLayer,
                     layout: {
                       'text-field': '{cellLabel}',
@@ -608,7 +531,7 @@ export const appStateMgmt = {
                   type: { type: 'symbol' } as mapboxgl.AnyLayer,
                   layout: {
                     'icon-image': icon,
-                    'icon-size': 0.5,
+                    'icon-size': icon === 'ground' ? 0.1 : icon === 'air' ? 0.25 : 0.5,
                     'icon-allow-overlap': true,
                   },
                 }] as ILayer[],
@@ -671,7 +594,7 @@ export const appStateMgmt = {
         });
       },
 
-      //CHT
+      //CHT, fix to make this a cht.start message
       submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => {
         (hazard.scenario as IChemicalIncidentScenario).source_location = location;
         (hazard.scenario as IChemicalIncidentScenario).source_location[2] = 0;

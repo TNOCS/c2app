@@ -1,0 +1,109 @@
+{
+    "name": "Mission",
+    "type": "record",
+    "doc": "Mission defines the path and actions that a resource must take. Database collection: missions",
+    "namespace": "nl.tno.assistance",
+    "fields": [
+        {
+            "name": "_id",
+            "type": "string",
+            "doc": "Mission unique identifier"
+        },
+        {
+            "name": "doc",
+            "type": "string",
+            "doc": "Brief description of the mission"
+        },
+        {
+            "name": "context",
+            "type": "string",
+            "doc": "Identifier of the context to which it is related"
+        },
+        {
+            "name": "resource",
+            "type": "string",
+            "doc": "Identifier of the resource to which the mission applies"
+        },
+        {
+            "name": "actions",
+            "doc": "Actions to be taken by the resource",
+            "type": {
+                "type": "array",
+                "items": {
+                    "name": "Action",
+                    "type": "record",
+                    "fields": [
+                        {
+                            "name": "sensor",
+                            "type": "string",
+                            "doc": "Identifier of the sensor that the action involves"
+                        },
+                        {
+                            "name": "position",
+                            "type": "int",
+                            "doc": "Index of the point in the GeoJSON coordinates field in which the action will take place"
+                        },
+                        {
+                            "name": "action",
+                            "type": "string",
+                            "doc": "Identifier of the action to be taken. The possible values should be given for each sensor"
+                        },
+                        {
+                            "name": "parameters",
+                            "type": "string",
+                            "doc": "Optional action parameters. The possible values should be given for each sensor"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "geometry",
+            "type": {
+                "name": "Geometry",
+                "type": "record",
+                "doc": "Geographic data as a GeoJSON geometry object",
+                "fields": [
+                    {
+                        "name": "type",
+                        "type": "string"
+                    },
+                    {
+                        "name": "coordinates",
+                        "type": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": "float"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "start",
+            "doc": "Date in ISO 8601 format in which the misson begins",
+            "type": "long",
+            "logicalType": "timestamp"
+        },
+        {
+            "name": "end",
+            "doc": "Date in ISO 8601 format in which the misson ends",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "timestamp",
+            "doc": "Date in ISO 8601 format in which the misson is inserted/updated",
+            "type": "long",
+            "logicalType": "timestamp"
+        }
+    ]
+}
