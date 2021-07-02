@@ -55,24 +55,28 @@
         },
         {
             "name": "attitude",
-            "type": {
-                "name": "Attitude",
-                "type": "record",
-                "fields": [
-                    {
-                        "name": "pitch",
-                        "type": "float"
-                    },
-                    {
-                        "name": "roll",
-                        "type": "float"
-                    },
-                    {
-                        "name": "yaw",
-                        "type": "float"
-                    }
-                ]
-            }
+            "type": [
+                "null",
+                {
+                    "name": "Attitude",
+                    "type": "record",
+                    "fields": [
+                        {
+                            "name": "pitch",
+                            "type": "float"
+                        },
+                        {
+                            "name": "roll",
+                            "type": "float"
+                        },
+                        {
+                            "name": "yaw",
+                            "type": "float"
+                        }
+                    ]
+                }
+            ],
+            "default": null
         },
         {
             "name": "measurement",
@@ -92,7 +96,11 @@
                     },
                     {
                         "name": "type",
-                        "type": "string",
+                        "type": [
+                            "null",
+                            "string"
+                        ],
+                        "default": null,
                         "doc": "Measurement type"
                     },
                     {

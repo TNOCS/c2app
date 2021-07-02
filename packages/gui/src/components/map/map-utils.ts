@@ -179,6 +179,10 @@ export const loadImages = (map: mapboxgl.Map) => {
     if (error) throw error;
     if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
   });
+  map.loadImage(media, function(error, image) {
+    if (error) throw error;
+    if (!map.hasImage('media')) map.addImage('media', image as ImageBitmap);
+  });
 };
 
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
