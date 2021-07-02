@@ -1,5 +1,5 @@
 import { envServices, updateAgent } from './env-services';
-import { TestBedAdapter, LogLevel, IAlert, IInfo } from 'node-test-bed-adapter';
+import { TestBedAdapter, LogLevel } from 'node-test-bed-adapter';
 import { IAgent } from './models';
 import { uuid4, simTime, log, sleep, generateAgents, agentToFeature } from './utils';
 
@@ -42,44 +42,6 @@ export const simController = async (
       tb.send(payload, (error) => error && log(error));
     };
 
-    const capTest = () => {
-      console.log('send');
-      const payload = {
-        topic: cap,
-        messages: {
-          identifier: 'agent-smith',
-          sender: 'agent-smith',
-          sent: 'agent-smith',
-          status: 'Exercise',
-          msgType: 'Alert',
-          scope: 'Restricted',
-          info: {
-            category: 'Rescue',
-            event: 'Testing cap messages',
-            urgency: 'Immediate',
-            severity: 'Extreme',
-            certainty: 'Likely',
-            area: [
-              {
-                areaDesc: 'first',
-                polygon: [
-                  '5.477628707885741, 51.443763428806044',
-                  '5.4743242263793945, 51.44181075517023',
-                  '5.477542877197266, 51.43921597746186',
-                  '5.485525131225586, 51.440633760869964',
-                  '5.486512184143066, 51.44403091184326',
-                  '5.4817914962768555, 51.447481302560234',
-                  '5.480632781982422, 51.443549441248216',
-                  '5.477628707885741, 51.443763428806044',
-                ]
-              },
-            ],
-          } as IInfo,
-        } as IAlert,
-      };
-      tb.send(payload, (error) => error && log(error));
-    };
-
     services.locations = {
       huisarts: {
         type: 'medical',
@@ -95,34 +57,9 @@ export const simController = async (
       },
     };
 
-    const agent1 = {
-      id: uuid4(),
-      type: 'man',
-      // speed: 1.4,
-      status: 'active',
-      home: services.locations['Firmamentlaan 5'],
-      owns: [{ type: 'car', id: 'car1' }],
-      actual: services.locations['Firmamentlaan 5'],
-      occupations: [{ type: 'work', id: 'tue_innovation_forum' }],
-    } as IAgent;
-
-    const car = {
-      id: 'car1',
-      type: 'car',
-      status: 'active',
-      actual: {
-        type: 'home',
-        coord: (
-          await services.drive.nearest({
-            coordinates: [services.locations['Firmamentlaan 5'].coord],
-          })
-        ).waypoints[0].location,
-      },
-    } as IAgent;
-
-    const agentCount = 98;
+    const agentCount = 2;
     const { agents: generatedAgents, locations } = generateAgents(5.476543, 51.440208, agentCount);
-    agents.push(agent1, car, ...generatedAgents);
+    agents.push(...generatedAgents);
     services.locations = Object.assign({}, services.locations, locations);
     services.agents = agents.reduce((acc, cur) => {
       acc[cur.id] = cur;
@@ -139,8 +76,7 @@ export const simController = async (
       );
       updateTime();
       await sleep(1);
-      i % 25 === 0 && notifyOthers();
-      i % 250 === 0 && capTest();
+      i % 1000 === 0 && notifyOthers();
       i++;
     }
   });
