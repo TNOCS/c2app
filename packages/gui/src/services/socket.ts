@@ -195,6 +195,7 @@ export class Socket {
                       'icon-size': type === 'ground' ? 0.1 : type === 'air' ? 0.25 : 0.5,
                       'icon-allow-overlap': true,
                     },
+                    filter: ['all', ['in', 'resourceSubType', type]],
                   } as ILayer
                 }) as ILayer[],
               } as ISource);
@@ -206,26 +207,45 @@ export class Socket {
     });
     this.socket.on('sensor', (data: ISensor) => {
       let features = [] as Feature[];
+      let sensorMissions: Array<string> = [];
 
       this.sensors[data._id] = data;
 
       for (const key in this.sensors) {
         let sensor = this.sensors[key] as ISensor;
+        sensorMissions.push(sensor.mission);
+      }
+
+      const uniqueSensorMissions = sensorMissions.filter((v, i, a) => a.indexOf(v) === i) as Array<string>;
+
+      uniqueSensorMissions.forEach((mission: string) => {
+        const sensorList: Array<ISensor> = [];
+        for (const key in this.sensors) {
+          let sensor = this.sensors[key] as ISensor;
+          if(sensor.mission !== mission) return;
+          sensorList.push(sensor);
+        }
+
         features.push({
-          geometry: sensor.geometry,
+          geometry: sensorList[0].geometry,
           properties: {
             type: 'sensor',
-            measurement: sensor.measurement as IMeasurement,
-            height: sensor.height as number,
-            id: sensor._id as string,
-            mission: sensor.mission as string,
-            context: sensor.context as string,
-            sensorType: sensor.type as string,
-            attitude: sensor.attitude as IAttitude,
-            timestamp: sensor.timestamp as number,
+            sensors: sensorList.map((sensor: ISensor) => {
+              return {
+                measurement: sensor.measurement as IMeasurement,
+                height: sensor.height as number,
+                id: sensor._id as string,
+                mission: sensor.mission as string,
+                context: sensor.context as string,
+                sensorType: sensor.type as string,
+                attitude: sensor.attitude as IAttitude,
+                timestamp: sensor.timestamp as number,
+              }
+            })
           } as GeoJsonProperties,
         } as Feature);
-      }
+      })
+
       const fc = {
         type: 'FeatureCollection',
         features: features,

@@ -92,13 +92,16 @@ export const sensorFormatComponent: FactoryComponent<{
   return {
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
-
-      return m('div', [
-        m('p', 'ID: ' + ft.properties?.id),
-        m('p', 'Type: ' + ft.properties?.sensorType),
-        m('p', 'Height: ' + ft.properties?.height),
-        m('p', ft.properties?.measurement.type + ': ' + ft.properties?.measurement.value + ' ' + ft.properties?.measurement.unit),
-      ]);
+      const sensors = JSON.parse(ft.properties?.sensors);
+      return m('li', sensors.map((sensor: any) => {
+        return [
+            m('div.divider'),
+        m('p', 'ID: ' + sensor.id),
+        m('p', 'Type: ' + sensor.sensorType),
+        m('p', 'Height: ' + sensor.height),
+        m('p', sensor.measurement.metricFeature + ': ' + sensor.measurement.value + ' ' + sensor.measurement.unit)
+        ]
+      }))
     },
   };
 };
