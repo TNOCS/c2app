@@ -94,9 +94,8 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-cht')
-  async handleClientCHT(client: Socket, data: ICHT): Promise<string> {
-    const res = await this.httpService.post(this.URL, data.hazard).toPromise();
-    return JSON.stringify(res.data);
+  async handleClientCHT(client: Socket, data: ICHT) {
+    await this.httpService.post(this.URL, data.hazard).toPromise();
   }
 
   /** Helper Funcs */

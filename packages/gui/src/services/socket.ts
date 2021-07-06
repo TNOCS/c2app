@@ -178,6 +178,19 @@ export class Socket {
 
             if (index > -1) {
               sources[index].source = fc;
+              sources[index].layers = uniqueTypes.map((type: string) => {
+                return {
+                  layerName: type + 'Resources',
+                  showLayer: true,
+                  type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                  layout: {
+                    'icon-image': type,
+                    'icon-size': type === 'ground' ? 0.1 : type === 'air' ? 0.25 : 0.5,
+                    'icon-allow-overlap': true,
+                  },
+                  filter: ['all', ['in', 'resourceSubType', type]],
+                } as ILayer
+              }) as ILayer[]
             } else {
               sources.push({
                 id: 'resourcesID',

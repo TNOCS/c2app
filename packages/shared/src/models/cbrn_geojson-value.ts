@@ -62,6 +62,7 @@ export interface Iproperties {
   deltaTime?: null | undefined | number;
   color?: null | undefined | string;
   fillOpacity?: null | undefined | number;
+  level?: null | undefined | number;
 }
 
 /** A GeoJSON Feature object */

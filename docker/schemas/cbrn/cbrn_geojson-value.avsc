@@ -313,6 +313,14 @@
                       "default": null
                     },
                     {
+                      "name": "level",
+                      "type": [
+                        "null", 
+                        "float"
+                      ],
+                      "default": null
+                    },
+                    {
                       "name": "timestamp",
                       "type": [
                         "null", 
