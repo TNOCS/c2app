@@ -14,6 +14,7 @@ import {
   IChemicalIncidentScenario,
   IChemicalIncidentControlParameters,
   ICbrnFeatureCollection,
+  IContext,
 } from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
@@ -139,6 +140,54 @@ export class Socket {
        });
        M.toast({ html: 'New Alert' });*/
     });
+    this.socket.on('context', (data: IContext) => {
+      console.log(data);
+      const fc = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: data.geometry,
+          properties: {
+            id: data._id,
+            description: data.description,
+            start: data.start,
+            timestamp: data.timestamp,
+            type: 'context'
+          }
+        } as Feature] as Feature[]
+      } as FeatureCollection
+      us({
+        app: {
+          sources: (sources: ISource[]) => {
+            const index = sources.findIndex((source: ISource) => {
+              return source.sourceName === 'Contexts';
+            });
+
+            if (index > -1) {
+              sources[index].source = fc;
+            } else {
+              sources.push({
+                id: 'contextsID',
+                source: fc as FeatureCollection,
+                sourceName: 'Contexts',
+                sourceCategory: SourceType.realtime,
+                shared: false,
+                layers: [{
+                    layerName: 'Contexts',
+                    showLayer: true,
+                    type: { type: 'line' } as mapboxgl.AnyLayer,
+                    paint: {
+                      'line-width': 4,
+                    }
+                  } as ILayer
+                 ] as ILayer[],
+              } as ISource);
+            }
+            return sources;
+          },
+        },
+      });
+    })
     this.socket.on('resource', (data: IAssistanceResource) => {
       let features = [] as Feature[];
       let resourceTypes: Array<string> = [];

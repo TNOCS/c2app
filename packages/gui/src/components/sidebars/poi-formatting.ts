@@ -68,6 +68,22 @@ export const alertFormatComponent: FactoryComponent<{
   };
 };
 
+export const contextFormatComponent: FactoryComponent<{
+  state: IAppModel;
+  actions: IActions;
+}> = () => {
+  return {
+    view: (vnode) => {
+      const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
+      return m('div', [
+        m('p', 'ID: ' + ft.properties?.id),
+        m('p', 'Description: ' + ft.properties?.description),
+        m('p', 'Start: ' + ft.properties?.start)
+      ]);
+    },
+  };
+};
+
 export const resourceFormatComponent: FactoryComponent<{
   state: IAppModel;
   actions: IActions;

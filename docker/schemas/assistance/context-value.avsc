@@ -10,7 +10,7 @@
             "doc": "Context unique identifier"
         },
         {
-            "name": "doc",
+            "name": "description",
             "type": "string",
             "doc": "Context will identify a specific operation or incident to which all the corresponding objects must be related, such as missions, measurements, evacuation routes, etc. Database collection: contexts"
         },
@@ -44,8 +44,7 @@
         {
             "name": "start",
             "doc": "Date in ISO 8601 format in which the context begins",
-            "type": "long",
-            "logicalType": "timestamp"
+            "type": "string"
         },
         {
             "name": "timestamp",

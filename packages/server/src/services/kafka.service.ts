@@ -8,7 +8,7 @@ import {
 } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert, IAssistanceResource, ICbrnFeatureCollection, ISensor } from '../../../shared/src';
+import { IAlert, IAssistanceResource, ICbrnFeatureCollection, IContext, IMission, ISensor } from '../../../shared/src';
 
 interface ISendResponse {
   [topic: string]: {
@@ -93,10 +93,10 @@ export class KafkaService {
           this.socket.server.emit('alert', message.value as IAlert);
           break;
         case contextTopic:
-          //this.socket.server.emit('alert', message.value as IAlert);
+          this.socket.server.emit('context', message.value as IContext);
           break;
         case missionTopic:
-          //this.socket.server.emit('alert', message.value as IAlert);
+          this.socket.server.emit('mission', message.value as IMission);
           break;
         case resourceTopic:
           this.socket.server.emit('resource', message.value as IAssistanceResource);

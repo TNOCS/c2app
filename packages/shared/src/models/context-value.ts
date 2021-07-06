@@ -16,7 +16,7 @@ export interface IContext {
    * corresponding objects must be related, such as missions, measurements,
    * evacuation routes, etc. Database collection: contexts
    */
-  doc: string;
+  description: string;
   /** Geographic data as a GeoJSON geometry object */
   geometry: IGeometry;
   /** Date in ISO 8601 format in which the context begins */
