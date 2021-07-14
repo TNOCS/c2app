@@ -1,0 +1,277 @@
+{
+    "name": "CbrnFeatureCollection",
+    "doc": "A GeoJSON FeatureCollection object where the properties represent CBRN plumes.",
+    "type": "record",
+    "namespace": "nl.tno.assistance",
+    "fields": [
+        {
+            "name": "_id",
+            "type": "string"
+        },
+        {
+            "name": "context",
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "type": {
+                "type": "enum",
+                "name": "FeatureCollectionType",
+                "symbols": [
+                    "FeatureCollection"
+                ]
+            },
+            "default": "FeatureCollection"
+        },
+        {
+            "name": "bbox",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "double"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "features",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "record",
+                        "name": "Feature",
+                        "doc": "A GeoJSON Feature object",
+                        "fields": [
+                            {
+                                "name": "type",
+                                "type": {
+                                    "type": "enum",
+                                    "name": "FeatureType",
+                                    "symbols": [
+                                        "Feature"
+                                    ]
+                                },
+                                "default": "Feature"
+                            },
+                            {
+                                "name": "bbox",
+                                "type": [
+                                    "null",
+                                    {
+                                        "type": "array",
+                                        "items": "double"
+                                    }
+                                ],
+                                "default": null
+                            },
+                            {
+                                "name": "geometry",
+                                "type": [
+                                    {
+                                        "type": "record",
+                                        "name": "Point",
+                                        "doc": "Describes a point geometry",
+                                        "fields": [
+                                            {
+                                                "name": "type",
+                                                "type": {
+                                                    "type": "enum",
+                                                    "name": "PointType",
+                                                    "symbols": [
+                                                        "Point"
+                                                    ]
+                                                },
+                                                "default": "Point"
+                                            },
+                                            {
+                                                "name": "coordinates",
+                                                "type": {
+                                                    "type": "array",
+                                                    "items": "double"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "record",
+                                        "name": "LineString",
+                                        "doc": "Describes a LineString geometry",
+                                        "fields": [
+                                            {
+                                                "name": "type",
+                                                "type": {
+                                                    "type": "enum",
+                                                    "name": "LineStringType",
+                                                    "symbols": [
+                                                        "LineString"
+                                                    ]
+                                                },
+                                                "default": "LineString"
+                                            },
+                                            {
+                                                "name": "coordinates",
+                                                "type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": "double"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "record",
+                                        "name": "MultiLineString",
+                                        "doc": "Describes a MultiLineString geometry",
+                                        "fields": [
+                                            {
+                                                "name": "type",
+                                                "type": {
+                                                    "type": "enum",
+                                                    "name": "MultiLineStringType",
+                                                    "symbols": [
+                                                        "MultiLineString"
+                                                    ]
+                                                },
+                                                "default": "MultiLineString"
+                                            },
+                                            {
+                                                "name": "coordinates",
+                                                "type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": "double"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "record",
+                                        "name": "Polygon",
+                                        "doc": "Describes a Polygon geometry",
+                                        "fields": [
+                                            {
+                                                "name": "type",
+                                                "type": {
+                                                    "type": "enum",
+                                                    "name": "PolygonType",
+                                                    "symbols": [
+                                                        "Polygon"
+                                                    ]
+                                                },
+                                                "default": "Polygon"
+                                            },
+                                            {
+                                                "name": "coordinates",
+                                                "type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": "double"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "record",
+                                        "name": "MultiPolygon",
+                                        "doc": "Describes a MultiPolygon geometry",
+                                        "fields": [
+                                            {
+                                                "name": "type",
+                                                "type": {
+                                                    "type": "enum",
+                                                    "name": "MultiPolygonType",
+                                                    "symbols": [
+                                                        "MultiPolygon"
+                                                    ]
+                                                },
+                                                "default": "MultiPolygon"
+                                            },
+                                            {
+                                                "name": "coordinates",
+                                                "type": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "array",
+                                                                "items": "double"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "properties",
+                                "type": {
+                                    "name": "properties",
+                                    "type": "record",
+                                    "fields": [
+                                        {
+                                            "name": "comments",
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ],
+                                            "default": null
+                                        },
+                                        {
+                                            "name": "time_of_validity",
+                                            "type": "long",
+                                            "logicalType": "timestamp",
+                                            "doc": "Date in ISO 8601 format in which the resource is inserted/updated, e.g. 2020-01-01T10:00:00.000Z"
+                                        },
+                                        {
+                                            "name": "deltaTime",
+                                            "type": [
+                                                "null",
+                                                "int"
+                                            ],
+                                            "default": null
+                                        },
+                                        {
+                                            "name": "color",
+                                            "type": [
+                                                "null",
+                                                "string"
+                                            ],
+                                            "default": null
+                                        },
+                                        {
+                                            "name": "fillOpacity",
+                                            "type": [
+                                                "null",
+                                                "float"
+                                            ],
+                                            "default": null
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
