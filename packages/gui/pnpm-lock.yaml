@@ -18,7 +18,7 @@ specifiers:
   geojson: ^0.5.0
   html-webpack-plugin: ^5.3.2
   html-webpack-tags-plugin: ^3.0.1
-  mapbox-gl: ^2.3.1
+  mapbox-gl: ^1.13.0
   mapbox-gl-controls: ^2.3.3
   material-icons: ^0.7.6
   materialize-css: ^1.0.0
@@ -44,8 +44,8 @@ dependencies:
   '@turf/boolean-point-in-polygon': 6.5.0
   '@turf/square-grid': 6.5.0
   geojson: 0.5.0
-  mapbox-gl: 2.3.1
-  mapbox-gl-controls: 2.3.3_mapbox-gl@2.3.1
+  mapbox-gl: 1.13.1
+  mapbox-gl-controls: 2.3.3_mapbox-gl@1.13.1
   material-icons: 0.7.6
   materialize-css: 1.0.0
   mithril: 2.0.4
@@ -1206,8 +1206,12 @@ packages:
       xtend: 4.0.2
     dev: false
 
-  /@mapbox/mapbox-gl-supported/2.0.0:
-    resolution: {integrity: sha512-zu4udqYiBrKMQKwpKJ4hhPON7tz0QR/JZ3iGpHnNWFmH3Sv/ysxlICATUtGCFpsyJf2v1WpFhlzaZ3GhhKmPMA==}
+  /@mapbox/mapbox-gl-supported/1.5.0_mapbox-gl@1.13.1:
+    resolution: {integrity: sha512-/PT1P6DNf7vjEEiPkVIRJkvibbqWtqnyGaBz3nfRdcxclNSnSdaLU5tfAgcD7I8Yt5i+L19s406YLl1koLnLbg==}
+    peerDependencies:
+      mapbox-gl: '>=0.32.1 <2.0.0'
+    dependencies:
+      mapbox-gl: 1.13.1
     dev: false
 
   /@mapbox/point-geometry/0.1.0:
@@ -4060,23 +4064,23 @@ packages:
       object-visit: 1.0.1
     dev: true
 
-  /mapbox-gl-controls/2.3.3_mapbox-gl@2.3.1:
+  /mapbox-gl-controls/2.3.3_mapbox-gl@1.13.1:
     resolution: {integrity: sha512-GHOdP6WJ2YLUIq19iEBdEEEcCbBSAdvd+tYcD2qC6Dn2g2uWCuFe2+e+XVy064CYji9VVflaPMajLubQjU37Uw==}
     peerDependencies:
       mapbox-gl: '>=1.0.0 <3.0.0'
     dependencies:
       '@turf/distance': 6.3.0
-      mapbox-gl: 2.3.1
+      mapbox-gl: 1.13.1
     dev: false
 
-  /mapbox-gl/2.3.1:
-    resolution: {integrity: sha512-xGohzbxxdN3UhHMHy0aweaueYwSoOspSg90gi1T7DIl8Ev0YLjl+ApV6VYtNnR1B9lmwDn8jITfG6Y2JiSEuwg==}
+  /mapbox-gl/1.13.1:
+    resolution: {integrity: sha512-GSyubcoSF5MyaP8z+DasLu5v7KmDK2pp4S5+VQ5WdVQUOaAqQY4jwl4JpcdNho3uWm2bIKs7x1l7q3ynGmW60g==}
     engines: {node: '>=6.4.0'}
     dependencies:
       '@mapbox/geojson-rewind': 0.5.1
       '@mapbox/geojson-types': 1.0.2
       '@mapbox/jsonlint-lines-primitives': 2.0.2
-      '@mapbox/mapbox-gl-supported': 2.0.0
+      '@mapbox/mapbox-gl-supported': 1.5.0_mapbox-gl@1.13.1
       '@mapbox/point-geometry': 0.1.0
       '@mapbox/tiny-sdf': 1.2.5
       '@mapbox/unitbezier': 0.0.0
