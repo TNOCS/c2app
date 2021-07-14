@@ -1,0 +1,334 @@
+{
+    "name": "Message",
+    "type": "record",
+    "namespace": "nl.tno.assistance",
+    "fields": [
+        {
+            "name": "_id",
+            "doc": "Message unique identifier",
+            "type": "string"
+        },
+        {
+            "name": "context",
+            "doc": "Identifier of the context to which it is related",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "sender",
+            "doc": "Name or identifier of the service, application, etc. sending the message",
+            "type": "string"
+        },
+        {
+            "name": "resource",
+            "doc": "Identifier of the resource hat must receive the message",
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "doc": "Classification of the information contained in the message",
+            "type": {
+                "type": "enum",
+                "namespace": "nl.tno.assistance",
+                "name": "MessageType",
+                "symbols": [
+                    "info",
+                    "warning",
+                    "danger",
+                    "INFO",
+                    "WARNING",
+                    "DANGER"
+                ]
+            },
+            "default": "INFO"
+        },
+        {
+            "name": "priority",
+            "doc": "Priority of the message",
+            "type": {
+                "type": "enum",
+                "namespace": "nl.tno.assistance",
+                "name": "PriorityType",
+                "symbols": [
+                    "very_low",
+                    "low",
+                    "medium",
+                    "high",
+                    "very_high",
+                    "VERY_LOW",
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "VERY_HIGH"
+                ]
+            },
+            "default": "LOW"
+        },
+        {
+            "name": "text",
+            "doc": "Content of the message sent to the resource",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "geometry",
+            "doc": "GeoJSON geometry object that may be sent to complement the text message (e.g. to indicate the receiver where to go, a danger zone, etc.)",
+            "default": null,
+            "type": [
+                "null",
+                {
+                    "type": "record",
+                    "name": "Point",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a point geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "PointType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "Point"
+                                ]
+                            },
+                            "default": "Point"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": "double"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "name": "MultiPoint",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a collection of points geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "MultiPointType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "MultiPoint"
+                                ]
+                            },
+                            "default": "MultiPoint"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": "double"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "name": "LineString",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a LineString geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "LineStringType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "LineString"
+                                ]
+                            },
+                            "default": "LineString"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": "double"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "name": "MultiLineString",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a MultiLineString geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "MultiLineStringType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "MultiLineString"
+                                ]
+                            },
+                            "default": "MultiLineString"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": "double"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "name": "Polygon",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a Polygon geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "PolygonType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "Polygon"
+                                ]
+                            },
+                            "default": "Polygon"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": "double"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "record",
+                    "name": "MultiPolygon",
+                    "namespace": "nl.tno.assistance.geojson.geometry",
+                    "doc": "Describes a MultiPolygon geometry",
+                    "fields": [
+                        {
+                            "name": "type",
+                            "type": {
+                                "type": "enum",
+                                "name": "MultiPolygonType",
+                                "namespace": "nl.tno.assistance.geojson.geometry",
+                                "symbols": [
+                                    "MultiPolygon"
+                                ]
+                            },
+                            "default": "MultiPolygon"
+                        },
+                        {
+                            "name": "coordinates",
+                            "type": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": "double"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "attachments",
+            "doc": "Optional message attachments. These could be a base64 encoded image or the ID of a file uploaded to the SAS that the receiver should download",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "string"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "response",
+            "doc": "Text sent by the reciever. It should be used at least as acknowledgement so the sender can verify the message has been received",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "dueBy",
+            "doc": "Date in ISO 8601 format on which information should be taken into consideration",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "expires",
+            "doc": "Date in ISO 8601 format on which the information may no longer be valid",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp"
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "timestamp",
+            "doc": "Date in ISO 8601 format on which the message is inserted/updated",
+            "type": [
+                "null",
+                {
+                    "type": "long",
+                    "logicalType": "timestamp"
+                }
+            ],
+            "default": null
+        }
+    ]
+}
