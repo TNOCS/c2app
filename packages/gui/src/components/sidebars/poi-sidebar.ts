@@ -45,6 +45,8 @@ export const poiSidebar: FactoryComponent<{
                 ? m(sensorFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
                 : vnode.attrs.state.app.clickedFeature?.properties?.type === 'context'
                 ? m(contextFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
+                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'plume'
+                ? m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
                 : vnode.attrs.state.app.clickedFeature?.properties?.type === 'incidentLocation'
                 ? m(incidentLocationFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
                 : vnode.attrs.state.app.clickedFeature?.properties?.type === 'man'
@@ -53,8 +55,6 @@ export const poiSidebar: FactoryComponent<{
                 ? formatCar(vnode.attrs.state.app.clickedFeature)
                 : vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter'
                 ? formatMan(vnode.attrs.state.app.clickedFeature)
-                : vnode.attrs.state.app.clickedFeature?.properties?.time_of_validity
-                ? m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
                 : formatUnknown(vnode.attrs.state.app.clickedFeature)
               : // If there is no clicked feature
                 m('p', ''),

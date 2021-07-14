@@ -280,7 +280,7 @@
                       "default": null
                     },
                     {
-                      "name": "time_of_validity",
+                      "name": "validity",
                       "type": [
                         "null", 
                         "string"
@@ -324,9 +324,33 @@
                       "name": "timestamp",
                       "type": [
                         "null", 
+                        "string"
+                      ],
+                      "default": null,
+                      "doc": "Date in ISO 8601 format in which the resource is inserted/updated, e.g. 2020-01-01T10:00:00.000Z"
+                    },
+                    {
+                      "name": "confidence",
+                      "type": [
+                        "null", 
                         "float"
                       ],
-                      "default": null
+                      "default": null             
+                    },
+                    {
+                      "name": "toxicityLevel",
+                      "type": {
+                        "name": "toxicity",
+                        "type": "enum",
+                        "symbols": [
+                          "VERY_LOW",
+                          "LOW",
+                          "MEDIUM",
+                          "HIGH",
+                          "VERY_HIGH"
+                        ]
+                      },
+                      "default": "MEDIUM"
                     }
                   ]
                 }

@@ -11,27 +11,19 @@ This `docker-compose.yml` will start the following services:
 - [Kafka topics UI](kafka-topics-ui): An optional service to easily inspect the Kafka topics, and the messages that were sent.
 - [Kafka schema registry UI][schema-registry-ui]: An optional service to easily inspect the AVRO schemas that are used per topic (each topic is associated with one and only one schema, but a schema may have different versions).
 - Bootstrapper: A service that runs on startup, registering all required schemas and topics. When creating new schema files, just add them to the `schemas` folder and add their name to the `PRODUCE_TOPICS` environment variable of the bootstrapper, so the producer can create them on start-up.
-- Meteo Web Service: A web service that retrieves the current meteo information.
-- Dispersion service: A web service that computes the dispersion of a gas cloud.
-- Chemical Hazard Tool: A combination of a server and GUI that enable the user to interface with the dispersion service and inspect the output of the Chemical Hazard Tool.
-- [Traccar][traccar-local]: An open source [GPS server][traccar-website] that can receive the location of various clients. The image starts an administration interface accessible via the browser with the default credentials (user: admin, password: admin).
-- SAS forwarder: A Python server that listens for GPS data forwarded by Traccar after which it transforms the data into a suitable format for SAS and Kafka.
 - [C2app][c2app-local]: A command and control application for First Responders
 
-## Starting the environment
+## Starting the simulation
 
-For the forwarding to SAS to work the `sas_forwarder` service needs [externally defined environment variables][env-file] with the SAS credentials (`SAS_USERID` and `SAS_AUTHTOKEN`).
-If this file is missing everything else will work except for the SAS forwarding.
+Go to `docker/simulation` folder and follow the instructions in the `readme.md` in that folder.
+
+## Starting the environment
 
 To start all the services in the background (`-d` flag) run the following command in the current folder:
 
 ```bash
 docker-compose up -d
 ```
-
-## Starting the simulation
-
-Go to `docker/simulation` folder and follow the instructions in the `readme.md` in that folder.
 
 ## Inspecting the environment
 
@@ -40,7 +32,5 @@ Alternatively, if the [Docker plugin](https://marketplace.visualstudio.com/items
 
 [kafka-topics-ui]: http://localhost:3600
 [schema-registry-ui]: http://localhost:3601
-[traccar-local]: http://localhost:8083
-[traccar-website]: https://www.traccar.org/
 [env-file]: https://docs.docker.com/compose/environment-variables/#the-env-file
 [c2app-local]: http://localhost:3000

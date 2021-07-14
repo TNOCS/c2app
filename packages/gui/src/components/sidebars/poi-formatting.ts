@@ -5,6 +5,7 @@ import M from 'materialize-css';
 import { IChemicalIncident, IChemicalIncidentControlParameters, IChemicalIncidentScenario } from '../../../../shared/src';
 import { LayoutForm } from 'mithril-ui-form';
 import { formGenerator } from '../../template/form';
+import { ICbrnProperties } from '../../../../shared/src/models/cbrn_geojson-value';
 
 export const formatMan = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
@@ -47,6 +48,8 @@ export const alertFormatComponent: FactoryComponent<{
       return m('div', [
         m('p', 'Layer Name: ' + ft.layer.id),
         m('p', 'Source Name: ' + ft.source),
+        m('p', 'Comments: ' + (ft.properties as ICbrnProperties).comments),
+        m('p', 'Toxicity: ' + (ft.properties as ICbrnProperties).toxicityLevel),
         m('p.range-field', m('input-field', [
             m('input', {
               type: 'range',
@@ -131,15 +134,12 @@ export const incidentLocationFormatComponent: FactoryComponent<{
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
       const scenario = JSON.parse(ft.properties?.scenario) as IChemicalIncidentScenario;
-      const control_parameters = JSON.parse(ft.properties?.control_parameters) as IChemicalIncidentControlParameters;
       const form = formGenerator({});
 
       return [
           m('p', 'ID: ' + ft.properties?.id),
           m('p', 'Chemical: ' + scenario.chemical),
           m('p', 'Start of release: ' + scenario.start_of_release),
-          m('p', 'Toxicity: ' + scenario.toxicity),
-          m('p', 'Height: ' + control_parameters.z + 'm'),
           m('button.btn', {
             onclick: () => {
               source.scenario.source_location = scenario.source_location;
@@ -151,7 +151,7 @@ export const incidentLocationFormatComponent: FactoryComponent<{
                 timestamp: new Date().valueOf()
               } as IChemicalIncident;
               
-              vnode.attrs.actions.submitCHT2(chemicalIncident);
+              vnode.attrs.actions.updateCHT(chemicalIncident);
             },
           }, 'Recalculate'),
           m(LayoutForm, {

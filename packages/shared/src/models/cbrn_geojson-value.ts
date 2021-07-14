@@ -56,13 +56,16 @@ export interface IMultiPolygon {
   coordinates: number[][][][];
 }
 
-export interface Iproperties {
+export interface ICbrnProperties {
   comments?: null | undefined | string;
-  time_of_validity?: null | undefined | string;
+  validity?: null | undefined | string;
   deltaTime?: null | undefined | number;
   color?: null | undefined | string;
   fillOpacity?: null | undefined | number;
   level?: null | undefined | number;
+  timestamp?: null | undefined | string;
+  confidence?: null | undefined | number;
+  toxicityLevel?: 'VERY_LOW' | 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
 }
 
 /** A GeoJSON Feature object */
@@ -70,7 +73,7 @@ export interface IFeature {
   type: FeatureType;
   bbox?: null | undefined | number[];
   geometry: IPoint | ILineString | IMultiLineString | IPolygon | IMultiPolygon;
-  properties: Iproperties;
+  properties: ICbrnProperties;
 }
 
 /**

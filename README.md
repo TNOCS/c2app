@@ -1,18 +1,13 @@
 # c2app
 A command and control application for Concept Development &amp; Experimentation.
 
-## Prerequisites for Traccar to work
-
-- Ports 8084 (TCP), 8083 (TCP), 5000-5150 (TCP & UDP) forwarded on the router
-- Firewall configured to allow incoming connections port 8084 (TCP), 8083 (TCP), 5000-5150 (TCP & UDP)
-
 ## Installation
 
 The application is a mono-repository, developed in TypeScript using [Nest.js](https://docs.nestjs.com) for the server, and [Mithril](https://mithril.js.org) for the GUI. It consists of the following packages:
 
-- Server:
-- GUI:
-- Shared:
+- Server: Subscribes to Kafka topics and forwards them to the relevant clients
+- GUI: The client part of the application. Connects with the server through the WebSocket protocol
+- Shared: Type definitions and util functions
 
 The easiest way is to run the docker compose file in the `./docker` folder:
 
@@ -26,12 +21,17 @@ Refer to the [README](./docker/README.md) file in the `docker` folder for more i
 
 ## Development
 
-To run the node parts of this repository separately (i.e. without the Kafka and Traccar infrastructure) you can run:
+To run the node parts of this repository separately (i.e. without the Kafka infrastructure) you can run:
 
 ```bash
 # If you don't have pnpm installed, you can install it using `npm i -g pnpm`
 pnpm multi install
 npm start
+```
+
+Or run the following in `packages/gui`, `packages/server`, and `packages/shared`
+```bash
+npm i
 ```
 
 This installs the npm packages, their dependencies and then starts the server, gui and shared applications.

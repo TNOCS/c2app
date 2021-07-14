@@ -29,6 +29,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   private callsignToSocketId: Map<string, string> = new Map<string, string>();
   private URL: string = this.configService.get<string>('DISPERSION_SERVICE') ? `${ this.configService.get<string>('DISPERSION_SERVICE') + '/process'}` : 'http://localhost:8080/process';
+  private pop_URL: string = 'http://localhost:3333/detailed'
 
   /** Handlers */
   async handleConnection(client: Socket) {
@@ -96,6 +97,12 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   @SubscribeMessage('client-cht')
   async handleClientCHT(client: Socket, data: ICHT) {
     await this.httpService.post(this.URL, data.hazard).toPromise();
+  }
+
+  @SubscribeMessage('client-pop')
+  async handleClientPop(client: Socket, data: Feature) {
+    const response = await this.httpService.post(this.pop_URL, data).toPromise();
+    return JSON.stringify(response.data);
   }
 
   /** Helper Funcs */

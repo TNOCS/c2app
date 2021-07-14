@@ -96,8 +96,7 @@ services:
     environment:
       KAFKA_HOST: broker:9092
       SCHEMA_REGISTRY: http://schema_registry:3502
-      PRODUCE_TOPICS: chemical_incident,context,mission,resource,sensor,chemical_hazard,cbrn_geojson,simulation_entity_item,simulation_time_mgmt,system_topic_access_invite,simulation_request_startinject,simulation_entity_post,standard_named_geojson,system_heartbeat,simulation_entity_featurecollection,system_logging,standard_cap
-      # simulation_request_transport,lcms_plots,simulation_affected_area,simulation_sumo_configuration,chain_power,chain_care,chain_flood,chain,flood_prediction_geojson,flood_actual,system_timing
+      PRODUCE_TOPICS: chemical_incident,context,mission,resource,sensor,message,chemical_hazard,cbrn_geojson,simulation_entity_item,simulation_time_mgmt,system_topic_access_invite,simulation_request_startinject,simulation_entity_post,standard_named_geojson,system_heartbeat,simulation_entity_featurecollection,system_logging,standard_cap
     volumes:
       - ./schemas:/app/src/schemas
     restart: on-failure
@@ -137,7 +136,13 @@ services:
       - /data/${PBF_FILE}.osrm
     volumes:
       - ${DATA_FOLDER}/walking:/data
-
+  redis:
+    image: 'redis:latest'
+    ports:
+      - '6379:6379'
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
 #c2app:
 #  image: timovdk/c2app:latest
 #  depends_on:

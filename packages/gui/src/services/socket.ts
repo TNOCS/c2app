@@ -417,6 +417,10 @@ export class Socket {
       features.forEach((feature: Feature) => {
         // @ts-ignore
         feature.properties.color = ('#' + feature.properties?.color) as string;
+        feature.properties = {
+          ...feature.properties,
+          type: 'plume',
+        } as GeoJsonProperties;
         return feature;
       });
       uniqueDTs.sort((a, b) => a - b);
@@ -441,7 +445,7 @@ export class Socket {
                       property: 'color',
                     },
                     'line-opacity': 0.5,
-                    'line-width': 2,
+                    'line-width': 6,
                   },
                   filter: ['all', ['in', 'deltaTime', dt]],
                 } as ILayer;
@@ -465,7 +469,7 @@ export class Socket {
                         property: 'color',
                       },
                       'line-opacity': 0.5,
-                      'line-width': 2,
+                      'line-width': 6,
                     },
                     filter: ['all', ['in', 'deltaTime', dt]],
                   } as ILayer;
@@ -565,6 +569,14 @@ export class Socket {
   serverCHT(chemicalIncident: Partial<IChemicalIncident>) {
     this.socket.emit('client-cht', { hazard: chemicalIncident }, (_result: string) => {
     });
+  }
+
+  serverPopulator(feature: Feature): Promise<FeatureCollection> {
+    return new Promise((resolve) => {
+      this.socket.emit('client-pop', {feature}, (result: string) => {
+        resolve(JSON.parse(result) as FeatureCollection)
+      });
+    })
   }
 
   shouldUpdate(): boolean {

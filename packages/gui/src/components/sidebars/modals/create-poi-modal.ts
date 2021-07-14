@@ -129,8 +129,8 @@ export const createPOIModal: FactoryComponent<{
             onclick: () => {
               chosenTab === 'Group' ? vnode.attrs.actions.createGroup(groupName)
                 : chosenTab === 'POI' ? vnode.attrs.actions.addDrawingsToLayer(layerIndex)
-                : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.submitCHT(source, (vnode.attrs.state.app.latestDrawing.geometry as Point).coordinates)
-                  : chosenTab === 'Population' ? vnode.attrs.actions.createPOI()
+                : chosenTab === 'Chemical Hazard' ? vnode.attrs.actions.createCHT(source, (vnode.attrs.state.app.latestDrawing.geometry as Point).coordinates)
+                  : chosenTab === 'Population' ? vnode.attrs.actions.createPopulatorRequest()
                     : vnode.attrs.actions.createPOI();
             },
           }, `${'Create ' + chosenTab}`),

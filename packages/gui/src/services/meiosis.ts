@@ -1,7 +1,7 @@
 import m from 'mithril';
 import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
-import { Feature, FeatureCollection } from 'geojson';
+import { Feature, FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
 import { Socket } from './socket';
 import {
   IAlert,
@@ -13,6 +13,7 @@ import {
   IGroup,
   IMessage,
   ISensor,
+  uuid4,
 } from '../../../shared/src';
 // @ts-ignore
 import ch from '../ch.json';
@@ -137,9 +138,12 @@ export interface IActions {
   setLayerEdit: (sourceIndex: number) => void;
 
   // CHT
-  submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => void;
-  submitCHT2: (chemicalIncident: IChemicalIncident) => void;
+  createCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => void;
+  updateCHT: (chemicalIncident: IChemicalIncident) => void;
   setCHOpacities: (val: number, name: string) => void;
+
+  // Populator
+  createPopulatorRequest: () => void;
 }
 
 export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppModel>) => Partial<IAppModel>);
@@ -595,16 +599,173 @@ export const appStateMgmt = {
       },
 
       //CHT, fix to make this a cht.start message
-      submitCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => {
+      createCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => {
         (hazard.scenario as IChemicalIncidentScenario).source_location = location;
         (hazard.scenario as IChemicalIncidentScenario).source_location[2] = 0;
+        hazard._id = uuid4();
+        hazard.context = 'CTXT20200101100000';
 
         states()['app'].socket.serverCHT(hazard);
+        us({
+          app: {
+            clearDrawing: {
+              delete: true,
+              id: states()['app'].latestDrawing.id,
+            },
+            sources: (sources: ISource[]) => {
+              const fc = {
+                type: 'FeatureCollection',
+                features: [
+                  {
+                    geometry: {
+                      type: 'Point',
+                      coordinates: hazard.scenario?.source_location,
+                    } as Geometry,
+                    properties: {
+                      type: 'incidentLocation',
+                      scenario: hazard.scenario as IChemicalIncidentScenario,
+                      control_parameters: hazard.control_parameters as IChemicalIncidentControlParameters,
+                      context: hazard.context,
+                      timestamp: hazard.timestamp,
+                      id: hazard._id,
+                    } as GeoJsonProperties,
+                  } as Feature,
+                ] as Feature[],
+              } as FeatureCollection;
+  
+              const index = sources.findIndex((source: ISource) => {
+                return source.id === hazard._id && source.sourceName === 'IncidentLocation' + hazard._id;
+              });
+  
+              if (index > -1) {
+                sources[index].source = fc as FeatureCollection;
+              } else {
+                sources.push({
+                  id: hazard._id,
+                  source: fc as FeatureCollection,
+                  sourceName: 'IncidentLocation' + hazard._id,
+                  sourceCategory: SourceType.chemical_incident,
+                  shared: false,
+                  layers: [
+                    {
+                      layerName: 'Incident',
+                      showLayer: true,
+                      type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                      layout: {
+                        'icon-image': 'chemical',
+                        'icon-size': 0.5,
+                        'icon-allow-overlap': true,
+                      },
+                    },
+                  ] as ILayer[],
+                } as ISource);
+              }
+              return sources;
+            },
+          },
+        });
       },
 
-      submitCHT2: (chemicalIncident: IChemicalIncident) => {
+      updateCHT: (chemicalIncident: IChemicalIncident) => {
+        console.log(chemicalIncident);
         states()['app'].socket.serverCHT(chemicalIncident);
+        us({
+          app: {
+            clearDrawing: {
+              delete: true,
+              id: states()['app'].latestDrawing.id,
+            },
+            sources: (sources: ISource[]) => {
+              const fc = {
+                type: 'FeatureCollection',
+                features: [
+                  {
+                    geometry: {
+                      type: 'Point',
+                      coordinates: chemicalIncident.scenario?.source_location,
+                    } as Geometry,
+                    properties: {
+                      type: 'incidentLocation',
+                      scenario: chemicalIncident.scenario as IChemicalIncidentScenario,
+                      control_parameters: chemicalIncident.control_parameters as IChemicalIncidentControlParameters,
+                      context: chemicalIncident.context,
+                      timestamp: chemicalIncident.timestamp,
+                      id: chemicalIncident._id,
+                    } as GeoJsonProperties,
+                  } as Feature,
+                ] as Feature[],
+              } as FeatureCollection;
+  
+              const index = sources.findIndex((source: ISource) => {
+                return source.id === chemicalIncident._id && source.sourceName === 'IncidentLocation' + chemicalIncident._id;
+              });
+  
+              if (index > -1) {
+                console.log('update');
+                sources[index].source = fc as FeatureCollection;
+              } else {
+                sources.push({
+                  id: chemicalIncident._id,
+                  source: fc as FeatureCollection,
+                  sourceName: 'IncidentLocation' + chemicalIncident._id,
+                  sourceCategory: SourceType.chemical_incident,
+                  shared: false,
+                  layers: [
+                    {
+                      layerName: 'Incident',
+                      showLayer: true,
+                      type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                      layout: {
+                        'icon-image': 'chemical',
+                        'icon-size': 0.5,
+                        'icon-allow-overlap': true,
+                      },
+                    },
+                  ] as ILayer[],
+                } as ISource);
+              }
+              return sources;
+            },
+          },
+        });
       },
+
+      createPopulatorRequest: async () => {
+        console.log(states()['app'].latestDrawing)
+        const result = await states()['app'].socket.serverPopulator(states()['app'].latestDrawing) as FeatureCollection;
+        console.log(result)
+
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              const index = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'PopulationService';
+              });
+              if (index > -1) {
+                sources[index].source = result as FeatureCollection;
+              }
+              else {
+              sources.push({
+                id: 'pop',
+                source: result as FeatureCollection,
+                sourceName: 'PopulationService',
+                sourceCategory: SourceType.realtime,
+                shared: false,
+                layers: [{
+                  layerName: 'Population Data',
+                  showLayer: true,
+                  type: { type: 'line' } as mapboxgl.AnyLayer,
+                  paint: {
+                    'line-opacity': 0.5,
+                  },
+                }] as ILayer[],
+              } as ISource);
+            }
+              return sources;
+            },
+          },
+        });
+      }
     };
   },
 };

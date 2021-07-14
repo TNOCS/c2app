@@ -13,6 +13,7 @@ export const Map: FactoryComponent<{
   mapboxgl.accessToken = process.env.ACCESSTOKEN || '';
   let map: mapboxgl.Map;
   let draw: MapboxDraw;
+  let token: boolean = process.env.ACCESSTOKEN ? true : false;
 
   return {
     view: () => {
@@ -23,7 +24,7 @@ export const Map: FactoryComponent<{
       // Create map and add controls
       map = new mapboxgl.Map({
         container: 'mapboxMap',
-        style: `mapbox://styles/${appState.app.mapStyle}`,
+        style: token ? `mapbox://styles/${appState.app.mapStyle}` : 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
         center: [4.350, 51.911] as [number, number],
         zoom: 12,
       });
@@ -61,7 +62,7 @@ export const Map: FactoryComponent<{
       }
 
       // Check if basemap should be switched
-      if (!map.getStyle().sprite?.includes(appState.app.mapStyle)) {
+      if (token && !map.getStyle().sprite?.includes(appState.app.mapStyle)) {
         MapUtils.switchBasemap(map, appState.app.mapStyle).catch();
       }
 
