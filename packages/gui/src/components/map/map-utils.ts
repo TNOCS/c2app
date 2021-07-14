@@ -63,18 +63,29 @@ export const handleDrawEvent = (map: mapboxgl.Map, features: MapboxGeoJSONFeatur
 };
 
 const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
-  if (!map.getLayer('PositionsFiremen')) return;
+  let layers: Array<string> = [];
+  
+  if (map.getLayer('ResourcesresourcesIDfiremanResources')) layers.push('ResourcesresourcesIDfiremanResources');
+  if (map.getLayer('ResourcesresourcesIDpolicemanResources')) layers.push('ResourcesresourcesIDpolicemanResources');
+  if (map.getLayer('ResourcesresourcesIDfirst_responderResources')) layers.push('ResourcesresourcesIDfirst_responderResources');
+  if (map.getLayer('ResourcesresourcesIDsanitaryResources')) layers.push('ResourcesresourcesIDsanitaryResources');
+  if (map.getLayer('ResourcesresourcesIDcarResources')) layers.push('ResourcesresourcesIDcarResources');
+  if (map.getLayer('ResourcesresourcesIDvanResources')) layers.push('ResourcesresourcesIDvanResources');
+  if (map.getLayer('ResourcesresourcesIDtruckResources')) layers.push('ResourcesresourcesIDtruckResources');
+  if (map.getLayer('ResourcesresourcesIDairResources')) layers.push('ResourcesresourcesIDairResources');
+  if (map.getLayer('ResourcesresourcesIDgroundResources')) layers.push('ResourcesresourcesIDgroundResources');
+
+  if (layers.length === 0) return;
 
   const bounding = bbox(features[0]);
   let bboxFeatures = map.queryRenderedFeatures(
     [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-    { layers: ['PositionsFiremen'] },
-  );
+    { layers: layers });
   const polyFeatures = bboxFeatures.filter((element) =>
     booleanPointInPolygon(
       [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
-      features[0] as Feature<Polygon>,
-    ),
+      features[0] as Feature<Polygon>
+    )
   );
   actions.updateSelectedFeatures(polyFeatures);
 };
@@ -85,14 +96,20 @@ export const displayInfoSidebar = (features: MapboxGeoJSONFeature[], actions: IA
   instance.open();
 };
 
-export const getGridSource = (map: mapboxgl.Map, actions: IActions, appState: IAppModel): FeatureCollection<Polygon> => {
+export const getGridSource = (
+  map: mapboxgl.Map,
+  actions: IActions,
+  appState: IAppModel
+): FeatureCollection<Polygon> => {
   if (appState.app.gridOptions.updateLocation) {
     const bounds = map.getBounds();
     actions.updateGridLocation([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
     appState.app.gridOptions.gridLocation = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
   }
 
-  return SquareGrid(appState.app.gridOptions.gridLocation, appState.app.gridOptions.gridCellSize, { units: 'kilometers' });
+  return SquareGrid(appState.app.gridOptions.gridLocation, appState.app.gridOptions.gridCellSize, {
+    units: 'kilometers',
+  });
 };
 
 const getRowLetter = (index: number, rows: number) => {
@@ -117,69 +134,67 @@ export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): Feature
 
   return {
     type: 'FeatureCollection',
-    features:
-      gridSource.features.map((feature: Feature, index: number) => {
-        return {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: polylabel((feature.geometry as Polygon).coordinates),
-          } as Geometry,
-          properties: {
-            cellLabel: `${getRowLetter(index, rows.size) + getColumnNumber(index, rows.size)}`,
-          },
-        } as Feature;
-      }),
+    features: gridSource.features.map((feature: Feature, index: number) => {
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: polylabel((feature.geometry as Polygon).coordinates),
+        } as Geometry,
+        properties: {
+          cellLabel: `${getRowLetter(index, rows.size) + getColumnNumber(index, rows.size)}`,
+        },
+      } as Feature;
+    }),
   } as FeatureCollection;
 };
 
 export const loadImages = (map: mapboxgl.Map) => {
-
-  map.loadImage(fireman, function(error, image) {
+  map.loadImage(fireman, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
   });
-  map.loadImage(policeman, function(error, image) {
+  map.loadImage(policeman, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('policeman')) map.addImage('policeman', image as ImageBitmap);
   });
-  map.loadImage(first_responder, function(error, image) {
+  map.loadImage(first_responder, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('first_responder')) map.addImage('first_responder', image as ImageBitmap);
   });
-  map.loadImage(sanitary, function(error, image) {
+  map.loadImage(sanitary, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('sanitary')) map.addImage('sanitary', image as ImageBitmap);
   });
-  map.loadImage(car, function(error, image) {
+  map.loadImage(car, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
   });
-  map.loadImage(van, function(error, image) {
+  map.loadImage(van, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('van')) map.addImage('van', image as ImageBitmap);
   });
-  map.loadImage(truck, function(error, image) {
+  map.loadImage(truck, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('truck')) map.addImage('truck', image as ImageBitmap);
   });
-  map.loadImage(air, function(error, image) {
+  map.loadImage(air, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('air')) map.addImage('air', image as ImageBitmap);
   });
-  map.loadImage(ground, function(error, image) {
+  map.loadImage(ground, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('ground')) map.addImage('ground', image as ImageBitmap);
   });
-  map.loadImage(chemical, function(error, image) {
+  map.loadImage(chemical, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('chemical')) map.addImage('chemical', image as ImageBitmap);
   });
-  map.loadImage(roadBlock, function(error, image) {
+  map.loadImage(roadBlock, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
   });
-  map.loadImage(media, function(error, image) {
+  map.loadImage(media, function (error, image) {
     if (error) throw error;
     if (!map.hasImage('media')) map.addImage('media', image as ImageBitmap);
   });
@@ -187,16 +202,12 @@ export const loadImages = (map: mapboxgl.Map) => {
 
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
   const currentStyle = map.getStyle();
-  const newStyle = await m.request(
-    `https://api.mapbox.com/styles/v1/${styleID}?access_token=` + process.env.ACCESSTOKEN,
-  ) as mapboxgl.Style;
+  const newStyle = (await m.request(
+    `https://api.mapbox.com/styles/v1/${styleID}?access_token=` + process.env.ACCESSTOKEN
+  )) as mapboxgl.Style;
 
   // ensure any sources from the current style are copied across to the new style
-  newStyle.sources = Object.assign(
-    {},
-    currentStyle.sources,
-    newStyle.sources,
-  );
+  newStyle.sources = Object.assign({}, currentStyle.sources, newStyle.sources);
 
   // find the index of where to insert our layers to retain in the new style
   let labelIndex = newStyle.layers?.findIndex((el) => {
@@ -266,7 +277,8 @@ export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, m
         map.on('mouseleave', layerName, () => (map.getCanvas().style.cursor = ''));
       }
       map.setLayoutProperty(layerName, 'visibility', layer.showLayer ? 'visible' : 'none');
-      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.plume) map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
+      if (source.sourceCategory === SourceType.alert || source.sourceCategory === SourceType.plume)
+        map.setPaintProperty(layerName, 'line-opacity', (layer.paint as LinePaint)['line-opacity']);
     });
   });
 };

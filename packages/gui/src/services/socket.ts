@@ -29,7 +29,7 @@ export class Socket {
   constructor(us: UpdateStream) {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
 
-    this.socket.on('positions', (data: FeatureCollection) => {
+    /*this.socket.on('positions', (data: FeatureCollection) => {
       if (!this.shouldUpdate()) {
       } else {
         us({
@@ -67,7 +67,7 @@ export class Socket {
           },
         });
       }
-    });
+    });*/
     this.socket.on('alert', (_data: IAlert) => {
       /* const alertArea = (data.info as IInfo).area as IArea[];
 
@@ -141,7 +141,6 @@ export class Socket {
        M.toast({ html: 'New Alert' });*/
     });
     this.socket.on('context', (data: IContext) => {
-      console.log(data);
       const fc = {
         type: 'FeatureCollection',
         features: [{

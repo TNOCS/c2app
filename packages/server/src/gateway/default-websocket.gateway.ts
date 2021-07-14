@@ -19,7 +19,7 @@ import {
 import { HttpService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-@WebSocketGateway()
+@WebSocketGateway({cors: {origin: true}})
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private httpService: HttpService, private configService: ConfigService) {
   }
@@ -45,6 +45,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   @SubscribeMessage('client-init')
   handleClientInit(client: Socket, data: IGroupsInit): string {
     this.callsignToSocketId.set(data.callsign, client.id);
+    console.log('ID: ' + data.callsign + ' linked to Socket: ' + client.id);
 
     return this.getGroupIdsForCallsign(data.callsign);
   }
@@ -124,7 +125,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
     const callsigns = [
       ...new Set(
         featureCollection.features.map((feature: Feature) => {
-          return feature.properties.name;
+          return feature.properties.id;
         }),
       ),
     ];

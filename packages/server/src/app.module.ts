@@ -7,6 +7,6 @@ import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [HttpModule, ConfigModule.forRoot()],
   controllers: [AppController],
-  providers: [KafkaService, DefaultWebSocketGateway],
+  providers: [DefaultWebSocketGateway, KafkaService],
 })
 export class AppModule {}

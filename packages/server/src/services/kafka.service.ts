@@ -32,7 +32,7 @@ export class KafkaService {
   public messageQueue: IAdapterMessage[] = [];
   public busy = false;
 
-  constructor(@Inject('DefaultWebSocketGateway') private readonly socket: DefaultWebSocketGateway) {
+  constructor(@Inject(DefaultWebSocketGateway) private readonly socket: DefaultWebSocketGateway) {
     this.createAdapter().catch((e) => {
       log.error(e);
     });
