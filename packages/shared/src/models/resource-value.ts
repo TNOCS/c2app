@@ -95,5 +95,5 @@ export interface IAssistanceResource {
    * Date in ISO 8601 format in which the resource is inserted/updated, e.g.
    * 2020-01-01T10:00:00.000Z
    */
-  timestamp: number;
+  timestamp: string;
 }
