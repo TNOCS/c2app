@@ -548,7 +548,7 @@ export const appStateMgmt = {
           },
         });
       },
-      updateCustomLayers: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => {
+      updateCustomLayers: (layerName: string, _icon: string, _checked: boolean, _shareWith: string[]) => {
         us({
           app: {
             customLayers: (layers: Array<[string, boolean]>) => {
