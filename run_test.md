@@ -9,16 +9,17 @@
 
 ## Running the integration test
 I recommend using [Windows Terminal][wt] and opening 6 panes (alt+shift+D).
+The items marked `DEV` are for development purposes. If you choose to use these, make sure to comment out the `c2app` service in the docker compose file (`./c2app/docker/simulation/docker-compose.yml`), otherwise [SAFR][tnocs/c2app] is started twice which leads to weird errors.
 ```bash
 # Pane 1: Start kafka and OSRM
 cd ./c2app/docker/simulation
 docker compose up -d
 
-# Pane 2: Start the server
+# DEV: Pane 2: Start the server
 cd ./c2app/packages/server
 npm start
 
-# Pane 3: Start the client
+# DEV: Pane 3: Start the client
 cd ./c2app/packages/server
 npm start
 

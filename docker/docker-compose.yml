@@ -99,15 +99,16 @@ services:
       - ./schemas:/app/src/schemas
     restart: on-failure
 
-#  c2app:
-#    image: timovdk/c2app:latest
-#    depends_on:
-#      - broker
-#      - schema_registry
-#    ports:
-#      - 3000:3000
-#    environment:
-#      KAFKA_HOST: broker:9092
-#      SCHEMA_REGISTRY: http://schema_registry:3502
-#      PORT: 3000
-#      SERVER: http://localhost:3000
+  c2app:
+    image: timovdk/c2app:latest
+    depends_on:
+      - broker
+      - schema_registry
+    ports:
+      - 3000:3000
+    environment:
+      KAFKA_HOST: broker:9092
+      SCHEMA_REGISTRY: http://schema_registry:3502
+      PORT: 3000
+      SERVER: http://localhost:3000
+      DISPERSION_SERVICE: https://assistance.hex.tno.nl/dispersionservice
