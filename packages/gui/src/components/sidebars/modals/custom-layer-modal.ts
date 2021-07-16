@@ -1,35 +1,20 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../../../services/meiosis';
 import M from 'materialize-css';
-// @ts-ignore
 import car from '../../../assets/Operations/Car.png';
-// @ts-ignore
 import controlPoint from '../../../assets/Operations/Control point.png';
-// @ts-ignore
 import divisionCommand from '../../../assets/Operations/Division command.png';
-// @ts-ignore
 import evacuation from '../../../assets/Operations/Evacuation.png';
-// @ts-ignore
 import fireman from '../../../assets/Operations/Firemen unit.png';
-// @ts-ignore
 import helicopter from '../../../assets/Operations/Helicopter.png';
-// @ts-ignore
 import media from '../../../assets/Operations/Media.png';
-// @ts-ignore
 import sanitary from '../../../assets/Operations/Medical services.png';
-// @ts-ignore
 import military from '../../../assets/Operations/Military.png';
-// @ts-ignore
 import policeman from '../../../assets/Operations/Police unit.png';
-// @ts-ignore
 import roadBlock from '../../../assets/Operations/Road block.png';
-// @ts-ignore
 import truck from '../../../assets/Operations/Truck.png';
-// @ts-ignore
 import chemical from '../../../assets/Incidents/Chemical.png';
-// @ts-ignore
 import air from '../../../assets/Operations/air.png';
-// @ts-ignore
 import ground from '../../../assets/Operations/ground.png';
 
 export const customLayerModal: FactoryComponent<{

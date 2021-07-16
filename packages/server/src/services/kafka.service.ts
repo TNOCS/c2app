@@ -112,6 +112,7 @@ export class KafkaService {
           this.socket.server.emit('plume', KafkaService.preparePlume(message.value as ICbrnFeatureCollection));
           break;
         case messageTopic:
+          // Send message only to the resource that is mentioned
           if(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource)) {
             this.socket.server
             .to(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource))

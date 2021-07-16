@@ -7,7 +7,6 @@ import {
   IChemicalIncidentScenario,
   PasquillClass,
 } from '../../../shared/src';
-// @ts-ignore
 import chem_options from './chem_options.json'
 
 /** Additional properties for internal usage */

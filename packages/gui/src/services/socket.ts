@@ -15,6 +15,9 @@ import {
   IChemicalIncidentControlParameters,
   ICbrnFeatureCollection,
   IContext,
+  IAssistanceMessage,
+  IInfo,
+  IArea
 } from '../../../shared/src';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
@@ -28,118 +31,7 @@ export class Socket {
 
   constructor(us: UpdateStream) {
     this.socket = io(process.env.SERVER || 'http://localhost:3000');
-
-    /*this.socket.on('positions', (data: FeatureCollection) => {
-      if (!this.shouldUpdate()) {
-      } else {
-        us({
-          app: {
-            sources: (sources: Array<ISource>) => {
-              const index = sources.findIndex((source: ISource) => {
-                return source.sourceName === 'Positions';
-              });
-              if (index > -1) {
-                sources[index].source = data;
-              } else {
-                sources.push({
-                  id: 'testid1',
-                  source: data as FeatureCollection,
-                  sourceName: 'Positions',
-                  sourceCategory: SourceType.realtime,
-                  shared: false,
-                  layers: [
-                    {
-                      layerName: 'Firemen',
-                      showLayer: true,
-                      type: { type: 'symbol' } as mapboxgl.AnyLayer,
-                      layout: {
-                        'icon-image': 'fireman',
-                        'icon-size': 0.5,
-                        'icon-allow-overlap': true,
-                      },
-                      filter: ['all', ['in', 'type', 'man', 'firefighter']],
-                    },
-                  ] as ILayer[],
-                } as ISource);
-              }
-              return sources;
-            },
-          },
-        });
-      }
-    });*/
-    this.socket.on('alert', (_data: IAlert) => {
-      /* const alertArea = (data.info as IInfo).area as IArea[];
-
-       const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
-       const features = fc.features as Feature[];
-
-       // Find out the necessary layers (DeltaTimes)
-       const dts = features.map((feature: Feature) => {
-         return feature.properties?.deltaTime;
-       }) as number[];
-
-       const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
-
-       // Fix color formatting
-       fc.features.forEach((feature: Feature) => {
-         // @ts-ignore
-         feature.properties.color = '#' + feature.properties?.color as string;
-         return feature;
-       });
-
-       // Update the fc in the alert
-       ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
-
-       us({
-         app: {
-           sources: (sources: Array<ISource>) => {
-             const index = sources.findIndex((source: ISource) => {
-               return source.sourceName === data.identifier;
-             });
-             if (index > -1) {
-               sources[index].source = fc;
-             } else {
-               sources.push({
-                 id: 'testid2',
-                 source: fc as FeatureCollection,
-                 sourceName: 'Eindhoven Chlorine',
-                 sourceCategory: SourceType.alert,
-                 shared: false,
-                 layers: uniqueDTs.map((dt: number) => {
-                   return {
-                     layerName: dt.toString(),
-                     showLayer: true,
-                     type: { type: 'line' } as mapboxgl.AnyLayer,
-                     paint: {
-                         'line-color': {
-                           type: 'identity',
-                           property: 'color',
-                         },
-                         'line-opacity': 0.5,
-                         'line-width': 2,
-                       },
-                     filter: ['all', ['in', 'deltaTime', dt]],
-                   } as ILayer;
-                 }) as Array<ILayer>,
-               } as ISource);
-             }
-           },
-           alerts: (alerts: Array<IAlert>) => {
-             const index = alerts.findIndex((val: IAlert) => {
-               return val.identifier === data.identifier;
-             });
-             if (index > -1) {
-               alerts[index] = data;
-               return alerts;
-             }
-             alerts.push(data);
-             return alerts;
-           },
-         },
-       });
-       M.toast({ html: 'New Alert' });*/
-    });
+    // ASSISTANCE context
     this.socket.on('context', (data: IContext) => {
       const fc = {
         type: 'FeatureCollection',
@@ -186,7 +78,8 @@ export class Socket {
           },
         },
       });
-    })
+    });
+    // ASSISTANCE resource
     this.socket.on('resource', (data: IAssistanceResource) => {
       let features = [] as Feature[];
       let resourceTypes: Array<string> = [];
@@ -266,6 +159,7 @@ export class Socket {
         },
       });
     });
+    // ASSISTANCE sensor
     this.socket.on('sensor', (data: ISensor) => {
       let features = [] as Feature[];
       let sensorMissions: Array<string> = [];
@@ -347,6 +241,7 @@ export class Socket {
         },
       });
     });
+    // ASSISTANCE cht.start
     this.socket.on('chemical_incident', (data: IChemicalIncident) => {
       us({
         app: {
@@ -404,6 +299,7 @@ export class Socket {
       });
       M.toast({ html: 'New Chemical Incident' });
     });
+    // ASSISTANCE plume
     this.socket.on('plume', (data: ICbrnFeatureCollection) => {
       const features = data.features as Feature[];
 
@@ -480,6 +376,13 @@ export class Socket {
         },
       });
     });
+    // ASSISTANCE message
+    this.socket.on('sas_message', (data: IAssistanceMessage) => {
+      // This is the alert message for this particular FR
+      console.log(data);
+      M.toast({ html: 'New Alert Message!' });
+    });    
+    // Chat message
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
       us({
@@ -499,6 +402,7 @@ export class Socket {
       });
       M.toast({ html: 'New Chat' });
     });
+    // Added to a group
     this.socket.on('server-notification', (data: string) => {
       const result = JSON.parse(data) as Array<IGroup>;
       us({
@@ -516,6 +420,120 @@ export class Socket {
       });
       M.toast({ html: 'Added to a new group' });
     });
+    // These positions are received directly from the agent-smith simulator
+    // These are therefore NOT assistance resources, but 'just' simEntities
+    this.socket.on('positions', (data: FeatureCollection) => {
+      if (!this.shouldUpdate()) {
+      } else {
+        us({
+          app: {
+            sources: (sources: Array<ISource>) => {
+              const index = sources.findIndex((source: ISource) => {
+                return source.sourceName === 'Positions';
+              });
+              if (index > -1) {
+                sources[index].source = data;
+              } else {
+                sources.push({
+                  id: 'testid1',
+                  source: data as FeatureCollection,
+                  sourceName: 'Positions',
+                  sourceCategory: SourceType.realtime,
+                  shared: false,
+                  layers: [
+                    {
+                      layerName: 'Firemen',
+                      showLayer: true,
+                      type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                      layout: {
+                        'icon-image': 'fireman',
+                        'icon-size': 0.5,
+                        'icon-allow-overlap': true,
+                      },
+                      filter: ['all', ['in', 'type', 'man', 'firefighter']],
+                    },
+                  ] as ILayer[],
+                } as ISource);
+              }
+              return sources;
+            },
+          },
+        });
+      }
+    });
+    // CAP Alert
+    this.socket.on('alert', (data: IAlert) => {
+      const alertArea = (data.info as IInfo).area as IArea[];
+
+       const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
+       const features = fc.features as Feature[];
+
+       // Find out the necessary layers (DeltaTimes)
+       const dts = features.map((feature: Feature) => {
+         return feature.properties?.deltaTime;
+       }) as number[];
+
+       const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
+
+       // Fix color formatting
+       fc.features.forEach((feature: Feature) => {
+         // @ts-ignore
+         feature.properties.color = '#' + feature.properties?.color as string;
+         return feature;
+       });
+
+       // Update the fc in the alert
+       ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
+
+       us({
+         app: {
+           sources: (sources: Array<ISource>) => {
+             const index = sources.findIndex((source: ISource) => {
+               return source.sourceName === data.identifier;
+             });
+             if (index > -1) {
+               sources[index].source = fc;
+             } else {
+               sources.push({
+                 id: 'testid2',
+                 source: fc as FeatureCollection,
+                 sourceName: 'Eindhoven Chlorine',
+                 sourceCategory: SourceType.alert,
+                 shared: false,
+                 layers: uniqueDTs.map((dt: number) => {
+                   return {
+                     layerName: dt.toString(),
+                     showLayer: true,
+                     type: { type: 'line' } as mapboxgl.AnyLayer,
+                     paint: {
+                         'line-color': {
+                           type: 'identity',
+                           property: 'color',
+                         },
+                         'line-opacity': 0.5,
+                         'line-width': 2,
+                       },
+                     filter: ['all', ['in', 'deltaTime', dt]],
+                   } as ILayer;
+                 }) as Array<ILayer>,
+               } as ISource);
+             }
+           },
+           alerts: (alerts: Array<IAlert>) => {
+             const index = alerts.findIndex((val: IAlert) => {
+               return val.identifier === data.identifier;
+             });
+             if (index > -1) {
+               alerts[index] = data;
+               return alerts;
+             }
+             alerts.push(data);
+             return alerts;
+           },
+         },
+       });
+       M.toast({ html: 'New Alert' });
+    });    
   }
 
   serverInit(s: IAppModel): Promise<Array<IGroup>> {

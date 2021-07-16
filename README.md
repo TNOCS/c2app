@@ -19,6 +19,9 @@ docker-compose up -d
 The GUI will then be available at [localhost:3000](http://localhost:3000/).  
 Refer to the [README](./docker/README.md) file in the `docker` folder for more information on what all the different services do.
 
+## Run integration tests
+[Run test](run_test.md)
+
 ## Development
 
 To run the node parts of this repository separately (i.e. without the Kafka infrastructure) you can run:

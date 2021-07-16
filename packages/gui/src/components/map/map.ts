@@ -44,6 +44,7 @@ export const Map: FactoryComponent<{
 
         map.once('styledata', () => {
           MapUtils.updateSourcesAndLayers(appState, actions, map);
+          MapUtils.updateSatellite(appState, map);
         });
       });
     },
@@ -67,6 +68,7 @@ export const Map: FactoryComponent<{
       }
 
       MapUtils.updateSourcesAndLayers(appState, actions, map);
+      MapUtils.updateSatellite(appState, map);
     },
   };
 };

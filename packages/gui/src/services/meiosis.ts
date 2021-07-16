@@ -87,6 +87,7 @@ export interface IAppModel {
     editLayer: number;
     resourceDict: { [id: string]: IAssistanceResource };
     sensorDict: { [id: string]: ISensor };
+    showSatellite: boolean;
 
     // CHT
     source: {
@@ -136,6 +137,7 @@ export interface IActions {
   updateDrawings: (feature: Feature) => void;
   deleteLayer: (sourceIndex: number) => void;
   setLayerEdit: (sourceIndex: number) => void;
+  toggleSatellite: () => void;
 
   // CHT
   createCHT: (hazard: Partial<IChemicalIncident>, location: number[]) => void;
@@ -189,6 +191,7 @@ export const appStateMgmt = {
       } as IGridOptions,
       resourceDict: {} as { [id: string]: IAssistanceResource },
       sensorDict: {} as { [id: string]: ISensor },
+      showSatellite: false,
 
       // CHT
       source: {
@@ -546,7 +549,6 @@ export const appStateMgmt = {
         });
       },
       updateCustomLayers: (layerName: string, icon: string, checked: boolean, shareWith: string[]) => {
-        console.log(icon, checked, shareWith);
         us({
           app: {
             customLayers: (layers: Array<[string, boolean]>) => {
@@ -596,6 +598,13 @@ export const appStateMgmt = {
             editLayer: sourceIndex,
           },
         });
+      },
+      toggleSatellite: () => {
+        us({
+          app: {
+            showSatellite: !states()['app'].showSatellite,
+          }
+        })
       },
 
       //CHT, fix to make this a cht.start message
@@ -667,7 +676,6 @@ export const appStateMgmt = {
       },
 
       updateCHT: (chemicalIncident: IChemicalIncident) => {
-        console.log(chemicalIncident);
         states()['app'].socket.serverCHT(chemicalIncident);
         us({
           app: {
@@ -701,7 +709,6 @@ export const appStateMgmt = {
               });
   
               if (index > -1) {
-                console.log('update');
                 sources[index].source = fc as FeatureCollection;
               } else {
                 sources.push({
@@ -731,9 +738,7 @@ export const appStateMgmt = {
       },
 
       createPopulatorRequest: async () => {
-        console.log(states()['app'].latestDrawing)
         const result = await states()['app'].socket.serverPopulator(states()['app'].latestDrawing) as FeatureCollection;
-        console.log(result)
 
         us({
           app: {

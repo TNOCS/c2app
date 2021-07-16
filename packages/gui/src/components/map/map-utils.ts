@@ -6,39 +6,23 @@ import { Point, Feature, Polygon, FeatureCollection, Geometry } from 'geojson';
 import { IActions, IAppModel, ILayer, ISource, SourceType } from '../../services/meiosis';
 import SquareGrid from '@turf/square-grid';
 import polylabel from 'polylabel';
-// @ts-ignore
+// ICONS
 import car from '../../assets/Operations/Car.png';
-// @ts-ignore
 import van from '../../assets/Operations/Car.png';
-// @ts-ignore
 import controlPoint from '../../assets/Operations/Control point.png';
-// @ts-ignore
 import divisionCommand from '../../assets/Operations/Division command.png';
-// @ts-ignore
 import evacuation from '../../assets/Operations/Evacuation.png';
-// @ts-ignore
 import fireman from '../../assets/Operations/Firemen unit.png';
-// @ts-ignore
 import helicopter from '../../assets/Operations/Helicopter.png';
-// @ts-ignore
 import media from '../../assets/Operations/Media.png';
-// @ts-ignore
 import sanitary from '../../assets/Operations/Medical services.png';
-// @ts-ignore
 import military from '../../assets/Operations/Military.png';
-// @ts-ignore
 import policeman from '../../assets/Operations/Police unit.png';
-// @ts-ignore
 import roadBlock from '../../assets/Operations/Road block.png';
-// @ts-ignore
 import truck from '../../assets/Operations/Truck.png';
-// @ts-ignore
 import chemical from '../../assets/Incidents/Chemical.png';
-// @ts-ignore
 import air from '../../assets/Operations/air.png';
-// @ts-ignore
 import ground from '../../assets/Operations/ground.png';
-// @ts-ignore
 import first_responder from '../../assets/Operations/Medical services.png';
 
 export const drawConfig = {
@@ -64,10 +48,11 @@ export const handleDrawEvent = (map: mapboxgl.Map, features: MapboxGeoJSONFeatur
 
 const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: IActions) => {
   let layers: Array<string> = [];
-  
+
   if (map.getLayer('ResourcesresourcesIDfiremanResources')) layers.push('ResourcesresourcesIDfiremanResources');
   if (map.getLayer('ResourcesresourcesIDpolicemanResources')) layers.push('ResourcesresourcesIDpolicemanResources');
-  if (map.getLayer('ResourcesresourcesIDfirst_responderResources')) layers.push('ResourcesresourcesIDfirst_responderResources');
+  if (map.getLayer('ResourcesresourcesIDfirst_responderResources'))
+    layers.push('ResourcesresourcesIDfirst_responderResources');
   if (map.getLayer('ResourcesresourcesIDsanitaryResources')) layers.push('ResourcesresourcesIDsanitaryResources');
   if (map.getLayer('ResourcesresourcesIDcarResources')) layers.push('ResourcesresourcesIDcarResources');
   if (map.getLayer('ResourcesresourcesIDvanResources')) layers.push('ResourcesresourcesIDvanResources');
@@ -80,7 +65,8 @@ const getFeaturesInPolygon = (map: mapboxgl.Map, features: Feature[], actions: I
   const bounding = bbox(features[0]);
   let bboxFeatures = map.queryRenderedFeatures(
     [map.project([bounding[0], bounding[1]]), map.project([bounding[2], bounding[3]])],
-    { layers: layers });
+    { layers: layers }
+  );
   const polyFeatures = bboxFeatures.filter((element) =>
     booleanPointInPolygon(
       [(element.geometry as Point).coordinates[0], (element.geometry as Point).coordinates[1]],
@@ -198,6 +184,26 @@ export const loadImages = (map: mapboxgl.Map) => {
     if (error) throw error;
     if (!map.hasImage('media')) map.addImage('media', image as ImageBitmap);
   });
+  map.loadImage(controlPoint, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('controlPoint')) map.addImage('controlPoint', image as ImageBitmap);
+  });
+  map.loadImage(divisionCommand, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('divisionCommand')) map.addImage('divisionCommand', image as ImageBitmap);
+  });
+  map.loadImage(evacuation, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('evacuation')) map.addImage('evacuation', image as ImageBitmap);
+  });
+  map.loadImage(helicopter, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('helicopter')) map.addImage('helicopter', image as ImageBitmap);
+  });
+  map.loadImage(military, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('military')) map.addImage('military', image as ImageBitmap);
+  });
 };
 
 export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
@@ -220,24 +226,17 @@ export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
   }
   const appLayers = currentStyle.layers?.filter((el) => {
     // app layers are the layers to retain, and these are any layers which have a different source set
-    return (
-      // @ts-ignore
-      el.source &&
-      // @ts-ignore
-      el.source != 'mapbox://mapbox.satellite' &&
-      // @ts-ignore
-      el.source != 'mapbox' &&
-      // @ts-ignore
-      el.source != 'composite'
-    );
+    const source = (el as any).source;
+    return source &&
+      source != 'mapbox://mapbox.satellite' &&
+      source != 'mapbox' &&
+      source != 'composite';
   });
 
-  newStyle.layers = [
-    // @ts-ignore
+  if(!newStyle || !newStyle.layers || !appLayers) return;
+  newStyle.layers = [  
     ...newStyle.layers.slice(0, labelIndex),
-    // @ts-ignore
     ...appLayers,
-    // @ts-ignore
     ...newStyle.layers.slice(labelIndex, -1),
   ];
 
@@ -268,7 +267,7 @@ export const updateSourcesAndLayers = (appState: IAppModel, actions: IActions, m
           type: layer.type.type,
           source: sourceName,
           layout: layer.layout ? layer.layout : {},
-          // @ts-ignore
+          // @ts-ignore        
           paint: layer.paint ? layer.paint : {},
           filter: layer.filter ? layer.filter : ['all'],
         });
@@ -288,4 +287,37 @@ export const updateGrid = (appState: IAppModel, actions: IActions, map: mapboxgl
   const gridLabelsSource = getLabelsSource(gridSource);
 
   actions.updateGrid(gridSource, gridLabelsSource);
+};
+
+export const updateSatellite = (appState: IAppModel, map: mapboxgl.Map) => {
+  // Set source
+  const sourceName = 'wms-satellite-source';
+  if (!map.getSource(sourceName)) {
+    map.addSource(sourceName, {
+      type: 'raster',
+      tiles: ['https://service.pdok.nl/hwh/luchtfotorgb/wmts/v1_0/Actueel_ortho25/EPSG:3857/{z}/{x}/{y}.jpeg'],
+      tileSize: 256,
+      maxzoom: 18,
+    });
+  }
+  // Set Layer
+  const layerName = 'wms-satellite-layer';
+
+  if (!map.getLayer(layerName)) {
+    map.addLayer(
+      {
+        id: layerName,
+        type: 'raster',
+        source: sourceName,
+        layout: {
+          visibility: appState.app.showSatellite ? 'visible' : 'none',
+        },
+      
+        paint: {},
+      },
+      'aeroway-line'
+    );
+  }
+  map.setLayoutProperty(layerName, 'visibility', appState.app.showSatellite ? 'visible' : 'none');
+  map.setPaintProperty('building', 'fill-opacity', appState.app.showSatellite ? 0 : ["interpolate", ["linear"], ["zoom"], 15, 0, 16, 1]);
 };

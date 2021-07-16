@@ -22,7 +22,7 @@ To start all the services in the background (`-d` flag) run the following comman
 docker-compose up -d
 ```
 
-Then, start Agent Smith Simulator. You can use VSCode's `run` tab, and run `launch simulation` (make sure to run `npm install` and `npm run build` in `docker/simulation/ass` before running the ASS)
+Then, start [Agent Smith Simulator][ass].
 
 ## Inspecting the environment
 
@@ -33,3 +33,4 @@ Alternatively, if the [Docker plugin](https://marketplace.visualstudio.com/items
 [schema-registry-ui]: http://localhost:3601
 [env-file]: https://docs.docker.com/compose/environment-variables/#the-env-file
 [c2app-local]: http://localhost:3000
+[ass]: https://github.com/TNOCS/agent-smith

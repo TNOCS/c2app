@@ -101,8 +101,8 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-pop')
-  async handleClientPop(client: Socket, data: Feature) {
-    const response = await this.httpService.post(this.pop_URL, data).toPromise();
+  async handleClientPop(client: Socket, data: {feature: Feature}) {
+    const response = await this.httpService.post(this.pop_URL, data.feature).toPromise();
     return JSON.stringify(response.data);
   }
 
@@ -136,6 +136,5 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   updateGroupNameForId(data: INameUpdate) {
     const obj = this.groups.get(data.id);
     obj.name = data.name;
-    console.log(this.groups.get(data.id));
   }
 }

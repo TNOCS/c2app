@@ -1,6 +1,5 @@
 import m, { FactoryComponent } from 'mithril';
 import { IActions, IAppModel } from '../services/meiosis';
-// @ts-ignore
 import logo from '../assets/safr.svg';
 import { profileModal } from './sidebars/modals';
 import M from 'materialize-css';

@@ -9,7 +9,6 @@ import { ICbrnProperties } from '../../../../shared/src/models/cbrn_geojson-valu
 
 export const formatMan = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
-  console.log(ft);
   return m('div', [
     m('p', 'Layer Name: ' + ft.layer.id),
     m('p', 'Type: ' + props?.type),
@@ -18,7 +17,6 @@ export const formatMan = (ft: MapboxGeoJSONFeature) => {
 };
 export const formatCar = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
-  console.log(ft);
   return m('div', [
     m('p', 'Layer Name: ' + ft.layer.id),
     m('p', 'Type: ' + props?.type),
@@ -27,7 +25,6 @@ export const formatCar = (ft: MapboxGeoJSONFeature) => {
 
 export const formatUnknown = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
-  console.log(ft);
   return m('div', [
     m('p', 'Layer Name: ' + ft.layer.id),
     m('p', 'ID: ' + props?.id),

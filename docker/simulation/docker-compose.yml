@@ -143,17 +143,61 @@ services:
     volumes:
       - $PWD/redis-data:/var/lib/redis
       - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
-  c2app:
-    image: timovdk/c2app:latest
-    depends_on:
-      - broker
-      - schema_registry
-      - dispersionservice
-    ports:
-      - 3000:3000
-    environment:
-      KAFKA_HOST: broker:9092
-      SCHEMA_REGISTRY: http://schema_registry:3502
-      PORT: 3000
-      SERVER: http://localhost:3000
-      DISPERSION_SERVICE: https://assistance.hex.tno.nl/dispersionservice
+      
+#  c2app:
+#    image: timovdk/c2app:latest
+#    depends_on:
+#      - broker
+#      - schema_registry
+#    ports:
+#      - 3000:3000
+#    environment:
+#      KAFKA_HOST: broker:9092
+#      SCHEMA_REGISTRY: http://schema_registry:3502
+#      PORT: 3000
+#      SERVER: http://localhost:3000
+#      DISPERSION_SERVICE: https://assistance.hex.tno.nl/dispersionservice
+      
+#  db:
+#    container_name: pop-service-db
+#    image: floris881/pop-service-db
+#    env_file:
+#      - .env
+#    volumes:
+#      - pop-data:/var/libe/postgis/data
+#    ports:
+#      - 5432:5432
+#    restart: on-failure
+#    shm_size: '4g'
+#
+#  pgadmin:
+#    container_name: pop-service-pgadmin
+#    image: dpage/pgadmin4
+#    restart: on-failure
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: pgadmin@database.org
+#      PGADMIN_DEFAULT_PASSWORD: Geheim1!
+#      PGADMIN_LISTEN_PORT: 80
+#    ports:
+#      - 8080:80
+#    depends_on:
+#      - db
+#    links:
+#      - db:postgis-db
+#    volumes:
+#      - ./pgadmin/servers.json:/pgadmin4/servers.json
+#
+#  pop:
+#    container_name: pop-service
+#    image: floris881/population-service
+#    env_file:
+#      - .env
+#    ports:
+#      - 3333:3333
+#    restart: on-failure
+#    depends_on:
+#      - db
+#
+#volumes:
+#  pop-data:
+#    external: false

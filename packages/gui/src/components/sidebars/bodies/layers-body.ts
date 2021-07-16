@@ -29,6 +29,20 @@ export const layersBody: FactoryComponent<{
                   },
                 },
                 'Light'),
+                m('div.valign-wrapper.col.s12', [
+                  m('div.switch.col.s2',
+                    m('label', [
+                      m('input', {
+                        type: 'checkbox',
+                        checked: vnode.attrs.state.app.showSatellite,
+                        onclick: () => {
+                          vnode.attrs.actions.toggleSatellite();
+                        },
+                      }),
+                      m('span.lever'),
+                    ])),
+                  m('p.col.s9', 'NL Satellite'),
+                ])
             ])),
           ]),
         ]),
