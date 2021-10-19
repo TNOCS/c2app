@@ -1,19 +1,19 @@
 export enum ResourceType {
-  person = 'person',
-  vehicle = 'vehicle',
-  unmannedVehicle = 'unmannedVehicle',
+  person = 'PERSON',
+  vehicle = 'VEHICLE',
+  unmannedVehicle = 'UNMANNED_VEHICLE',
 }
 
 export enum ResourceSubtype {
-  fireman = 'fireman',
-  policeman = 'policeman',
-  first_responder = 'first_responder',
-  sanitary = 'sanitary',
-  car = 'car',
-  van = 'van',
-  truck = 'truck',
-  air = 'air',
-  ground = 'ground',
+  FIREFIGHTER = 'FIREFIGHTER',
+  POLICE = 'POLICE',
+  MEDICAL = 'MEDICAL',
+  OTHER = 'OTHER',
+  CAR = 'CAR',
+  VAN = 'VAN',
+  TRUCK = 'TRUCK',
+  AIR = 'AIR',
+  GROUND = 'GROUND',
 }
 
 export interface IGeometry {

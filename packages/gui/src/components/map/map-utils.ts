@@ -138,39 +138,39 @@ export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): Feature
 export const loadImages = (map: mapboxgl.Map) => {
   map.loadImage(fireman, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('fireman')) map.addImage('fireman', image as ImageBitmap);
+    if (!map.hasImage('FIREFIGHTER')) map.addImage('FIREFIGHTER', image as ImageBitmap);
   });
   map.loadImage(policeman, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('policeman')) map.addImage('policeman', image as ImageBitmap);
-  });
-  map.loadImage(first_responder, function (error, image) {
-    if (error) throw error;
-    if (!map.hasImage('first_responder')) map.addImage('first_responder', image as ImageBitmap);
+    if (!map.hasImage('POLICE')) map.addImage('POLICE', image as ImageBitmap);
   });
   map.loadImage(sanitary, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('sanitary')) map.addImage('sanitary', image as ImageBitmap);
+    if (!map.hasImage('MEDICAL')) map.addImage('MEDICAL', image as ImageBitmap);
+  });
+  map.loadImage(first_responder, function (error, image) {
+    if (error) throw error;
+    if (!map.hasImage('OTHER')) map.addImage('OTHER', image as ImageBitmap);
   });
   map.loadImage(car, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('car')) map.addImage('car', image as ImageBitmap);
+    if (!map.hasImage('CAR')) map.addImage('CAR', image as ImageBitmap);
   });
   map.loadImage(van, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('van')) map.addImage('van', image as ImageBitmap);
+    if (!map.hasImage('VAN')) map.addImage('VAN', image as ImageBitmap);
   });
   map.loadImage(truck, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('truck')) map.addImage('truck', image as ImageBitmap);
+    if (!map.hasImage('TRUCK')) map.addImage('TRUCK', image as ImageBitmap);
   });
   map.loadImage(air, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('air')) map.addImage('air', image as ImageBitmap);
+    if (!map.hasImage('AIR')) map.addImage('AIR', image as ImageBitmap);
   });
   map.loadImage(ground, function (error, image) {
     if (error) throw error;
-    if (!map.hasImage('ground')) map.addImage('ground', image as ImageBitmap);
+    if (!map.hasImage('GROUND')) map.addImage('GROUND', image as ImageBitmap);
   });
   map.loadImage(chemical, function (error, image) {
     if (error) throw error;

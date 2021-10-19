@@ -1,8 +1,3 @@
-export enum UseMeteoService {
-  true = 'true',
-  false = 'false'
-}
-
 export enum ChemicalSubstance {
   UnknownLow = 'UnknownLow',
   UnknownMedium = 'UnknownMedium',
@@ -344,9 +339,11 @@ export enum ChemicalSubstance {
 }
 
 export enum Toxicity {
-  low = 'low',
-  medium = 'medium',
-  high = 'high'
+  VERY_LOW = 'VERY_LOW',
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  VERY_HIGH = 'VERY_HIGH'
 }
 
 export enum PasquillClass {
@@ -368,7 +365,7 @@ export interface IChemicalIncidentScenario {
    * Whether the CHT should use meteo information from external meteo service or
    * from this message
    */
-  use_meteo_service?: null | undefined | UseMeteoService;
+  use_meteo_service?: null | boolean;
   /** The height in meter above the ground at which the release takes place */
   source_height?: null | undefined | number;
   /** Released quantity */
@@ -402,10 +399,13 @@ export interface IChemicalIncidentScenario {
 }
 
 export enum OutputKind {
-  contours = 'contours',
-  template = 'template',
-  ensemble = 'ensemble',
-  trajectories = 'trajectories'
+  CONTOUR = 'CONTOUR',
+  TEMPLATE = 'TEMPLATE',
+  ENSEMBLE = 'ENSEMBLE',
+  TRAJECTORIES = 'TRAJECTORIES',
+  BOTH = 'BOTH',
+  GRID = 'GRID',
+  PROBABILISTIC = 'PROBABILISTIC'
 }
 
 /** Extra options to control the output */

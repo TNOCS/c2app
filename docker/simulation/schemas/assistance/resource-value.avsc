@@ -15,9 +15,9 @@
                 "name": "ResourceType",
                 "type": "enum",
                 "symbols": [
-                    "person",
-                    "vehicle",
-                    "unmannedVehicle"
+                    "PERSON",
+                    "VEHICLE",
+                    "UNMANNED_VEHICLE"
                 ]
             },
             "doc": "Type of resource"
@@ -28,15 +28,15 @@
                 "name": "ResourceSubtype",
                 "type": "enum",
                 "symbols": [
-                    "fireman",
-                    "policeman",
-                    "first_responder",
-                    "sanitary",
-                    "car",
-                    "van",
-                    "truck",
-                    "air",
-                    "ground"
+                    "FIREFIGHTER",
+                    "POLICE",
+                    "MEDICAL",
+                    "OTHER",
+                    "CAR",
+                    "VAN",
+                    "TRUCK",
+                    "AIR",
+                    "GROUND"
                 ]
             },
             "doc": "Subtype of resource. Note that the subtype must be in accordance with the type of resource, so the applicable subtypes for 'person' are ['fireman', 'policeman', 'sanitary'], for 'vehicle' are ['car', 'van', 'truck'] and for 'unmannedVehicle' are ['air', 'ground']"

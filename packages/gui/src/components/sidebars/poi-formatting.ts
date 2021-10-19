@@ -47,6 +47,7 @@ export const alertFormatComponent: FactoryComponent<{
         m('p', 'Source Name: ' + ft.source),
         m('p', 'Comments: ' + (ft.properties as ICbrnProperties).comments),
         m('p', 'Toxicity: ' + (ft.properties as ICbrnProperties).toxicityLevel),
+        m('p', 'Confidence: ' + (ft.properties as ICbrnProperties).confidence),
         m('p.range-field', m('input-field', [
             m('input', {
               type: 'range',

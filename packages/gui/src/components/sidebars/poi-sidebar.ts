@@ -49,11 +49,11 @@ export const poiSidebar: FactoryComponent<{
                 ? m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
                 : vnode.attrs.state.app.clickedFeature?.properties?.type === 'incidentLocation'
                 ? m(incidentLocationFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'man'
+                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'MAN'
                 ? formatMan(vnode.attrs.state.app.clickedFeature)
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'car'
+                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'CAR'
                 ? formatCar(vnode.attrs.state.app.clickedFeature)
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'firefighter'
+                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'FIREFIGHTER'
                 ? formatMan(vnode.attrs.state.app.clickedFeature)
                 : formatUnknown(vnode.attrs.state.app.clickedFeature)
               : // If there is no clicked feature

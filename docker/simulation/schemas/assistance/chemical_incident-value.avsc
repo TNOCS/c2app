@@ -38,11 +38,7 @@
                             "null",
                             {
                                 "name": "UseMeteoService",
-                                "type": "enum",
-                                "symbols": [
-                                    "true",
-                                    "false"
-                                ]
+                                "type": "boolean"
                             }
                         ],
                         "default": null
@@ -443,9 +439,11 @@
                                 "name": "Toxicity",
                                 "type": "enum",
                                 "symbols": [
-                                    "low",
-                                    "medium",
-                                    "high"
+                                    "VERY_LOW",
+                                    "LOW",
+                                    "MEDIUM",
+                                    "HIGH",
+                                    "VERY_HIGH" 
                                 ]
                             }
                         ],
@@ -573,10 +571,13 @@
                                     "name": "OutputKind",
                                     "type": "enum",
                                     "symbols": [
-                                        "contours",
-                                        "template",
-                                        "ensemble",
-                                        "trajectories"
+                                        "CONTOUR",
+                                        "TEMPLATE",
+                                        "ENSEMBLE",
+                                        "TRAJECTORIES",
+                                        "BOTH",
+                                        "GRID",
+                                        "PROBABILISTIC"
                                     ]
                                 }
                             ],

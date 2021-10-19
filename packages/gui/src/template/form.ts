@@ -42,7 +42,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
       z: 1.5,
       cell_size: 10,
       time_of_interest: 120,
-      output: OutputKind.contours,
+      output: OutputKind.CONTOUR,
       comment: '',
     } as IChemicalIncidentControlParameters;
   }
@@ -76,11 +76,11 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           type: 'select',
           className: 'col m6',
           options: [
-            { id: 'template' , label: 'template' },
-            { id: 'contours', label: 'contours' },
-            { id: 'both', label: 'both' },
-            { id: 'ensemble', label: 'ensemble' },
-            { id: 'trajectories', label: 'trajectories' },
+            { id: 'TEMPLATE' , label: 'template' },
+            { id: 'CONTOUR', label: 'contours' },
+            { id: 'BOTH', label: 'both' },
+            { id: 'ENSEMBLE', label: 'ensemble' },
+            { id: 'TRAJECTORIES', label: 'trajectories' },
           ],
         },
         {
@@ -187,11 +187,11 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           value: 'medium',
           className: 'col m6',
           options: [
-            { id: 'verylow', label: 'Very low' },
-            { id: 'low' },
-            { id: 'medium' },
-            { id: 'high' },
-            { id: 'veryhigh', label: 'Very high' },
+            { id: 'VERY_LOW', label: 'Very low'},
+            { id: 'LOW', label: 'Low' },
+            { id: 'MEDIUM', label: 'Medium' },
+            { id: 'HIGH', label: 'High' },
+            { id: 'VERY_HIGH', label: 'Very high' },
           ],
         },
         { type: 'md', value: '###### Meteorology', className: 'col s12' },
@@ -199,7 +199,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           id: 'use_meteo_service',
           type: 'checkbox',
           label: 'Wind direction and speed from external service',
-          value: 'true',
+          value: true,
           className: 'col m12',
         },
         {

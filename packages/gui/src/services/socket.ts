@@ -126,7 +126,7 @@ export class Socket {
                   type: { type: 'symbol' } as mapboxgl.AnyLayer,
                   layout: {
                     'icon-image': type,
-                    'icon-size': type === 'ground' ? 0.1 : type === 'air' ? 0.25 : 0.5,
+                    'icon-size': type === 'GROUND' ? 0.1 : type === 'AIR' ? 0.25 : 0.5,
                     'icon-allow-overlap': true,
                   },
                   filter: ['all', ['in', 'resourceSubType', type]],
@@ -146,7 +146,7 @@ export class Socket {
                     type: { type: 'symbol' } as mapboxgl.AnyLayer,
                     layout: {
                       'icon-image': type,
-                      'icon-size': type === 'ground' ? 0.1 : type === 'air' ? 0.25 : 0.5,
+                      'icon-size': type === 'GROUND' ? 0.1 : type === 'AIR' ? 0.25 : 0.5,
                       'icon-allow-overlap': true,
                     },
                     filter: ['all', ['in', 'resourceSubType', type]],
@@ -422,7 +422,7 @@ export class Socket {
     });
     // These positions are received directly from the agent-smith simulator
     // These are therefore NOT assistance resources, but 'just' simEntities
-    this.socket.on('positions', (data: FeatureCollection) => {
+    /*this.socket.on('positions', (data: FeatureCollection) => {
       if (!this.shouldUpdate()) {
       } else {
         us({
@@ -460,7 +460,7 @@ export class Socket {
           },
         });
       }
-    });
+    });*/
     // CAP Alert
     this.socket.on('alert', (data: IAlert) => {
       const alertArea = (data.info as IInfo).area as IArea[];
