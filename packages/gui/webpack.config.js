@@ -2,24 +2,18 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const webpack = require('webpack')
-const {GenerateSW} = require('workbox-webpack-plugin');
+const webpack = require('webpack');
+const { GenerateSW } = require('workbox-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = (env) => {
   const isProduction = env.production;
   const outputPath = path.resolve(__dirname, isProduction ? '../../docs' : './dist');
-  const publicPath = isProduction
-    ? 'https://timovdk.github.io/c2app/'
-    : '/';
+  const publicPath = isProduction ? 'https://timovdk.github.io/c2app/' : '/';
 
-  console.log(
-    `Running in ${
-      isProduction ? 'production' : 'development'
-    } mode, output directed to ${outputPath}.`,
-  );
+  console.log(`Running in ${isProduction ? 'production' : 'development'} mode, output directed to ${outputPath}.`);
 
   return {
     mode: isProduction ? 'production' : 'development',
@@ -28,14 +22,11 @@ module.exports = (env) => {
     devServer: {
       liveReload: true,
       port: 1234,
-      contentBase: './dist',
+      // contentBase: './dist',
     },
     plugins: [
       new webpack.WatchIgnorePlugin({
-        paths: [
-          /\.js$/,
-          /\.d\.ts$/,
-        ],
+        paths: [/\.js$/, /\.d\.ts$/],
       }),
       new Dotenv(),
       new HtmlWebpackPlugin({
@@ -49,9 +40,9 @@ module.exports = (env) => {
             path: './app.webmanifest',
             publicPath: false,
             attributes: {
-              rel: 'manifest'
-            }
-          }
+              rel: 'manifest',
+            },
+          },
         ],
         metas: [
           {
@@ -104,35 +95,37 @@ module.exports = (env) => {
           },
         ],
       }),
-      new MiniCssExtractPlugin({
-        filename: isProduction ? '[name].[contenthash].css' : '[name].css',
-        chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
-      }),
+      // new MiniCssExtractPlugin({
+      //   filename: isProduction ? '[name].[contenthash].css' : '[name].css',
+      //   chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
+      // }),
       new GenerateSW({
-        swDest: "sw.js",
-        maximumFileSizeToCacheInBytes: 7000000,
+        swDest: 'sw.js',
+        maximumFileSizeToCacheInBytes: 10000000,
         clientsClaim: true,
         skipWaiting: true,
       }),
       new CopyPlugin({
         patterns: [
-          { from: "src/app.webmanifest" },
-          { from: "src/assets/pwa-192x192.png"},
-          { from: "src/assets/pwa-512x512.png"}
-        ]
+          { from: 'src/app.webmanifest' },
+          { from: 'src/assets/pwa-192x192.png' },
+          { from: 'src/assets/pwa-512x512.png' },
+        ],
       }),
     ],
     module: {
       rules: [
         {
           test: /\.ts$/,
-          use: [{
-            loader: 'ts-loader',
-            options: {
-              configFile: path.resolve(__dirname, 'tsconfig.json'),
-              projectReferences: true,
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                configFile: path.resolve(__dirname, 'tsconfig.json'),
+                projectReferences: true,
+              },
             },
-          }],
+          ],
           exclude: /node_modules/,
         },
         {
@@ -147,10 +140,10 @@ module.exports = (env) => {
           test: /\.(woff|woff2|eot|ttf|otf)$/i,
           type: 'asset/resource',
         },
-        {
-          test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
-        },
+        // {
+        //   test: /\.css$/,
+        //   use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        // },
         // {
         //   test: /\.(csv|tsv)$/i,
         //   use: ['csv-loader'],
