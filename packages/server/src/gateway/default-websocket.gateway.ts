@@ -14,22 +14,26 @@ import {
   IGroupsInit,
   IGroupCreate,
   IGroupUpdate,
-  IGroupDelete, ICHT, IReturnGroup, INameUpdate,
-} from '../../../shared/src';
+  IGroupDelete,
+  ICHT,
+  IReturnGroup,
+  INameUpdate,
+} from 'c2app-models-utils';
 import { HttpService } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-@WebSocketGateway({cors: {origin: true}})
+@WebSocketGateway({ cors: { origin: true } })
 export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private httpService: HttpService, private configService: ConfigService) {
-  }
+  constructor(private httpService: HttpService, private configService: ConfigService) {}
 
   @WebSocketServer() server: Server;
   private clients: number = 0;
   private groups: Map<string, IServerGroup> = new Map<string, IServerGroup>();
   public callsignToSocketId: Map<string, string> = new Map<string, string>();
-  private URL: string = this.configService.get<string>('DISPERSION_SERVICE') ? `${ this.configService.get<string>('DISPERSION_SERVICE') + '/process'}` : 'http://localhost:8080/process';
-  private pop_URL: string = 'http://localhost:3333/detailed'
+  private URL: string = this.configService.get<string>('DISPERSION_SERVICE')
+    ? `${this.configService.get<string>('DISPERSION_SERVICE') + '/process'}`
+    : 'http://localhost:8080/process';
+  private pop_URL: string = 'http://localhost:3333/detailed';
 
   /** Handlers */
   async handleConnection(client: Socket) {
@@ -65,7 +69,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
 
   @SubscribeMessage('client-update')
   handleClientUpdate(client: Socket, data: INameUpdate): string {
-    this.updateGroupNameForId(data)
+    this.updateGroupNameForId(data);
 
     return this.getGroupIdsForCallsign(data.callsign);
   }
@@ -101,7 +105,7 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
   }
 
   @SubscribeMessage('client-pop')
-  async handleClientPop(client: Socket, data: {feature: Feature}) {
+  async handleClientPop(client: Socket, data: { feature: Feature }) {
     const response = await this.httpService.post(this.pop_URL, data.feature).toPromise();
     return JSON.stringify(response.data);
   }
@@ -126,11 +130,16 @@ export class DefaultWebSocketGateway implements OnGatewayConnection, OnGatewayDi
       ...new Set(
         featureCollection.features.map((feature: Feature) => {
           return feature.properties.id;
-        }),
+        })
       ),
     ];
 
-    this.groups.set(update.id, { features: featureCollection, callsigns: callsigns, owner: update.callsign, name: update.name });
+    this.groups.set(update.id, {
+      features: featureCollection,
+      callsigns: callsigns,
+      owner: update.callsign,
+      name: update.name,
+    });
     return this.groups.get(update.id);
   }
   updateGroupNameForId(data: INameUpdate) {

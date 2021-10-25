@@ -1,14 +1,16 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  TestBedAdapter,
-  Logger,
-  LogLevel,
-  IAdapterMessage,
-  ProduceRequest,
-} from 'node-test-bed-adapter';
+import { TestBedAdapter, Logger, LogLevel, IAdapterMessage, ProduceRequest } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert, IAssistanceMessage, IAssistanceResource, ICbrnFeatureCollection, IContext, IMission, ISensor } from '../../../shared/src';
+import {
+  IAlert,
+  IAssistanceMessage,
+  IAssistanceResource,
+  ICbrnFeatureCollection,
+  IContext,
+  IMission,
+  ISensor,
+} from 'c2app-models-utils';
 
 interface ISendResponse {
   [topic: string]: {
@@ -46,7 +48,17 @@ export class KafkaService {
         clientId: 'c2app-server',
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }, { topic: chemicalIncidentTopic }, { topic: plumeTopic }, { topic: messageTopic }],
+        consume: [
+          { topic: SimEntityFeatureCollectionTopic },
+          { topic: capMessage },
+          { topic: contextTopic },
+          { topic: missionTopic },
+          { topic: resourceTopic },
+          { topic: sensorTopic },
+          { topic: chemicalIncidentTopic },
+          { topic: plumeTopic },
+          { topic: messageTopic },
+        ],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
@@ -113,13 +125,14 @@ export class KafkaService {
           break;
         case messageTopic:
           // Send message only to the resource that is mentioned
-          if(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource)) {
+          if (this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource)) {
             this.socket.server
-            .to(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource))
-            .emit('sas_message', message.value as IAssistanceMessage);
-          }
-          else {
-            console.log('Alert for ID: ' + (message.value as IAssistanceMessage).resource + ', resource not logged in!');
+              .to(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource))
+              .emit('sas_message', message.value as IAssistanceMessage);
+          } else {
+            console.log(
+              'Alert for ID: ' + (message.value as IAssistanceMessage).resource + ', resource not logged in!'
+            );
           }
           break;
         default:
@@ -138,22 +151,17 @@ export class KafkaService {
   }
   private static preparePlume(collection: ICbrnFeatureCollection) {
     for (const feature of collection.features) {
-      if(feature.geometry[`nl.tno.assistance.geojson.geometry.Point`]) {
+      if (feature.geometry[`nl.tno.assistance.geojson.geometry.Point`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Point`];
-      }
-      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`];
-      }
-      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]){
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`];
       }
     }

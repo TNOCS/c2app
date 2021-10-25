@@ -6,15 +6,15 @@ import { Socket } from './socket';
 import {
   IAlert,
   IAssistanceResource,
-  IChemicalIncident, 
-  IChemicalIncidentControlParameters, 
+  IChemicalIncident,
+  IChemicalIncidentControlParameters,
   IChemicalIncidentScenario,
   IGridOptions,
   IGroup,
   IMessage,
   ISensor,
   uuid4,
-} from '../../../shared/src';
+} from 'c2app-models-utils';
 // @ts-ignore
 import ch from '../ch.json';
 import mapboxgl, { LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
@@ -34,7 +34,7 @@ export const enum SourceType {
   'custom',
   'alert',
   'chemical_incident',
-  'plume'
+  'plume',
 }
 
 export interface ISource {
@@ -42,7 +42,7 @@ export interface ISource {
   source: FeatureCollection;
   sourceName: string;
   dts?: Array<number>;
-  sourceCategory: SourceType
+  sourceCategory: SourceType;
   layers: ILayer[];
   shared: boolean;
   shareWith?: string[];
@@ -62,9 +62,9 @@ export interface IAppModel {
     selectedFeatures?: FeatureCollection;
     latestDrawing: Feature;
     clearDrawing: {
-      delete: boolean,
-      id: string
-    },
+      delete: boolean;
+      id: string;
+    };
 
     // Groups
     groups: Array<IGroup>;
@@ -186,7 +186,7 @@ export const appStateMgmt = {
       gridOptions: {
         gridCellSize: 0.5,
         updateLocation: false,
-        gridLocation: [5.46, 51.42, 5.50, 51.46],
+        gridLocation: [5.46, 51.42, 5.5, 51.46],
         updateGrid: true,
       } as IGridOptions,
       resourceDict: {} as { [id: string]: IAssistanceResource },
@@ -235,7 +235,7 @@ export const appStateMgmt = {
           app: {
             sources: (sources: Array<ISource>) => {
               sources.forEach((source: ISource) => {
-                if ((source.sourceName + source.id) !== name) return;
+                if (source.sourceName + source.id !== name) return;
 
                 let deltaTime_values = source.dts as Array<number>;
 
@@ -255,13 +255,13 @@ export const appStateMgmt = {
                 } else {
                   let i: number;
                   for (i = 0; i < dt_len - 1; i++) {
-                    if ((val >= deltaTime_values[i]) && (val <= deltaTime_values[i + 1])) {
+                    if (val >= deltaTime_values[i] && val <= deltaTime_values[i + 1]) {
                       i1 = i;
                       i2 = i1 + 1;
                       const d1 = val - deltaTime_values[i];
                       const d2 = deltaTime_values[i + 1] - val;
-                      opacity1 = 1 - (d1 / (d1 + d2));
-                      opacity2 = 1 - (d2 / (d1 + d2));
+                      opacity1 = 1 - d1 / (d1 + d2);
+                      opacity2 = 1 - d2 / (d1 + d2);
                     }
                   }
                 }
@@ -270,7 +270,7 @@ export const appStateMgmt = {
                   const index = deltaTime_values.indexOf(dt);
                   if (index == i1) {
                     return opacity1;
-                  } else if ((opacity1 < 1) && (index == i2)) {
+                  } else if (opacity1 < 1 && index == i2) {
                     return opacity2;
                   } else {
                     return 0.05;
@@ -475,14 +475,16 @@ export const appStateMgmt = {
                   sourceName: 'GridSource',
                   sourceCategory: SourceType.grid,
                   shared: false,
-                  layers: [{
-                    layerName: 'Grid',
-                    showLayer: false,
-                    type: { type: 'line' } as mapboxgl.AnyLayer,
-                    paint: {
-                      'line-opacity': 0.5,
+                  layers: [
+                    {
+                      layerName: 'Grid',
+                      showLayer: false,
+                      type: { type: 'line' } as mapboxgl.AnyLayer,
+                      paint: {
+                        'line-opacity': 0.5,
+                      },
                     },
-                  }] as ILayer[],
+                  ] as ILayer[],
                 } as ISource);
               }
 
@@ -498,18 +500,20 @@ export const appStateMgmt = {
                   sourceName: 'GridLabelSource',
                   sourceCategory: SourceType.grid,
                   shared: false,
-                  layers: [{
-                    layerName: 'Grid Labels',
-                    showLayer: false,
-                    type: { type: 'symbol' } as mapboxgl.AnyLayer,
-                    layout: {
-                      'text-field': '{cellLabel}',
-                      'text-allow-overlap': true,
+                  layers: [
+                    {
+                      layerName: 'Grid Labels',
+                      showLayer: false,
+                      type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                      layout: {
+                        'text-field': '{cellLabel}',
+                        'text-allow-overlap': true,
+                      },
+                      paint: {
+                        'text-opacity': 0.5,
+                      },
                     },
-                    paint: {
-                      'text-opacity': 0.5,
-                    },
-                  }] as ILayer[],
+                  ] as ILayer[],
                 } as ISource);
               }
               return sources;
@@ -532,16 +536,18 @@ export const appStateMgmt = {
                 sourceCategory: SourceType.custom,
                 shared: checked,
                 shareWith: shareWith,
-                layers: [{
-                  layerName: layerName,
-                  showLayer: true,
-                  type: { type: 'symbol' } as mapboxgl.AnyLayer,
-                  layout: {
-                    'icon-image': icon,
-                    'icon-size': icon === 'ground' ? 0.1 : icon === 'air' ? 0.25 : 0.5,
-                    'icon-allow-overlap': true,
+                layers: [
+                  {
+                    layerName: layerName,
+                    showLayer: true,
+                    type: { type: 'symbol' } as mapboxgl.AnyLayer,
+                    layout: {
+                      'icon-image': icon,
+                      'icon-size': icon === 'ground' ? 0.1 : icon === 'air' ? 0.25 : 0.5,
+                      'icon-allow-overlap': true,
+                    },
                   },
-                }] as ILayer[],
+                ] as ILayer[],
               } as ISource);
               return sources;
             },
@@ -603,8 +609,8 @@ export const appStateMgmt = {
         us({
           app: {
             showSatellite: !states()['app'].showSatellite,
-          }
-        })
+          },
+        });
       },
 
       //CHT, fix to make this a cht.start message
@@ -641,11 +647,11 @@ export const appStateMgmt = {
                   } as Feature,
                 ] as Feature[],
               } as FeatureCollection;
-  
+
               const index = sources.findIndex((source: ISource) => {
                 return source.id === hazard._id && source.sourceName === 'IncidentLocation' + hazard._id;
               });
-  
+
               if (index > -1) {
                 sources[index].source = fc as FeatureCollection;
               } else {
@@ -703,11 +709,13 @@ export const appStateMgmt = {
                   } as Feature,
                 ] as Feature[],
               } as FeatureCollection;
-  
+
               const index = sources.findIndex((source: ISource) => {
-                return source.id === chemicalIncident._id && source.sourceName === 'IncidentLocation' + chemicalIncident._id;
+                return (
+                  source.id === chemicalIncident._id && source.sourceName === 'IncidentLocation' + chemicalIncident._id
+                );
               });
-  
+
               if (index > -1) {
                 sources[index].source = fc as FeatureCollection;
               } else {
@@ -738,7 +746,9 @@ export const appStateMgmt = {
       },
 
       createPopulatorRequest: async () => {
-        const result = await states()['app'].socket.serverPopulator(states()['app'].latestDrawing) as FeatureCollection;
+        const result = (await states()['app'].socket.serverPopulator(
+          states()['app'].latestDrawing
+        )) as FeatureCollection;
 
         us({
           app: {
@@ -748,29 +758,30 @@ export const appStateMgmt = {
               });
               if (index > -1) {
                 sources[index].source = result as FeatureCollection;
+              } else {
+                sources.push({
+                  id: 'pop',
+                  source: result as FeatureCollection,
+                  sourceName: 'PopulationService',
+                  sourceCategory: SourceType.realtime,
+                  shared: false,
+                  layers: [
+                    {
+                      layerName: 'Population Data',
+                      showLayer: true,
+                      type: { type: 'line' } as mapboxgl.AnyLayer,
+                      paint: {
+                        'line-opacity': 0.5,
+                      },
+                    },
+                  ] as ILayer[],
+                } as ISource);
               }
-              else {
-              sources.push({
-                id: 'pop',
-                source: result as FeatureCollection,
-                sourceName: 'PopulationService',
-                sourceCategory: SourceType.realtime,
-                shared: false,
-                layers: [{
-                  layerName: 'Population Data',
-                  showLayer: true,
-                  type: { type: 'line' } as mapboxgl.AnyLayer,
-                  paint: {
-                    'line-opacity': 0.5,
-                  },
-                }] as ILayer[],
-              } as ISource);
-            }
               return sources;
             },
           },
         });
-      }
+      },
     };
   },
 };
@@ -790,7 +801,7 @@ const app = {
 const runServices = (startingState: IAppModel) =>
   app.services.reduce(
     (state: IAppModel, service: (s: IAppModel) => Partial<IAppModel> | void) => merge(state, service(state)),
-    startingState,
+    startingState
   );
 
 export const states = Stream.scan((state, patch) => runServices(merge(state, patch)), app.initial, update);
