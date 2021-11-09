@@ -19,7 +19,7 @@ import {
   IReturnGroup,
   INameUpdate,
 } from 'c2app-models-utils';
-import { HttpService } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({ cors: { origin: true } })
