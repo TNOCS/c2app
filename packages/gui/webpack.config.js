@@ -11,7 +11,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = (env) => {
   const isProduction = env.production;
   const outputPath = path.resolve(__dirname, isProduction ? '../../docs' : './dist');
-  const publicPath = isProduction ? 'https://timovdk.github.io/c2app/' : '/';
+  const publicPath = isProduction ? 'https://erikvullings.github.io/c2app/' : '/';
 
   console.log(`Running in ${isProduction ? 'production' : 'development'} mode, output directed to ${outputPath}.`);
 
@@ -99,20 +99,21 @@ module.exports = (env) => {
       //   filename: isProduction ? '[name].[contenthash].css' : '[name].css',
       //   chunkFilename: isProduction ? '[id].[contenthash].css' : '[id].css',
       // }),
-      new GenerateSW({
-        swDest: 'sw.js',
-        maximumFileSizeToCacheInBytes: 10000000,
-        clientsClaim: true,
-        skipWaiting: true,
-      }),
+      isProduction &&
+        new GenerateSW({
+          swDest: 'sw.js',
+          maximumFileSizeToCacheInBytes: 10000000,
+          clientsClaim: true,
+          skipWaiting: true,
+        }),
       new CopyPlugin({
         patterns: [
           { from: 'src/app.webmanifest' },
-          { from: 'src/assets/pwa-192x192.png' },
-          { from: 'src/assets/pwa-512x512.png' },
+          { from: 'src/assets/pwa-192x192.png', to: 'assets/pwa-192x192.png' },
+          { from: 'src/assets/pwa-512x512.png', to: 'assets/pwa-512x512.png' },
         ],
       }),
-    ],
+    ].filter(Boolean),
     module: {
       rules: [
         {
