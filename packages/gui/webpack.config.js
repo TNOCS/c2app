@@ -22,7 +22,7 @@ module.exports = (env) => {
     devServer: {
       liveReload: true,
       port: 1234,
-      // contentBase: './dist',
+      compress: true,
     },
     plugins: [
       new webpack.WatchIgnorePlugin({
