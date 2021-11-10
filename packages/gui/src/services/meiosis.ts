@@ -1,4 +1,4 @@
-import m from 'mithril';
+import m, { FactoryComponent } from 'mithril';
 import Stream from 'mithril/stream';
 import { merge } from '../utils/mergerino';
 import { Feature, FeatureCollection, Geometry, GeoJsonProperties } from 'geojson';
@@ -18,6 +18,8 @@ import {
 // @ts-ignore
 import ch from '../ch.json';
 import mapboxgl, { LinePaint, MapboxGeoJSONFeature } from 'mapbox-gl';
+import { routingSvc } from './routing-service';
+import { Pages } from '../models';
 
 export interface ILayer {
   layerName: string;
@@ -98,6 +100,13 @@ export interface IAppModel {
 }
 
 export interface IActions {
+  // Utils
+  switchToPage: (
+    pageId: Pages,
+    params?: { [key: string]: string | number | undefined },
+    query?: { [key: string]: string | number | undefined }
+  ) => void;
+
   // Core
   drawingCleared: () => void;
   createPOI: () => void;
@@ -152,6 +161,12 @@ export type ModelUpdateFunction = Partial<IAppModel> | ((model: Partial<IAppMode
 export type UpdateStream = Stream<Partial<ModelUpdateFunction>>;
 const update = Stream<ModelUpdateFunction>();
 
+export type MeiosisComponent<T extends { [key: string]: any } = {}> = FactoryComponent<{
+  state: IAppModel;
+  actions: IActions;
+  options?: T;
+}>;
+
 /** Application state */
 export const appStateMgmt = {
   initial: {
@@ -202,6 +217,15 @@ export const appStateMgmt = {
   },
   actions: (us: UpdateStream, states: Stream<IAppModel>) => {
     return {
+      // Utils
+      switchToPage: (
+        pageId: Pages,
+        params?: { [key: string]: string | number | undefined },
+        query?: { [key: string]: string | number | undefined }
+      ) => {
+        routingSvc.switchTo(pageId, params, query);
+      },
+
       // Core
       drawingCleared: () => {
         us({

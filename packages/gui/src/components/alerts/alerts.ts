@@ -8,11 +8,11 @@ export const Alerts: FactoryComponent<{
 }> = () => {
   return {
     view: (vnode) => {
-      return m('div.col.s12', [
-        m('div.col.s12.l5', [
+      return m('.col.s12', [
+        m('.col.s12.l5', [
           m('h4', 'Alerts'),
           m(
-            'div.collection',
+            '.collection',
             vnode.attrs.state.app.alerts.length > 0
               ? vnode.attrs.state.app.alerts?.map((alert: IAlert, index: number) => {
                   return m(
@@ -29,11 +29,11 @@ export const Alerts: FactoryComponent<{
               : [m('a.collection-item', 'No Alerts')]
           ),
         ]),
-        m('div.col.s12.l7', [
+        m('.col.s12.l7', [
           vnode.attrs.state.app.alert
             ? [
                 m('h4', vnode.attrs.state.app.alert.identifier),
-                m('div.card-panel', [
+                m('.card-panel', [
                   m('p', `${'Sender: ' + vnode.attrs.state.app.alert.sender}`),
                   m('p', `${'Status: ' + vnode.attrs.state.app.alert.status}`),
                   m('p', `${'Type: ' + vnode.attrs.state.app.alert.msgType}`),
@@ -45,7 +45,7 @@ export const Alerts: FactoryComponent<{
                   m('p', `${'Certainty: ' + (vnode.attrs.state.app.alert.info as IInfo).certainty}`),
                 ]),
               ]
-            : [m('h4', 'No alert selected'), m('div.card-panel', '')],
+            : [m('h4', 'No alert selected'), m('.card-panel', '')],
         ]),
       ]);
     },

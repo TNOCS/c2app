@@ -1,31 +1,28 @@
 import m, { FactoryComponent, RouteDefs } from 'mithril';
 import { actions, states, IAppModel, IActions } from './meiosis';
-import { IPage } from '../models/page';
+import { IPage, Pages } from '../models';
 import { Layout } from '../components/layout';
 import { Map } from '../components/map/map';
 import { mapSideBar } from '../components/sidebars/map-sidebar';
 import { sideBar } from '../components/sidebars/sidebar';
 import { Chat } from '../components/chat/chat';
 import { Settings } from '../components/settings/settings';
-import { Alerts } from '../components/alerts/alerts'
+import { Alerts } from '../components/alerts/alerts';
 import { chatSidebar } from '../components/sidebars/chat-sidebar';
-
-export enum Pages {
-  MAP = 'MAP',
-  CHAT = 'CHAT',
-  SETTINGS = 'SETTINGS',
-  ALERTS = 'ALERTS'
-}
 
 class RoutingService {
   private pages!: ReadonlyArray<IPage>;
 
-  constructor(private layout: FactoryComponent<{ state: IAppModel, actions: IActions }>, pages: IPage[]) {
+  constructor(private layout: FactoryComponent<{ state: IAppModel; actions: IActions }>, pages: IPage[]) {
     this.setList(pages);
   }
 
   public setList(list: IPage[]) {
     this.pages = Object.freeze(list);
+  }
+
+  public getPages() {
+    return this.pages;
   }
 
   public get defaultRoute() {
@@ -38,19 +35,35 @@ class RoutingService {
     return page ? page.route : this.defaultRoute;
   }
 
+  public switchTo(
+    pageId: Pages,
+    params?: { [key: string]: string | number | undefined },
+    query?: { [key: string]: string | number | undefined }
+  ) {
+    const page = this.pages.filter((p) => p.id === pageId).shift();
+    if (page) {
+      const url = page.route + (query ? '?' + m.buildQueryString(query) : '');
+      m.route.set(url, params);
+    }
+  }
+
   public routingTable() {
     return this.pages.reduce((r, p) => {
-      r[p.route] =
-        p.hasSidebar
-          ? {
+      r[p.route] = p.hasSidebar
+        ? {
             render: () =>
               m(this.layout, { state: states(), actions: actions }, [
                 m(p.sidebar, { state: states(), actions: actions }),
                 m(p.component, { state: states(), actions: actions }),
               ]),
           }
-          : {
-            render: () => m(this.layout, { state: states(), actions: actions }, m(p.component, { state: states(), actions: actions })),
+        : {
+            render: () =>
+              m(
+                this.layout,
+                { state: states(), actions: actions },
+                m(p.component, { state: states(), actions: actions })
+              ),
           };
       return r;
     }, {} as RouteDefs);
@@ -99,4 +112,4 @@ export const routingSvc: RoutingService = new RoutingService(Layout, [
     sidebar: sideBar,
     hasSidebar: false,
   },
-]);
+] as IPage[]);

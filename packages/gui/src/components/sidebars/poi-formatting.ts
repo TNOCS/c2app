@@ -120,7 +120,7 @@ export const sensorFormatComponent: FactoryComponent<{
         'li',
         sensors.map((sensor: any) => {
           return [
-            m('div.divider'),
+            m('.divider'),
             m('p', 'ID: ' + sensor.id),
             m('p', 'Type: ' + sensor.sensorType),
             m('p', 'Height: ' + sensor.height),

@@ -10,11 +10,13 @@ export const gridModal: FactoryComponent<{
   let updateLocation: boolean = false;
   return {
     view: (vnode) => {
-      return m('div.modal.modal-fixed-footer', { id: 'gridModal' },
-        m('div.modal-content', [
+      return m(
+        '.modal.modal-fixed-footer',
+        { id: 'gridModal' },
+        m('.modal-content', [
           m('h4', 'Create Grid'),
           m('row', [
-            m('div.input-field.col.s12', [
+            m('.input-field.col.s12', [
               m('input', {
                 id: 'gridCellSize',
                 type: 'text',
@@ -29,12 +31,14 @@ export const gridModal: FactoryComponent<{
                 {
                   for: 'gridCellSize',
                 },
-                'Cell Size (km)',
+                'Cell Size (km)'
               ),
             ]),
-            m('div.col.s6',
-              m('div.valign-wrapper', [
-                m('div.switch.col.s2',
+            m(
+              '.col.s6',
+              m('.valign-wrapper', [
+                m(
+                  '.switch.col.s2',
                   m('label', [
                     m('input', {
                       type: 'checkbox',
@@ -45,20 +49,26 @@ export const gridModal: FactoryComponent<{
                       },
                     }),
                     m('span.lever'),
-                  ])),
+                  ])
+                ),
                 m('p.col.s10', 'Fit Grid to Current Viewport'),
-              ]),
+              ])
             ),
           ]),
         ]),
-        m('div.modal-footer',
+        m(
+          '.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
-          m('a.modal-close.waves-effect.waves-green.btn-flat', {
-            onclick: () => {
-              vnode.attrs.actions.updateGridOptions(Number(gridCellSize), updateLocation);
+          m(
+            'a.modal-close.waves-effect.waves-green.btn-flat',
+            {
+              onclick: () => {
+                vnode.attrs.actions.updateGridOptions(Number(gridCellSize), updateLocation);
+              },
             },
-          }, 'Create Grid'),
-        ),
+            'Create Grid'
+          )
+        )
       );
     },
     oncreate: () => {

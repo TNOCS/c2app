@@ -10,11 +10,11 @@ export const Chat: FactoryComponent<{
   return {
     view: (vnode) => {
       return m(
-        'div.col.s12.l9.right',
-        m('div.col.s12.l5', [
+        '.col.s12.l9.right',
+        m('.col.s12.l5', [
           m('h4', 'Chats'),
           m(
-            'div.collection',
+            '.collection',
             vnode.attrs.state.app.groups.length > 0
               ? vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
                   return m(
@@ -38,11 +38,11 @@ export const Chat: FactoryComponent<{
               : [m('a.collection-item', 'No Groups')]
           ),
         ]),
-        m('div.col.s12.l7', [
+        m('.col.s12.l7', [
           vnode.attrs.state.app.chat
             ? [
                 m('h4', vnode.attrs.state.app.chat.name),
-                m('div.card-panel', [
+                m('.card-panel', [
                   m(
                     'div',
                     vnode.attrs.state.app.messages.get(vnode.attrs.state.app.chat.id)?.map((message: IMessage) => {
@@ -59,8 +59,8 @@ export const Chat: FactoryComponent<{
                 ]),
                 m(
                   'form.row',
-                  m('div.valign-wrapper', [
-                    m('div.input-field.col.s9', [
+                  m('.valign-wrapper', [
+                    m('.input-field.col.s9', [
                       m('input', {
                         id: 'message',
                         type: 'text',
@@ -95,11 +95,11 @@ export const Chat: FactoryComponent<{
               ]
             : [
                 m('h4', 'No chat selected'),
-                m('div.card-panel', ''),
+                m('.card-panel', ''),
                 m(
                   'form.row',
-                  m('div.valign-wrapper', [
-                    m('div.input-field.col.s9', [
+                  m('.valign-wrapper', [
+                    m('.input-field.col.s9', [
                       m('input', {
                         id: 'dummy',
                         type: 'text',

@@ -10,61 +10,72 @@ export const profileModal: FactoryComponent<{
   let profile: string;
   return {
     view: (vnode) => {
-      return m('div.modal.modal-fixed-footer', { id: 'profileModal' },
-        m('div.modal-content', [
+      return m(
+        '.modal.modal-fixed-footer',
+        { id: 'profileModal' },
+        m('.modal-content', [
           m('h4', 'Login'),
-          m('form.row', {
-            onsubmit: function(e: Event) {
-              e.preventDefault();
+          m(
+            'form.row',
+            {
+              onsubmit: function (e: Event) {
+                e.preventDefault();
+              },
             },
-          }, [
-            m('div.input-field.col.s12.m4', [
-              m('input', {
-                id: 'callsign',
-                type: 'text',
-                value: callsign,
-                onchange: (e: Event) => {
-                  const target = e.target as HTMLInputElement;
-                  callsign = target.value;
-                },
-              }),
-              m(
-                'label',
-                {
-                  for: 'callsign',
-                },
-                'Callsign',
-              ),
-            ]),
-            m('div.input-field.col.s12.m4', [
-              m(
-                'select',
-                {
+            [
+              m('.input-field.col.s12.m4', [
+                m('input', {
+                  id: 'callsign',
+                  type: 'text',
+                  value: callsign,
                   onchange: (e: Event) => {
                     const target = e.target as HTMLInputElement;
-                    profile = target.value;
+                    callsign = target.value;
                   },
-                },
-                [
-                  m('option', { value: '', disabled: true, selected: true }, 'Choose your profile'),
-                  m('option', { value: 'commander' }, 'commander'),
-                  m('option', { value: 'firefighter' }, 'firefighter'),
-                ],
-              ),
-              m('label', 'Profile'),
-            ]),
-          ]),
+                }),
+                m(
+                  'label',
+                  {
+                    for: 'callsign',
+                  },
+                  'Callsign'
+                ),
+              ]),
+              m('.input-field.col.s12.m4', [
+                m(
+                  'select',
+                  {
+                    onchange: (e: Event) => {
+                      const target = e.target as HTMLInputElement;
+                      profile = target.value;
+                    },
+                  },
+                  [
+                    m('option', { value: '', disabled: true, selected: true }, 'Choose your profile'),
+                    m('option', { value: 'commander' }, 'commander'),
+                    m('option', { value: 'firefighter' }, 'firefighter'),
+                  ]
+                ),
+                m('label', 'Profile'),
+              ]),
+            ]
+          ),
         ]),
-        m('div.modal-footer',
+        m(
+          '.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
-          m('a.modal-close.waves-effect.waves-green.btn-flat', {
-            onclick: () => {
-              vnode.attrs.actions.updateCallsign(callsign);
-              vnode.attrs.actions.updateProfile(profile);
-              vnode.attrs.actions.initGroups();
+          m(
+            'a.modal-close.waves-effect.waves-green.btn-flat',
+            {
+              onclick: () => {
+                vnode.attrs.actions.updateCallsign(callsign);
+                vnode.attrs.actions.updateProfile(profile);
+                vnode.attrs.actions.initGroups();
+              },
             },
-          }, 'Login'),
-        ),
+            'Login'
+          )
+        )
       );
     },
     oncreate: () => {

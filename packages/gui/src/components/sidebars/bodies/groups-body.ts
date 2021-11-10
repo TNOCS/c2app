@@ -14,10 +14,10 @@ export const groupsBody: FactoryComponent<{
         vnode.attrs.state.app.groups.length !== 0
           ? vnode.attrs.state.app.groups?.map((group: IGroup, index: number) => {
               return m(
-                'div.collection-item',
+                '.collection-item',
                 m(
                   'label.row',
-                  m('div.valign-wrapper', [
+                  m('.valign-wrapper', [
                     m('p.col.s7', 'ID: ' + index + ' Members: ' + group.callsigns.length),
                     m(
                       'a.btn.waves-effect.waves-light.col.s2.offset-s1.modal-trigger',

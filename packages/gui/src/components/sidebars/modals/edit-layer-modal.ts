@@ -8,18 +8,21 @@ export const editLayerModal: FactoryComponent<{
 }> = () => {
   return {
     view: (vnode) => {
-      return m('div.modal.modal-fixed-footer', { id: 'editLayerModal' },
-        m('div.modal-content', [
-          m('h4', 'Edit Layer'),
-          m('p', `${'layerId: ' + vnode.attrs.state.app.editLayer}`),
-        ]),
-        m('div.modal-footer',
+      return m(
+        '.modal.modal-fixed-footer',
+        { id: 'editLayerModal' },
+        m('.modal-content', [m('h4', 'Edit Layer'), m('p', `${'layerId: ' + vnode.attrs.state.app.editLayer}`)]),
+        m(
+          '.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
-          m('a.modal-close.waves-effect.waves-green.btn-flat', {
-            onclick: () => {
+          m(
+            'a.modal-close.waves-effect.waves-green.btn-flat',
+            {
+              onclick: () => {},
             },
-          }, 'Edit Layer'),
-        ),
+            'Edit Layer'
+          )
+        )
       );
     },
     oncreate: () => {
