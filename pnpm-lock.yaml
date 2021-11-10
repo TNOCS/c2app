@@ -88,15 +88,18 @@ importers:
       '@nestjs/common': ^8.2.0
       '@nestjs/config': ^1.1.0
       '@nestjs/core': ^8.2.0
+      '@nestjs/mapped-types': '*'
       '@nestjs/platform-express': ^8.2.0
       '@nestjs/platform-socket.io': ^8.2.0
       '@nestjs/websockets': ^8.2.0
       '@types/express': ^4.17.13
       '@types/geojson': ^7946.0.8
+      '@types/lokijs': ^1.5.7
       '@types/node': ^16.11.7
       c2app-models-utils: workspace:*
       express: ^4.17.1
       geojson: ^0.5.0
+      lokijs: ^1.5.12
       node-test-bed-adapter: ^2.1.0
       reflect-metadata: ^0.1.13
       rxjs: ^7.4.0
@@ -108,12 +111,14 @@ importers:
       '@nestjs/common': 8.2.0_ad16f1f28877c5242670873e13562245
       '@nestjs/config': 1.1.0_461b1fe9cbc46f5026314aa9aa33f557
       '@nestjs/core': 8.2.0_c34d51c3dc877ce8125ab6fd70ab3fae
+      '@nestjs/mapped-types': 1.0.0_8b5ef8327c265714ccf8ff97f2190d15
       '@nestjs/platform-express': 8.2.0_3be9f4a5443d29d58a8c4813bc34ec98
       '@nestjs/platform-socket.io': 8.2.0_24f4439d25ac0bcc29106962e829f2bf
       '@nestjs/websockets': 8.2.0_0322c81e56bb7239c8dec0d441e208cf
       c2app-models-utils: link:../shared
       express: 4.17.1
       geojson: 0.5.0
+      lokijs: 1.5.12
       node-test-bed-adapter: 2.1.0
       reflect-metadata: 0.1.13
       rxjs: 7.4.0
@@ -121,6 +126,7 @@ importers:
     devDependencies:
       '@types/express': 4.17.13
       '@types/geojson': 7946.0.8
+      '@types/lokijs': 1.5.7
       '@types/node': 16.11.7
       ts-node-dev: 1.1.8_typescript@4.4.4
       typescript: 4.4.4
@@ -1439,6 +1445,18 @@ packages:
       uuid: 8.3.2
     dev: false
 
+  /@nestjs/mapped-types/1.0.0_8b5ef8327c265714ccf8ff97f2190d15:
+    resolution: {integrity: sha512-26AW5jHadLXtvHs+M+Agd9KZ92dDlBrmD0rORlBlvn2KvsWs4JRaKl2mUsrW7YsdZeAu3Hc4ukqyYyDdyCmMWQ==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.8 || ^8.0.0
+      class-transformer: ^0.2.0 || ^0.3.0 || ^0.4.0
+      class-validator: ^0.11.1 || ^0.12.0 || ^0.13.0
+      reflect-metadata: ^0.1.12
+    dependencies:
+      '@nestjs/common': 8.2.0_ad16f1f28877c5242670873e13562245
+      reflect-metadata: 0.1.13
+    dev: false
+
   /@nestjs/platform-express/8.2.0_3be9f4a5443d29d58a8c4813bc34ec98:
     resolution: {integrity: sha512-IiYXT1t9hkWWjohHvNWYi/hWk8CCvDY25y8y72zkN5/iyvWWiqwmcGGhji2bENvQx8e/Vlm1d4EkwRFYWfBGjA==}
     peerDependencies:
@@ -1786,6 +1804,10 @@ packages:
 
   /@types/json-schema/7.0.9:
     resolution: {integrity: sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==}
+    dev: true
+
+  /@types/lokijs/1.5.7:
+    resolution: {integrity: sha512-WEFQLgO3u2Wa7yFybqkTZYumqF1GcHvUwx8Tv2SUHy2qpnIainMMoLmEUGdjhPNp/v5pyC9e91fSMC3mkxBIDw==}
     dev: true
 
   /@types/mapbox-gl/2.4.2:
@@ -4138,6 +4160,10 @@ packages:
 
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+
+  /lokijs/1.5.12:
+    resolution: {integrity: sha512-Q5ALD6JiS6xAUWCwX3taQmgwxyveCtIIuL08+ml0nHwT3k0S/GIFJN+Hd38b1qYIMaE5X++iqsqWVksz7SYW+Q==}
+    dev: false
 
   /long/1.1.2:
     resolution: {integrity: sha1-6u9ZUcp1UdlpJrgtokLbnWso+1M=}

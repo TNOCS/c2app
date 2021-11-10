@@ -11,6 +11,7 @@ import {
   IMission,
   ISensor,
 } from 'c2app-models-utils';
+import { MessagesService } from '../messages/messages.service';
 
 interface ISendResponse {
   [topic: string]: {
@@ -36,7 +37,10 @@ export class KafkaService {
   public messageQueue: IAdapterMessage[] = [];
   public busy = false;
 
-  constructor(@Inject(DefaultWebSocketGateway) private readonly socket: DefaultWebSocketGateway) {
+  constructor(
+    @Inject(DefaultWebSocketGateway) private readonly socket: DefaultWebSocketGateway,
+    private readonly messagesService: MessagesService
+  ) {
     this.createAdapter().catch((e) => {
       log.error(e);
     });
@@ -97,52 +101,63 @@ export class KafkaService {
   }
 
   private async handleMessage() {
-    if (this.messageQueue.length > 0 && !this.busy) {
+    while (this.messageQueue.length > 0 && !this.busy) {
       this.busy = true;
       const { topic, value } = this.messageQueue.shift();
 
       switch (topic) {
         case SimEntityFeatureCollectionTopic:
-          this.socket.server.emit('positions', KafkaService.preparePositions(value as FeatureCollection));
+          const positions = KafkaService.preparePositions(value as FeatureCollection);
+          this.messagesService.create('positions', positions);
+          this.socket.server.emit('positions', positions);
           break;
         case capMessage:
+          this.messagesService.create('alerts', value);
           this.socket.server.emit('alert', value as IAlert);
           break;
         case contextTopic:
+          this.messagesService.create('contexts', value);
           this.socket.server.emit('context', value as IContext);
           break;
         case missionTopic:
+          this.messagesService.create('missions', value);
           this.socket.server.emit('mission', value as IMission);
           break;
         case resourceTopic:
+          this.messagesService.create('resources', value);
           this.socket.server.emit('resource', value as IAssistanceResource);
           break;
         case sensorTopic:
+          this.messagesService.create('sensors', value);
           this.socket.server.emit('sensor', value as ISensor);
           break;
         case chemicalIncidentTopic:
+          this.messagesService.create('chemical_incidents', value);
           this.socket.server.emit('chemical_incident', value as ISensor);
           break;
         case plumeTopic:
-          this.socket.server.emit('plume', KafkaService.preparePlume(value as ICbrnFeatureCollection));
+          const plume = KafkaService.preparePlume(value as ICbrnFeatureCollection);
+          this.messagesService.create('plumes', plume);
+          this.socket.server.emit('plume', plume);
           break;
         case messageTopic:
+          const msg = value as IAssistanceMessage;
+          const { resource } = msg;
           // Send message only to the resource that is mentioned
-          if (this.socket.callsignToSocketId.get((value as IAssistanceMessage).resource)) {
-            this.socket.server
-              .to(this.socket.callsignToSocketId.get((value as IAssistanceMessage).resource))
-              .emit('sas_message', value as IAssistanceMessage);
+          if (this.socket.callsignToSocketId.get(resource)) {
+            this.messagesService.create('sas_messages', msg);
+            this.socket.server.to(this.socket.callsignToSocketId.get(resource)).emit('sas_message', msg);
           } else {
-            console.log('Alert for ID: ' + (value as IAssistanceMessage).resource + ', resource not logged in!');
+            console.log('Alert for ID: ' + msg.resource + ', resource not logged in!');
           }
           break;
-        // case c2000Topic:
         default:
-          log.warn(`Unknown topic: ${topic}`);
+          this.messagesService.create(`${topic}s`, value);
+          log.warn(`Unknown topic: ${topic}: ${value}`);
           break;
       }
+      this.busy = false;
     }
-    this.busy = false;
   }
 
   private static preparePositions(collection: FeatureCollection) {
