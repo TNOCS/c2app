@@ -37,7 +37,7 @@ COPY --from=builder /packages/shared/node_modules /shared/node_modules
 COPY --from=builder /packages/shared/dist /shared
 COPY --from=builder /packages/server/node_modules /app/node_modules
 COPY --from=builder /packages/server/package.json /app/package.json
-COPY --from=builder /packages/server/dist/src /app/dist
+COPY --from=builder /packages/server/dist /app/dist
 COPY --from=builder /packages/server/.yalc /app/.yalc
 COPY --from=builder /packages/gui/dist /app/public
 WORKDIR /app
