@@ -1,5 +1,5 @@
-import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../services/meiosis';
+import m from 'mithril';
+import { MeiosisComponent } from '../../services/meiosis';
 import M from 'materialize-css';
 import {
   formatMan,
@@ -12,54 +12,51 @@ import {
   contextFormatComponent,
 } from './poi-formatting';
 
-export const poiSidebar: FactoryComponent<{
-  state: IAppModel;
-  actions: IActions;
-}> = () => {
+export const poiSidebar: MeiosisComponent = () => {
   return {
-    view: (vnode) => {
+    view: ({ attrs: { state, actions } }) => {
+      const {
+        app: { clickedFeature, sensorDict },
+      } = state;
       return m(
         'ul#slide-out-2.sidenav.no-autoinit',
-        {
-          style: 'top: 64px; overflow-y: auto',
-        },
-        m('div.row', [
+        m('.row', [
           m(
             'a.waves-effect.waves-teal.btn-flat',
             {
               onclick: () => {
                 const elem = document.getElementById('slide-out-2') as HTMLElement;
                 M.Sidenav.getInstance(elem).close();
-                vnode.attrs.actions.resetClickedFeature();
+                actions.resetClickedFeature();
               },
             },
             m('i.material-icons', 'clear')
           ),
           m('h5', 'Details'),
           // If there is a clicked feature
-          m('div.col.s12', [
-            vnode.attrs.state.app.clickedFeature
-              ? vnode.attrs.state.app.clickedFeature?.properties?.type === 'resource'
-                ? m(resourceFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'sensor'
-                ? m(sensorFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'context'
-                ? m(contextFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'plume'
-                ? m(alertFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'incidentLocation'
-                ? m(incidentLocationFormatComponent, { state: vnode.attrs.state, actions: vnode.attrs.actions })
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'MAN'
-                ? formatMan(vnode.attrs.state.app.clickedFeature)
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'CAR'
-                ? formatCar(vnode.attrs.state.app.clickedFeature)
-                : vnode.attrs.state.app.clickedFeature?.properties?.type === 'FIREFIGHTER'
-                ? formatMan(vnode.attrs.state.app.clickedFeature)
-                : formatUnknown(vnode.attrs.state.app.clickedFeature)
+          m('.col.s12', [
+            clickedFeature
+              ? clickedFeature?.properties?.type === 'resource'
+                ? m(resourceFormatComponent, { state, actions })
+                : clickedFeature?.properties?.type === 'sensor'
+                ? m(sensorFormatComponent, { state, actions })
+                : clickedFeature?.properties?.type === 'context'
+                ? m(contextFormatComponent, { state, actions })
+                : clickedFeature?.properties?.type === 'plume'
+                ? m(alertFormatComponent, { state, actions })
+                : clickedFeature?.properties?.type === 'incidentLocation'
+                ? m(incidentLocationFormatComponent, { state, actions })
+                : clickedFeature?.properties?.type === 'MAN'
+                ? formatMan(clickedFeature)
+                : clickedFeature?.properties?.type === 'CAR'
+                ? formatCar(clickedFeature)
+                : clickedFeature?.properties?.type === 'FIREFIGHTER'
+                ? formatMan(clickedFeature)
+                : formatUnknown(clickedFeature)
               : // If there is no clicked feature
                 m('p', ''),
           ]),
-          m('p', vnode.attrs.state.app.sensorDict),
+          m('p', sensorDict),
           m('div', { style: 'margin: 128px' }),
         ])
       );

@@ -1,109 +1,99 @@
-import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../services/meiosis';
+import m from 'mithril';
+import { MeiosisComponent } from '../services/meiosis';
 import logo from '../assets/safr.svg';
 import { profileModal } from './sidebars/modals';
 import M from 'materialize-css';
 import { poiSidebar } from './sidebars/poi-sidebar';
 import { profileSidebar } from './sidebars/profile-sidebar';
+import { routingSvc } from '../services/routing-service';
 
-export const Layout: FactoryComponent<{
-  state: IAppModel;
-  actions: IActions;
-}> = () => {
+export const Layout: MeiosisComponent = () => {
   return {
-    view: (vnode) => {
+    view: ({ children, attrs: { state, actions } }) => {
+      const { switchToPage } = actions;
+
       return m('.main', [
-        m(profileModal, { state: vnode.attrs.state, actions: vnode.attrs.actions }),
-        m('.navbar',
-          { style: 'z-index: 1001; height: 64px' },
-          m('nav',
-            { style: 'height:64px' },
+        m(profileModal, { state, actions }),
+        m(
+          '.navbar',
+          // { style: 'z-index: 1001; height: 64px' },
+          m(
+            'nav',
+            // { style: 'height:64px' },
             m('.nav-wrapper', [
-              m('a.brand-logo', {
-                onclick: () => {
-                  m.route.set('/map');
-                },
-              }, [
-                m(`img[width=45][height=45][src=${logo}].hide-on-med-and-down`, {
-                  style: 'margin: 7px 0 0 25px;',
-                }),
-                m('div',
-                  {
-                    style: 'margin-top: 0px; position: absolute; top: 16px; left: 50px; width: 400px;',
+              m(
+                'a.brand-logo',
+                {
+                  onclick: () => {
+                    m.route.set('/map');
                   },
-                  m('h4.center.hide-on-med-and-down',
+                },
+                [
+                  m(`img[width=45][height=45][src=${logo}].hide-on-med-and-down`, {
+                    style: 'margin: 7px 0 0 25px;',
+                  }),
+                  m(
+                    'div',
                     {
-                      style: 'text-align: left; margin: -7px 0 0 60px; background: #314443',
+                      style: 'margin-top: 0px; position: absolute; top: 16px; left: 50px; width: 400px;',
                     },
-                    'SAFR',
+                    m(
+                      'h4.center.hide-on-med-and-down',
+                      {
+                        style: 'text-align: left; margin: -7px 0 0 60px; background: #314443',
+                      },
+                      'SAFR'
+                    )
                   ),
-                ),
-              ]),
-              m(m.route.Link,
+                ]
+              ),
+              m(
+                m.route.Link,
                 {
                   class: 'sidenav-trigger',
                   'data-target': 'slide-out',
                   href: m.route.get(),
                 },
-                m('i.material-icons.hide-on-large-only', 'menu'),
+                m('i.material-icons.hide-on-large-only', 'menu')
               ),
               m('ul.right', [
-                m('li',
-                  m('a',
+                ...routingSvc
+                  .getPages()
+                  .filter((page) => page.visible)
+                  .map((page) =>
+                    m(
+                      'li',
+                      m(
+                        'a',
+                        { onclick: () => switchToPage(page.id) },
+                        m(
+                          'i.material-icons',
+                          typeof page.icon === 'string' ? page.icon : page.icon ? page.icon() : undefined
+                        )
+                      )
+                    )
+                  ),
+                m(
+                  'li',
+                  m(
+                    'a',
                     {
                       onclick: () => {
-                        m.route.set('/alerts');
+                        const sideNavEl = document.getElementById('slide-out-profile') as HTMLElement;
+                        if (!sideNavEl) return;
+                        M.Sidenav.getInstance(sideNavEl).open();
                       },
                     },
-                    m('i.material-icons', 'warning'),
-                  ),
-                ),
-                m('li',
-                  m('a',
-                    {
-                      onclick: () => {
-                        m.route.set('/map');
-                      },
-                    },
-                    m('i.material-icons', 'map'),
-                  ),
-                ),
-                m('li',
-                  m('a',
-                    {
-                      onclick: () => {
-                        m.route.set('/chat');
-                      },
-                    },
-                    m('i.material-icons', 'chat'),
-                  ),
-                ),
-                m('li',
-                  m('a',
-                    {
-                      onclick: () => {
-                        m.route.set('/settings');
-                      },
-                    },
-                    m('i.material-icons', 'settings'),
-                  ),
-                ),
-                m('li',
-                  m('a',
-                    {
-                      onclick: () => {
-                        const instance = M.Sidenav.getInstance(document.getElementById('slide-out-profile') as HTMLElement);
-                        instance.open();
-                      }
-                    }, m('i.material-icons', 'account_circle')),
+                    m('i.material-icons', 'account_circle')
+                  )
                 ),
               ]),
-            ]),
-          ),
+            ])
+          )
         ),
-        m('.row', vnode.children),
-        m('.row', m(poiSidebar, { state: vnode.attrs.state, actions: vnode.attrs.actions })),
-        m('.row', m(profileSidebar, { state: vnode.attrs.state, actions: vnode.attrs.actions }))
+        m('.row', children),
+        m('.row', m(poiSidebar, { state, actions })),
+        m('.row', m(profileSidebar, { state, actions })),
       ]);
     },
     oncreate: () => {

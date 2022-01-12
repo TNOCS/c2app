@@ -26,11 +26,13 @@ export const customLayerModal: FactoryComponent<{
   let share: boolean = false;
   return {
     view: (vnode) => {
-      return m('div.modal.modal-fixed-footer', { id: 'customLayerModal' },
-        m('div.modal-content', [
+      return m(
+        '.modal.modal-fixed-footer',
+        { id: 'customLayerModal' },
+        m('.modal-content', [
           m('h4', 'Create Layer'),
           m('row', [
-            m('div.input-field.col.s6', [
+            m('.input-field.col.s6', [
               m('input', {
                 id: 'layerName',
                 type: 'text',
@@ -45,11 +47,13 @@ export const customLayerModal: FactoryComponent<{
                 {
                   for: 'layerName',
                 },
-                'Layer Name',
+                'Layer Name'
               ),
             ]),
-            m('div.input-field.col.s6', [
-              m('select.icons', {
+            m('.input-field.col.s6', [
+              m(
+                'select.icons',
+                {
                   onchange: (e: Event) => {
                     const target = e.target as HTMLInputElement;
                     icon = target.value;
@@ -70,13 +74,15 @@ export const customLayerModal: FactoryComponent<{
                 m('option.left', { value: 'TRUCK', 'data-icon': truck }, 'Truck'),
                 m('option.left', { value: 'chemical', 'data-icon': chemical }, 'Chemical Incident'),
                 m('option.left', { value: 'AIR', 'data-icon': air }, 'UAV'),
-                m('option.left', { value: 'GROUND', 'data-icon': ground }, 'UGV'),
+                m('option.left', { value: 'GROUND', 'data-icon': ground }, 'UGV')
               ),
               m('label', 'Choose how this layer gets visualized'),
             ]),
-            m('div.col.s6',
-              m('div.valign-wrapper', [
-                m('div.switch.col.s2',
+            m(
+              '.col.s6',
+              m('.valign-wrapper', [
+                m(
+                  '.switch.col.s2',
                   m('label', [
                     m('input', {
                       type: 'checkbox',
@@ -87,12 +93,15 @@ export const customLayerModal: FactoryComponent<{
                       },
                     }),
                     m('span.lever'),
-                  ])),
+                  ])
+                ),
                 m('p.col.s9.offset-s1', 'Share this layer'),
-              ]),
+              ])
             ),
-            m('div.input-field.col.s6', [
-              m('select.multiple', {
+            m('.input-field.col.s6', [
+              m(
+                'select.multiple',
+                {
                   id: 'sharewith',
                   multiple: true,
                 },
@@ -100,20 +109,30 @@ export const customLayerModal: FactoryComponent<{
                 m('option', { value: 'commander' }, 'Commanders'),
                 m('option', { value: 'firefighter' }, 'Firefighters'),
                 m('option', { value: 'medical' }, 'Medical Personnel'),
-                m('option', { value: 'police' }, 'Police'),
+                m('option', { value: 'police' }, 'Police')
               ),
               m('label', 'Choose with who this layer gets shared'),
             ]),
           ]),
         ]),
-        m('div.modal-footer',
+        m(
+          '.modal-footer',
           m('a.modal-close.waves-effect.waves-green.btn-flat', 'Cancel'),
-          m('a.modal-close.waves-effect.waves-green.btn-flat', {
-            onclick: () => {
-              vnode.attrs.actions.createCustomLayer(layerName, icon, share, M.FormSelect.getInstance(document.getElementById('sharewith') as HTMLElement).getSelectedValues());
+          m(
+            'a.modal-close.waves-effect.waves-green.btn-flat',
+            {
+              onclick: () => {
+                vnode.attrs.actions.createCustomLayer(
+                  layerName,
+                  icon,
+                  share,
+                  M.FormSelect.getInstance(document.getElementById('sharewith') as HTMLElement).getSelectedValues()
+                );
+              },
             },
-          }, 'Create Layer'),
-        ),
+            'Create Layer'
+          )
+        )
       );
     },
     oncreate: () => {

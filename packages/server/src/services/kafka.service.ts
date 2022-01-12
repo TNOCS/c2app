@@ -1,14 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  TestBedAdapter,
-  Logger,
-  LogLevel,
-  IAdapterMessage,
-  ProduceRequest,
-} from 'node-test-bed-adapter';
+import { TestBedAdapter, Logger, LogLevel, IAdapterMessage, ProduceRequest } from 'node-test-bed-adapter';
 import { DefaultWebSocketGateway } from '../gateway/default-websocket.gateway';
 import { FeatureCollection } from 'geojson';
-import { IAlert, IAssistanceMessage, IAssistanceResource, ICbrnFeatureCollection, IContext, IMission, ISensor } from '../../../shared/src';
+import {
+  IAlert,
+  IAssistanceMessage,
+  IAssistanceResource,
+  ICbrnFeatureCollection,
+  IContext,
+  IMission,
+  ISensor,
+} from 'c2app-models-utils';
+import { MessagesService } from '../messages/messages.service';
 
 interface ISendResponse {
   [topic: string]: {
@@ -25,6 +28,7 @@ const sensorTopic = 'sensor';
 const messageTopic = 'message_incoming';
 const chemicalIncidentTopic = 'chemical_incident';
 const plumeTopic = 'cbrn_geojson';
+const c2000Topic = 'c2000';
 const log = Logger.instance;
 
 @Injectable()
@@ -33,7 +37,10 @@ export class KafkaService {
   public messageQueue: IAdapterMessage[] = [];
   public busy = false;
 
-  constructor(@Inject(DefaultWebSocketGateway) private readonly socket: DefaultWebSocketGateway) {
+  constructor(
+    @Inject(DefaultWebSocketGateway) private readonly socket: DefaultWebSocketGateway,
+    private readonly messagesService: MessagesService
+  ) {
     this.createAdapter().catch((e) => {
       log.error(e);
     });
@@ -46,7 +53,19 @@ export class KafkaService {
         clientId: 'c2app-server',
         kafkaHost: process.env.KAFKA_HOST || 'localhost:3501',
         schemaRegistry: process.env.SCHEMA_REGISTRY || 'localhost:3502',
-        consume: [{ topic: SimEntityFeatureCollectionTopic }, { topic: capMessage }, { topic: contextTopic }, { topic: missionTopic }, { topic: resourceTopic }, { topic: sensorTopic }, { topic: chemicalIncidentTopic }, { topic: plumeTopic }, { topic: messageTopic }],
+        consume: process.env.CONSUME
+          ? process.env.CONSUME.split(',').map((t) => ({ topic: t.trim() }))
+          : [
+              { topic: SimEntityFeatureCollectionTopic },
+              { topic: capMessage },
+              { topic: contextTopic },
+              { topic: missionTopic },
+              { topic: resourceTopic },
+              { topic: sensorTopic },
+              { topic: chemicalIncidentTopic },
+              { topic: plumeTopic },
+              { topic: messageTopic },
+            ],
         logging: {
           logToConsole: LogLevel.Info,
           logToKafka: LogLevel.Warn,
@@ -82,52 +101,63 @@ export class KafkaService {
   }
 
   private async handleMessage() {
-    if (this.messageQueue.length > 0 && !this.busy) {
+    while (this.messageQueue.length > 0 && !this.busy) {
       this.busy = true;
-      const message = this.messageQueue.shift();
+      const { topic, value } = this.messageQueue.shift();
 
-      switch (message.topic) {
+      switch (topic) {
         case SimEntityFeatureCollectionTopic:
-          this.socket.server.emit('positions', KafkaService.preparePositions(message.value as FeatureCollection));
+          const positions = KafkaService.preparePositions(value as FeatureCollection);
+          this.messagesService.create('positions', positions);
+          this.socket.server.emit('positions', positions);
           break;
         case capMessage:
-          this.socket.server.emit('alert', message.value as IAlert);
+          this.messagesService.create('alerts', value);
+          this.socket.server.emit('alert', value as IAlert);
           break;
         case contextTopic:
-          this.socket.server.emit('context', message.value as IContext);
+          this.messagesService.create('contexts', value);
+          this.socket.server.emit('context', value as IContext);
           break;
         case missionTopic:
-          this.socket.server.emit('mission', message.value as IMission);
+          this.messagesService.create('missions', value);
+          this.socket.server.emit('mission', value as IMission);
           break;
         case resourceTopic:
-          this.socket.server.emit('resource', message.value as IAssistanceResource);
+          this.messagesService.create('resources', value);
+          this.socket.server.emit('resource', value as IAssistanceResource);
           break;
         case sensorTopic:
-          this.socket.server.emit('sensor', message.value as ISensor);
+          this.messagesService.create('sensors', value);
+          this.socket.server.emit('sensor', value as ISensor);
           break;
         case chemicalIncidentTopic:
-          this.socket.server.emit('chemical_incident', message.value as ISensor);
+          this.messagesService.create('chemical_incidents', value);
+          this.socket.server.emit('chemical_incident', value as ISensor);
           break;
         case plumeTopic:
-          this.socket.server.emit('plume', KafkaService.preparePlume(message.value as ICbrnFeatureCollection));
+          const plume = KafkaService.preparePlume(value as ICbrnFeatureCollection);
+          this.messagesService.create('plumes', plume);
+          this.socket.server.emit('plume', plume);
           break;
         case messageTopic:
+          const msg = value as IAssistanceMessage;
+          const { resource } = msg;
           // Send message only to the resource that is mentioned
-          if(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource)) {
-            this.socket.server
-            .to(this.socket.callsignToSocketId.get((message.value as IAssistanceMessage).resource))
-            .emit('sas_message', message.value as IAssistanceMessage);
-          }
-          else {
-            console.log('Alert for ID: ' + (message.value as IAssistanceMessage).resource + ', resource not logged in!');
+          if (this.socket.callsignToSocketId.get(resource)) {
+            this.messagesService.create('sas_messages', msg);
+            this.socket.server.to(this.socket.callsignToSocketId.get(resource)).emit('sas_message', msg);
+          } else {
+            console.log('Alert for ID: ' + msg.resource + ', resource not logged in!');
           }
           break;
         default:
-          log.warn('Unknown topic');
+          this.messagesService.create(`${topic}s`, value);
+          log.warn(`Unknown topic: ${topic}: ${value}`);
           break;
       }
+      this.busy = false;
     }
-    this.busy = false;
   }
 
   private static preparePositions(collection: FeatureCollection) {
@@ -136,24 +166,20 @@ export class KafkaService {
     }
     return collection as FeatureCollection;
   }
+
   private static preparePlume(collection: ICbrnFeatureCollection) {
     for (const feature of collection.features) {
-      if(feature.geometry[`nl.tno.assistance.geojson.geometry.Point`]) {
+      if (feature.geometry[`nl.tno.assistance.geojson.geometry.Point`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Point`];
-      }
-      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPoint`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.LineString`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiLineString`];
-      }
-      else if(feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]){
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.Polygon`];
-      }
-      else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
+      } else if (feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
         feature.geometry = feature.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`];
       }
     }

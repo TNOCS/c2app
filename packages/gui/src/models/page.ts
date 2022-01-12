@@ -3,8 +3,15 @@ import { ComponentTypes } from 'mithril';
 type IconResolver = () => string;
 type IconOrResolver = string | IconResolver;
 
+export enum Pages {
+  MAP = 'MAP',
+  CHAT = 'CHAT',
+  SETTINGS = 'SETTINGS',
+  ALERTS = 'ALERTS',
+}
+
 export interface IPage {
-  id: string;
+  id: Pages;
   default?: boolean;
   hasNavBar?: boolean;
   title: string;

@@ -1,23 +1,14 @@
-import m, { FactoryComponent } from 'mithril';
-import { IActions, IAppModel } from '../../services/meiosis';
+import m from 'mithril';
+import { MeiosisComponent } from '../../services/meiosis';
 import M from 'materialize-css';
 
-export const sideBar: FactoryComponent<{
-  state: IAppModel;
-  actions: IActions;
-}> = () => {
+export const sideBar: MeiosisComponent = () => {
   return {
-    view: (_vnode) => {
-      return m(
-        'ul.col.l3.m4#slide-out.sidenav.sidenav-fixed',
-        {
-          style: 'top: 64px; overflow-y: auto',
-        },
-        [
-          // Fix the weird scroll clipping caused by
-          m('div', { style: 'margin: 128px' }),
-        ],
-      );
+    view: () => {
+      return m('ul.col.l3.m4#slide-out.sidenav.sidenav-fixed', [
+        // Fix the weird scroll clipping caused by
+        m('div', { style: 'margin: 128px' }),
+      ]);
     },
     oncreate: () => {
       M.AutoInit();

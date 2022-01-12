@@ -1,6 +1,6 @@
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { SourceType, IAppModel, ILayer, ISource, UpdateStream } from './meiosis';
-import io from 'socket.io-client';
+import io, { Socket as ioSocket } from 'socket.io-client';
 import {
   IAlert,
   IGroup,
@@ -17,15 +17,15 @@ import {
   IContext,
   IAssistanceMessage,
   IInfo,
-  IArea
-} from '../../../shared/src';
+  IArea,
+  ResourceSubtype,
+} from 'c2app-models-utils';
 import M from 'materialize-css';
 import mapboxgl from 'mapbox-gl';
 import m from 'mithril';
-import { ResourceSubtype } from '../../../shared/src/models/resource-value';
 
 export class Socket {
-  private socket: SocketIOClient.Socket;
+  private socket: ioSocket;
   private resources = {} as { [id: string]: IAssistanceResource };
   private sensors = {} as { [id: string]: ISensor };
 
@@ -35,18 +35,20 @@ export class Socket {
     this.socket.on('context', (data: IContext) => {
       const fc = {
         type: 'FeatureCollection',
-        features: [{
-          type: 'Feature',
-          geometry: data.geometry,
-          properties: {
-            id: data._id,
-            description: data.description,
-            start: data.start,
-            timestamp: data.timestamp,
-            type: 'context'
-          }
-        } as Feature] as Feature[]
-      } as FeatureCollection
+        features: [
+          {
+            type: 'Feature',
+            geometry: data.geometry,
+            properties: {
+              id: data._id,
+              description: data.description,
+              start: data.start,
+              timestamp: data.timestamp,
+              type: 'context',
+            },
+          } as Feature,
+        ] as Feature[],
+      } as FeatureCollection;
       us({
         app: {
           sources: (sources: ISource[]) => {
@@ -63,15 +65,16 @@ export class Socket {
                 sourceName: 'Contexts',
                 sourceCategory: SourceType.realtime,
                 shared: false,
-                layers: [{
+                layers: [
+                  {
                     layerName: 'Contexts',
                     showLayer: true,
                     type: { type: 'line' } as mapboxgl.AnyLayer,
                     paint: {
                       'line-width': 4,
-                    }
-                  } as ILayer
-                 ] as ILayer[],
+                    },
+                  } as ILayer,
+                ] as ILayer[],
               } as ISource);
             }
             return sources;
@@ -130,8 +133,8 @@ export class Socket {
                     'icon-allow-overlap': true,
                   },
                   filter: ['all', ['in', 'resourceSubType', type]],
-                } as ILayer
-              }) as ILayer[]
+                } as ILayer;
+              }) as ILayer[];
             } else {
               sources.push({
                 id: 'resourcesID',
@@ -150,7 +153,7 @@ export class Socket {
                       'icon-allow-overlap': true,
                     },
                     filter: ['all', ['in', 'resourceSubType', type]],
-                  } as ILayer
+                  } as ILayer;
                 }) as ILayer[],
               } as ISource);
             }
@@ -177,7 +180,7 @@ export class Socket {
         const sensorList: Array<ISensor> = [];
         for (const key in this.sensors) {
           let sensor = this.sensors[key] as ISensor;
-          if(sensor.mission !== mission) return;
+          if (sensor.mission !== mission) return;
           sensorList.push(sensor);
         }
 
@@ -195,11 +198,11 @@ export class Socket {
                 sensorType: sensor.type as string,
                 attitude: sensor.attitude as IAttitude,
                 timestamp: sensor.timestamp as number,
-              }
-            })
+              };
+            }),
           } as GeoJsonProperties,
         } as Feature);
-      })
+      });
 
       const fc = {
         type: 'FeatureCollection',
@@ -381,7 +384,7 @@ export class Socket {
       // This is the alert message for this particular FR
       console.log(data);
       M.toast({ html: 'New Alert Message!' });
-    });    
+    });
     // Chat message
     this.socket.on('server-message', (data: string) => {
       const message = JSON.parse(data) as IMessage;
@@ -465,75 +468,75 @@ export class Socket {
     this.socket.on('alert', (data: IAlert) => {
       const alertArea = (data.info as IInfo).area as IArea[];
 
-       const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
-       const features = fc.features as Feature[];
+      const fc = JSON.parse(alertArea[0].areaDesc) as FeatureCollection;
+      const features = fc.features as Feature[];
 
-       // Find out the necessary layers (DeltaTimes)
-       const dts = features.map((feature: Feature) => {
-         return feature.properties?.deltaTime;
-       }) as number[];
+      // Find out the necessary layers (DeltaTimes)
+      const dts = features.map((feature: Feature) => {
+        return feature.properties?.deltaTime;
+      }) as number[];
 
-       const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
+      const uniqueDTs = dts.filter((v, i, a) => a.indexOf(v) === i) as number[];
 
-       // Fix color formatting
-       fc.features.forEach((feature: Feature) => {
-         // @ts-ignore
-         feature.properties.color = '#' + feature.properties?.color as string;
-         return feature;
-       });
+      // Fix color formatting
+      fc.features.forEach((feature: Feature) => {
+        // @ts-ignore
+        feature.properties.color = ('#' + feature.properties?.color) as string;
+        return feature;
+      });
 
-       // Update the fc in the alert
-       ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
+      // Update the fc in the alert
+      ((data.info as IInfo).area as IArea[])[0].areaDesc = JSON.stringify(fc);
 
-       us({
-         app: {
-           sources: (sources: Array<ISource>) => {
-             const index = sources.findIndex((source: ISource) => {
-               return source.sourceName === data.identifier;
-             });
-             if (index > -1) {
-               sources[index].source = fc;
-             } else {
-               sources.push({
-                 id: 'testid2',
-                 source: fc as FeatureCollection,
-                 sourceName: 'Eindhoven Chlorine',
-                 sourceCategory: SourceType.alert,
-                 shared: false,
-                 layers: uniqueDTs.map((dt: number) => {
-                   return {
-                     layerName: dt.toString(),
-                     showLayer: true,
-                     type: { type: 'line' } as mapboxgl.AnyLayer,
-                     paint: {
-                         'line-color': {
-                           type: 'identity',
-                           property: 'color',
-                         },
-                         'line-opacity': 0.5,
-                         'line-width': 2,
-                       },
-                     filter: ['all', ['in', 'deltaTime', dt]],
-                   } as ILayer;
-                 }) as Array<ILayer>,
-               } as ISource);
-             }
-           },
-           alerts: (alerts: Array<IAlert>) => {
-             const index = alerts.findIndex((val: IAlert) => {
-               return val.identifier === data.identifier;
-             });
-             if (index > -1) {
-               alerts[index] = data;
-               return alerts;
-             }
-             alerts.push(data);
-             return alerts;
-           },
-         },
-       });
-       M.toast({ html: 'New Alert' });
-    });    
+      us({
+        app: {
+          sources: (sources: Array<ISource>) => {
+            const index = sources.findIndex((source: ISource) => {
+              return source.sourceName === data.identifier;
+            });
+            if (index > -1) {
+              sources[index].source = fc;
+            } else {
+              sources.push({
+                id: 'testid2',
+                source: fc as FeatureCollection,
+                sourceName: 'Eindhoven Chlorine',
+                sourceCategory: SourceType.alert,
+                shared: false,
+                layers: uniqueDTs.map((dt: number) => {
+                  return {
+                    layerName: dt.toString(),
+                    showLayer: true,
+                    type: { type: 'line' } as mapboxgl.AnyLayer,
+                    paint: {
+                      'line-color': {
+                        type: 'identity',
+                        property: 'color',
+                      },
+                      'line-opacity': 0.5,
+                      'line-width': 2,
+                    },
+                    filter: ['all', ['in', 'deltaTime', dt]],
+                  } as ILayer;
+                }) as Array<ILayer>,
+              } as ISource);
+            }
+          },
+          alerts: (alerts: Array<IAlert>) => {
+            const index = alerts.findIndex((val: IAlert) => {
+              return val.identifier === data.identifier;
+            });
+            if (index > -1) {
+              alerts[index] = data;
+              return alerts;
+            }
+            alerts.push(data);
+            return alerts;
+          },
+        },
+      });
+      M.toast({ html: 'New Alert' });
+    });
   }
 
   serverInit(s: IAppModel): Promise<Array<IGroup>> {
@@ -551,17 +554,15 @@ export class Socket {
         { callsign: s.app.callsign, group: s.app.selectedFeatures, name: name },
         (result: string) => {
           resolve(JSON.parse(result));
-        },
+        }
       );
     });
   }
 
   serverUpdate(s: IAppModel, id: string, name: string): Promise<Array<IGroup>> {
     return new Promise((resolve) => {
-      this.socket.emit(
-        'client-update',
-        { callsign: s.app.callsign, id: id, name: name },
-        (result: string) => resolve(JSON.parse(result)),
+      this.socket.emit('client-update', { callsign: s.app.callsign, id: id, name: name }, (result: string) =>
+        resolve(JSON.parse(result))
       );
     });
   }
@@ -578,22 +579,20 @@ export class Socket {
     this.socket.emit(
       'client-message',
       { id: group.id, callsign: s.app.callsign, message: message },
-      (_result: string) => {
-      },
+      (_result: string) => {}
     );
   }
 
   serverCHT(chemicalIncident: Partial<IChemicalIncident>) {
-    this.socket.emit('client-cht', { hazard: chemicalIncident }, (_result: string) => {
-    });
+    this.socket.emit('client-cht', { hazard: chemicalIncident }, (_result: string) => {});
   }
 
   serverPopulator(feature: Feature): Promise<FeatureCollection> {
     return new Promise((resolve) => {
-      this.socket.emit('client-pop', {feature}, (result: string) => {
-        resolve(JSON.parse(result) as FeatureCollection)
+      this.socket.emit('client-pop', { feature }, (result: string) => {
+        resolve(JSON.parse(result) as FeatureCollection);
       });
-    })
+    });
   }
 
   shouldUpdate(): boolean {

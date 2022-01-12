@@ -1,15 +1,12 @@
-import m, { FactoryComponent } from 'mithril';
+import m from 'mithril';
 import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-ignore
 import { RulerControl } from 'mapbox-gl-controls';
-import { IActions, IAppModel } from '../../services/meiosis';
+import { MeiosisComponent } from '../../services/meiosis';
 import * as MapUtils from './map-utils';
 
-export const Map: FactoryComponent<{
-  state: IAppModel;
-  actions: IActions;
-}> = () => {
+export const Map: MeiosisComponent = () => {
   mapboxgl.accessToken = process.env.ACCESSTOKEN || '';
   let map: mapboxgl.Map;
   let draw: MapboxDraw;
@@ -24,8 +21,10 @@ export const Map: FactoryComponent<{
       // Create map and add controls
       map = new mapboxgl.Map({
         container: 'mapboxMap',
-        style: token ? `mapbox://styles/${appState.app.mapStyle}` : 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
-        center: [4.350, 51.911] as [number, number],
+        style: token
+          ? `mapbox://styles/${appState.app.mapStyle}`
+          : 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
+        center: [4.35, 51.911] as [number, number],
         zoom: 12,
       });
       MapUtils.loadImages(map);

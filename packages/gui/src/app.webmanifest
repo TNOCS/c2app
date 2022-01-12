@@ -5,18 +5,19 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "description": "An SA and C2 platform for FRs.",
+  "description": "A smart cities monitoring application.",
   "icons": [
-     {
-        "src": "/pwa-192x192.png",
-        "type": "image/png",
-        "sizes": "192x192",
-        "purpose": "any"
-     },
-     {
-        "src": "/pwa-512x512.png",
-        "type": "image/png",
-        "sizes": "512x512",
-        "purpose": "any"
-  }]
+    {
+      "src": "/assets/pwa-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ]
 }

@@ -6,8 +6,8 @@ import {
   IChemicalIncidentControlParameters,
   IChemicalIncidentScenario,
   PasquillClass,
-} from '../../../shared/src';
-import chem_options from './chem_options.json'
+} from 'c2app-models-utils';
+import chem_options from './chem_options.json';
 
 /** Additional properties for internal usage */
 export interface IChemicalHazardExt extends IChemicalIncident {
@@ -29,9 +29,9 @@ const transform = (dir: 'from' | 'to', v: string | Date) => {
     return new Date();
   } else {
     const d = v as Date;
-    return `${padLeft(d.getDate())}-${padLeft(
-      d.getMonth() + 1
-    )}-${d.getFullYear()} ${padLeft(d.getHours())}:${padLeft(d.getMinutes())}`;
+    return `${padLeft(d.getDate())}-${padLeft(d.getMonth() + 1)}-${d.getFullYear()} ${padLeft(d.getHours())}:${padLeft(
+      d.getMinutes()
+    )}`;
   }
 };
 
@@ -76,7 +76,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           type: 'select',
           className: 'col m6',
           options: [
-            { id: 'TEMPLATE' , label: 'template' },
+            { id: 'TEMPLATE', label: 'template' },
             { id: 'CONTOUR', label: 'contours' },
             { id: 'BOTH', label: 'both' },
             { id: 'ENSEMBLE', label: 'ensemble' },
@@ -112,9 +112,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           className: 'col m6',
           transform,
         },
-        { type: 'md',
-          value: '###### Specify source',
-          className: 'col s12' },
+        { type: 'md', value: '###### Specify source', className: 'col s12' },
         {
           id: 'type_of_release',
           show: '!control_parameters.output=template',
@@ -187,7 +185,7 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           value: 'medium',
           className: 'col m6',
           options: [
-            { id: 'VERY_LOW', label: 'Very low'},
+            { id: 'VERY_LOW', label: 'Very low' },
             { id: 'LOW', label: 'Low' },
             { id: 'MEDIUM', label: 'Medium' },
             { id: 'HIGH', label: 'High' },
@@ -246,8 +244,8 @@ export const formGenerator = (source: Partial<IChemicalHazardExt>): Form => {
           id: 'mode',
           type: 'select',
           options: [
-            { id: 'simple', label: 'Simple'},
-            { id: 'advanced', label: 'Advanced'},
+            { id: 'simple', label: 'Simple' },
+            { id: 'advanced', label: 'Advanced' },
           ],
           value: 'simple',
         },

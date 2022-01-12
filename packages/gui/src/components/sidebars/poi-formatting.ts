@@ -2,10 +2,14 @@ import m, { FactoryComponent } from 'mithril';
 import { MapboxGeoJSONFeature } from 'mapbox-gl';
 import { IActions, ISource, IAppModel } from '../../services/meiosis';
 import M from 'materialize-css';
-import { IChemicalIncident, IChemicalIncidentControlParameters, IChemicalIncidentScenario } from '../../../../shared/src';
 import { LayoutForm } from 'mithril-ui-form';
 import { formGenerator } from '../../template/form';
-import { ICbrnProperties } from '../../../../shared/src/models/cbrn_geojson-value';
+import {
+  IChemicalIncident,
+  IChemicalIncidentControlParameters,
+  IChemicalIncidentScenario,
+  ICbrnProperties,
+} from 'c2app-models-utils';
 
 export const formatMan = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
@@ -17,10 +21,7 @@ export const formatMan = (ft: MapboxGeoJSONFeature) => {
 };
 export const formatCar = (ft: MapboxGeoJSONFeature) => {
   const props = ft?.properties;
-  return m('div', [
-    m('p', 'Layer Name: ' + ft.layer.id),
-    m('p', 'Type: ' + props?.type),
-  ]);
+  return m('div', [m('p', 'Layer Name: ' + ft.layer.id), m('p', 'Type: ' + props?.type)]);
 };
 
 export const formatUnknown = (ft: MapboxGeoJSONFeature) => {
@@ -40,7 +41,7 @@ export const alertFormatComponent: FactoryComponent<{
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
       const alert = vnode.attrs.state.app.sources.find((v: ISource) => {
-        return (v.sourceName+v.id) === ft.source;
+        return v.sourceName + v.id === ft.source;
       }) as ISource;
       return m('div', [
         m('p', 'Layer Name: ' + ft.layer.id),
@@ -48,17 +49,22 @@ export const alertFormatComponent: FactoryComponent<{
         m('p', 'Comments: ' + (ft.properties as ICbrnProperties).comments),
         m('p', 'Toxicity: ' + (ft.properties as ICbrnProperties).toxicityLevel),
         m('p', 'Confidence: ' + (ft.properties as ICbrnProperties).confidence),
-        m('p.range-field', m('input-field', [
+        m(
+          'p.range-field',
+          m('input-field', [
             m('input', {
               type: 'range',
               min: '0',
-              max: Math.max(...alert.dts as Array<number>),
+              max: Math.max(...(alert.dts as Array<number>)),
               onchange: (event: Event) => {
-                vnode.attrs.actions.setCHOpacities(Number((event.target as HTMLInputElement).value), (alert.sourceName+alert.id));
+                vnode.attrs.actions.setCHOpacities(
+                  Number((event.target as HTMLInputElement).value),
+                  alert.sourceName + alert.id
+                );
               },
             }),
             m('label', 'Delta time [s]'),
-          ]),
+          ])
         ),
       ]);
     },
@@ -79,7 +85,7 @@ export const contextFormatComponent: FactoryComponent<{
       return m('div', [
         m('p', 'ID: ' + ft.properties?.id),
         m('p', 'Description: ' + ft.properties?.description),
-        m('p', 'Start: ' + ft.properties?.start)
+        m('p', 'Start: ' + ft.properties?.start),
       ]);
     },
   };
@@ -110,15 +116,18 @@ export const sensorFormatComponent: FactoryComponent<{
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
       const sensors = JSON.parse(ft.properties?.sensors);
-      return m('li', sensors.map((sensor: any) => {
-        return [
-            m('div.divider'),
-        m('p', 'ID: ' + sensor.id),
-        m('p', 'Type: ' + sensor.sensorType),
-        m('p', 'Height: ' + sensor.height),
-        m('p', sensor.measurement.metricFeature + ': ' + sensor.measurement.value + ' ' + sensor.measurement.unit)
-        ]
-      }))
+      return m(
+        'li',
+        sensors.map((sensor: any) => {
+          return [
+            m('.divider'),
+            m('p', 'ID: ' + sensor.id),
+            m('p', 'Type: ' + sensor.sensorType),
+            m('p', 'Height: ' + sensor.height),
+            m('p', sensor.measurement.metricFeature + ': ' + sensor.measurement.value + ' ' + sensor.measurement.unit),
+          ];
+        })
+      );
     },
   };
 };
@@ -127,7 +136,10 @@ export const incidentLocationFormatComponent: FactoryComponent<{
   state: IAppModel;
   actions: IActions;
 }> = () => {
-  let source = { scenario: {} as IChemicalIncidentScenario, control_parameters: {} as IChemicalIncidentControlParameters};
+  let source = {
+    scenario: {} as IChemicalIncidentScenario,
+    control_parameters: {} as IChemicalIncidentControlParameters,
+  };
   return {
     view: (vnode) => {
       const ft = vnode.attrs.state.app.clickedFeature as MapboxGeoJSONFeature;
@@ -135,10 +147,12 @@ export const incidentLocationFormatComponent: FactoryComponent<{
       const form = formGenerator({});
 
       return [
-          m('p', 'ID: ' + ft.properties?.id),
-          m('p', 'Chemical: ' + scenario.chemical),
-          m('p', 'Start of release: ' + scenario.start_of_release),
-          m('button.btn', {
+        m('p', 'ID: ' + ft.properties?.id),
+        m('p', 'Chemical: ' + scenario.chemical),
+        m('p', 'Start of release: ' + scenario.start_of_release),
+        m(
+          'button.btn',
+          {
             onclick: () => {
               source.scenario.source_location = scenario.source_location;
               const chemicalIncident = {
@@ -146,18 +160,20 @@ export const incidentLocationFormatComponent: FactoryComponent<{
                 _id: ft.properties?.id,
                 scenario: source.scenario,
                 control_parameters: source.control_parameters,
-                timestamp: new Date().valueOf()
+                timestamp: new Date().valueOf(),
               } as IChemicalIncident;
-              
+
               vnode.attrs.actions.updateCHT(chemicalIncident);
             },
-          }, 'Recalculate'),
-          m(LayoutForm, {
-            form,
-            obj: source,
-            section: 'source',
-          }),
-          m('p', 'test text')
+          },
+          'Recalculate'
+        ),
+        m(LayoutForm, {
+          form,
+          obj: source,
+          section: 'source',
+        }),
+        m('p', 'test text'),
       ];
     },
     oncreate: () => {

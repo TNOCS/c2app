@@ -1,12 +1,8 @@
-/* styles.css */
-#mapboxMap {
-    height: 91vh;
-    /* display: initial; */
-    /*z-index: 950;*/
+body {
+  overflow-y: hidden;
 }
-
 /* Set theme color */
-.nav-wrapper{
+.nav-wrapper {
   background-color: #314443;
 }
 .dropdown-content {
@@ -14,4 +10,21 @@
   overflow-y: auto !important;
   backface-visibility: hidden !important;
 }
-p { margin: 0px 0;}
+p {
+  margin: 0px 0;
+}
+
+#mapboxMap {
+  position: absolute;
+  top: 67px;
+  width: 100%;
+  bottom: 0;
+}
+
+#slide-out {
+  position: absolute;
+  top: 67px;
+  width: 250px;
+  bottom: 0;
+  overflow-y: auto;
+}
