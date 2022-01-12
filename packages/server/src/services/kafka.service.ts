@@ -116,8 +116,9 @@ export class KafkaService {
           this.socket.server.emit('alert', value as IAlert);
           break;
         case contextTopic:
-          this.messagesService.create('contexts', value);
-          this.socket.server.emit('context', value as IContext);
+          const context = KafkaService.prepareContext(value as IContext)
+          this.messagesService.create('contexts', context);
+          this.socket.server.emit('context', context);
           break;
         case missionTopic:
           this.messagesService.create('missions', value);
@@ -184,5 +185,14 @@ export class KafkaService {
       }
     }
     return collection as ICbrnFeatureCollection;
+  }
+
+  private static prepareContext(context: IContext) {
+      if (context.geometry[`nl.tno.assistance.geojson.geometry.Polygon`]) {
+        context.geometry = context.geometry[`nl.tno.assistance.geojson.geometry.Polygon`];
+      } else if (context.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`]) {
+        context.geometry = context.geometry[`nl.tno.assistance.geojson.geometry.MultiPolygon`];
+      }
+    return context as IContext;
   }
 }

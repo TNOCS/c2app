@@ -1,6 +1,23 @@
-export interface IGeometry {
-  type: string;
+import { Geometry } from "geojson";
+
+export enum PolygonType {
+  Polygon = 'Polygon'
+}
+
+/** Describes a Polygon geometry */
+export interface IPolygon {
+  type: PolygonType;
   coordinates: number[][][];
+}
+
+export enum MultiPolygonType {
+  MultiPolygon = 'MultiPolygon'
+}
+
+/** Describes a MultiPolygon geometry */
+export interface IMultiPolygon {
+  type: MultiPolygonType;
+  coordinates: number[][][][];
 }
 
 /**
@@ -18,7 +35,7 @@ export interface IContext {
    */
   description: string;
   /** Geographic data as a GeoJSON geometry object */
-  geometry: IGeometry;
+  geometry: IPolygon | IMultiPolygon | Record<string, Geometry>;
   /** Date in ISO 8601 format in which the context begins */
   start: number;
   /** Date in ISO 8601 format in which the context is inserted/updated */

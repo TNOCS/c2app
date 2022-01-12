@@ -1,56 +1,101 @@
 {
-    "name": "Context",
-    "type": "record",
-    "doc": "Context will identify a specific operation or incident to which all the corresponding objects must be related, such as missions, measurements, evacuation routes, etc. Database collection: contexts",
-    "namespace": "nl.tno.assistance",
-    "fields": [
+  "name": "Context",
+  "type": "record",
+  "doc": "Context will identify a specific operation or incident to which all the corresponding objects must be related, such as missions, measurements, evacuation routes, etc. Database collection: contexts",
+  "namespace": "nl.tno.assistance",
+  "fields": [
+    {
+      "name": "_id",
+      "type": "string",
+      "doc": "Context unique identifier"
+    },
+    {
+      "name": "description",
+      "type": "string",
+      "doc": "Context will identify a specific operation or incident to which all the corresponding objects must be related, such as missions, measurements, evacuation routes, etc. Database collection: contexts"
+    },
+    {
+      "name": "geometry",
+      "doc": "Geographic data as a GeoJSON geometry object",
+      "type": [
         {
-            "name": "_id",
-            "type": "string",
-            "doc": "Context unique identifier"
-        },
-        {
-            "name": "description",
-            "type": "string",
-            "doc": "Context will identify a specific operation or incident to which all the corresponding objects must be related, such as missions, measurements, evacuation routes, etc. Database collection: contexts"
-        },
-        {
-            "name": "geometry",
-            "doc": "Geographic data as a GeoJSON geometry object",
-            "type": {
-                "name": "Geometry",
-                "type": "record",
-                "fields": [
-                    {
-                        "name": "type",
-                        "type": "string"
-                    },
-                    {
-                        "name": "coordinates",
-                        "type": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {
-                                    "type": "array",
-                                    "items": "float"
-                                }
-                            }
-                        }
-                    }
-                ]
+          "type": "record",
+          "name": "Polygon",
+          "namespace": "nl.tno.assistance.geojson.geometry",
+          "doc": "Describes a Polygon geometry",
+          "fields": [
+            {
+              "name": "type",
+              "type": {
+                "type": "enum",
+                "name": "PolygonType",
+                "namespace": "nl.tno.assistance.geojson.geometry",
+                "symbols": ["Polygon"]
+              },
+              "default": "Polygon"
+            },
+            {
+              "name": "coordinates",
+              "type": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": "double"
+                  }
+                }
+              }
             }
+          ]
         },
         {
-            "name": "start",
-            "doc": "Date in ISO 8601 format in which the context begins",
-            "type": "string"
-        },
-        {
-            "name": "timestamp",
-            "doc": "Date in ISO 8601 format in which the context is inserted/updated",
-            "type": "long",
-            "logicalType": "timestamp"
+          "type": "record",
+          "name": "MultiPolygon",
+          "namespace": "nl.tno.assistance.geojson.geometry",
+          "doc": "Describes a MultiPolygon geometry",
+          "fields": [
+            {
+              "name": "type",
+              "type": {
+                "type": "enum",
+                "name": "MultiPolygonType",
+                "namespace": "nl.tno.assistance.geojson.geometry",
+                "symbols": ["MultiPolygon"]
+              },
+              "default": "MultiPolygon"
+            },
+            {
+              "name": "coordinates",
+              "type": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": "double"
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "name": "start",
+      "doc": "Date in ISO 8601 format in which the context begins",
+      "type": "long",
+      "logicalType": "timestamp"
+    },
+    {
+      "name": "timestamp",
+      "doc": "Date in ISO 8601 format in which the context is inserted/updated",
+      "type": "long",
+      "logicalType": "timestamp"
+    }
+  ]
 }
