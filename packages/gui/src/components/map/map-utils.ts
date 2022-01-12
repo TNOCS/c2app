@@ -136,71 +136,71 @@ export const getLabelsSource = (gridSource: FeatureCollection<Polygon>): Feature
 };
 
 export const loadImages = (map: mapboxgl.Map) => {
-  map.loadImage(fireman, function (error, image) {
+  map.loadImage(fireman, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('FIREFIGHTER')) map.addImage('FIREFIGHTER', image as ImageBitmap);
   });
-  map.loadImage(policeman, function (error, image) {
+  map.loadImage(policeman, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('POLICE')) map.addImage('POLICE', image as ImageBitmap);
   });
-  map.loadImage(sanitary, function (error, image) {
+  map.loadImage(sanitary, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('MEDICAL')) map.addImage('MEDICAL', image as ImageBitmap);
   });
-  map.loadImage(first_responder, function (error, image) {
+  map.loadImage(first_responder, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('OTHER')) map.addImage('OTHER', image as ImageBitmap);
   });
-  map.loadImage(car, function (error, image) {
+  map.loadImage(car, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('CAR')) map.addImage('CAR', image as ImageBitmap);
   });
-  map.loadImage(van, function (error, image) {
+  map.loadImage(van, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('VAN')) map.addImage('VAN', image as ImageBitmap);
   });
-  map.loadImage(truck, function (error, image) {
+  map.loadImage(truck, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('TRUCK')) map.addImage('TRUCK', image as ImageBitmap);
   });
-  map.loadImage(air, function (error, image) {
+  map.loadImage(air, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('AIR')) map.addImage('AIR', image as ImageBitmap);
   });
-  map.loadImage(ground, function (error, image) {
+  map.loadImage(ground, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('GROUND')) map.addImage('GROUND', image as ImageBitmap);
   });
-  map.loadImage(chemical, function (error, image) {
+  map.loadImage(chemical, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('chemical')) map.addImage('chemical', image as ImageBitmap);
   });
-  map.loadImage(roadBlock, function (error, image) {
+  map.loadImage(roadBlock, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('roadBlock')) map.addImage('roadBlock', image as ImageBitmap);
   });
-  map.loadImage(media, function (error, image) {
+  map.loadImage(media, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('media')) map.addImage('media', image as ImageBitmap);
   });
-  map.loadImage(controlPoint, function (error, image) {
+  map.loadImage(controlPoint, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('controlPoint')) map.addImage('controlPoint', image as ImageBitmap);
   });
-  map.loadImage(divisionCommand, function (error, image) {
+  map.loadImage(divisionCommand, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('divisionCommand')) map.addImage('divisionCommand', image as ImageBitmap);
   });
-  map.loadImage(evacuation, function (error, image) {
+  map.loadImage(evacuation, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('evacuation')) map.addImage('evacuation', image as ImageBitmap);
   });
-  map.loadImage(helicopter, function (error, image) {
+  map.loadImage(helicopter, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('helicopter')) map.addImage('helicopter', image as ImageBitmap);
   });
-  map.loadImage(military, function (error, image) {
+  map.loadImage(military, function (error: any, image: ImageBitmap) {
     if (error) throw error;
     if (!map.hasImage('military')) map.addImage('military', image as ImageBitmap);
   });
