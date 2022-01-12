@@ -17,8 +17,9 @@ p {
 #mapboxMap {
   position: absolute;
   top: 67px;
-  width: 100%;
+  width: calc(100% - 250px);
   bottom: 0;
+  left: 250px;
 }
 
 #slide-out {
