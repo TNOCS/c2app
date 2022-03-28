@@ -7,8 +7,8 @@
     "start": "pnpm -r --parallel run dev",
     "build:domain": "pnpm run build:domain",
     "docker:build": "docker build -t c2app .",
-    "docker:tag": "docker tag c2app timovdk/c2app:latest",
-    "docker:publish": "docker push timovdk/c2app:latest",
+    "docker:tag": "docker tag c2app timovdk/c2app:assistance_gb",
+    "docker:publish": "docker push timovdk/c2app:assistance_gb",
     "docker:local": "npm run docker:build && npm run docker:tag"
   },
   "repository": {

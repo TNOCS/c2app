@@ -11,7 +11,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 module.exports = (env) => {
   const isProduction = env.production;
   const outputPath = path.resolve(__dirname, isProduction ? '../../docs' : './dist');
-  const publicPath = isProduction ? 'https://erikvullings.github.io/c2app/' : '/';
+  const publicPath = isProduction ? 'https://erikvullings.github.io/c2app/' : 'https://assistance.hex.tno.nl/rdam/c2app/';
 
   console.log(`Running in ${isProduction ? 'production' : 'development'} mode, output directed to ${outputPath}.`);
 

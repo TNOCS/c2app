@@ -30,7 +30,10 @@ export class Socket {
   private sensors = {} as { [id: string]: ISensor };
 
   constructor(us: UpdateStream) {
-    this.socket = io(process.env.SERVER || 'http://localhost:3000');
+    this.socket = io('https://assistance.hex.tno.nl',
+    { 
+	    path: '/rdam/c2app/socket.io'
+	});
     // ASSISTANCE context
     this.socket.on('context', (data: IContext) => {
       const fc = {
