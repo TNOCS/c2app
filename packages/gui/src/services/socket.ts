@@ -30,7 +30,12 @@ export class Socket {
   private sensors = {} as { [id: string]: ISensor };
 
   constructor(us: UpdateStream) {
-    this.socket = io(process.env.SERVER || 'http://localhost:3000');
+    // @ts-ignore
+    this.socket = io(process.env.SERVER_URL as string, 
+    { 
+      // @ts-ignore
+	    path: process.env.SERVER_PATH  as string 
+	});
     // ASSISTANCE context
     this.socket.on('context', (data: IContext) => {
       const fc = {

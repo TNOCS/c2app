@@ -6,7 +6,14 @@
 #   docker run -it -p 3000:3000 c2app
 
 # Build the app separately
-FROM node:alpine AS builder
+FROM node:14.17.2-alpine3.13 as builder
+
+ARG SERVER_URL
+ARG SERVER_PATH
+
+ENV SERVER_URL=${SERVER_URL}
+ENV SERVER_PATH=${SERVER_PATH}
+
 RUN apk add --no-cache --virtual .gyp python3 make g++ git vips-dev && \
   npm i -g yalc
 RUN mkdir /packages && \
@@ -31,7 +38,14 @@ RUN rm -fr node_modules && \
   npm run build:domain
 
 # Serve the built app
-FROM node:alpine
+FROM node:14.17.2-alpine3.13 as app
+
+ARG SERVER_URL
+ARG SERVER_PATH
+
+ENV SERVER_URL=${SERVER_URL}
+ENV SERVER_PATH=${SERVER_PATH}
+
 RUN mkdir -p /app
 COPY --from=builder /packages/shared/node_modules /shared/node_modules
 COPY --from=builder /packages/shared/dist /shared

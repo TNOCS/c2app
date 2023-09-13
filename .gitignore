@@ -10,3 +10,4 @@ tsconfig.tsbuildinfo
 docker/traccar/logs/*.log*
 docker/traccar/data/*.db
 packages/gui/src/assets/indigo
+safr.db.*

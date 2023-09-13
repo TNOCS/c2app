@@ -172,8 +172,7 @@ export const incidentLocationFormatComponent: FactoryComponent<{
           form,
           obj: source,
           section: 'source',
-        }),
-        m('p', 'test text'),
+        })
       ];
     },
     oncreate: () => {

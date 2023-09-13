@@ -2,7 +2,7 @@
 version: '3'
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+    image: confluentinc/cp-zookeeper:7.0.1
     hostname: zookeeper
     ports:
       - '3500:3500'
@@ -11,7 +11,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   broker:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.0.1
     hostname: broker
     links:
       - zookeeper
@@ -29,7 +29,7 @@ services:
       KAFKA_REPLICA_FETCH_MAX_BYTES: 100000000
 
   schema_registry:
-    image: confluentinc/cp-schema-registry:latest
+    image: confluentinc/cp-schema-registry:7.0.1
     hostname: schema_registry
     links:
       - zookeeper
@@ -43,7 +43,7 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://broker:9092'
 
   kafka_rest:
-    image: confluentinc/cp-kafka-rest:latest
+    image: confluentinc/cp-kafka-rest:7.0.1
     hostname: kafka_rest
     links:
       - zookeeper
@@ -99,19 +99,22 @@ services:
       - ./schemas:/app/src/schemas
     restart: on-failure
 
-#  c2app:
-#    image: timovdk/c2app:latest
-#    depends_on:
-#      - broker
-#      - schema_registry
-#    ports:
-#      - 3000:3000
-#    environment:
-#      KAFKA_HOST: broker:9092
-#      SCHEMA_REGISTRY: http://schema_registry:3502
-#      PORT: 3000
-#      SERVER: http://localhost:3000
-#      DISPERSION_SERVICE: https://assistance.hex.tno.nl/dispersionservice
+  c2app:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    depends_on:
+      - broker
+      - schema_registry
+    ports:
+      - 3000:3000
+    environment:
+      KAFKA_HOST: broker:9092
+      SCHEMA_REGISTRY: http://schema_registry:3502
+      PORT: 3000
+      SERVER: http://localhost:3000
+      ACCESSTOKEN: 
+      DISPERSION_SERVICE: https://assistance.hex.tno.nl/dispersionservice
       
 #  db:
 #    container_name: pop-service-db
