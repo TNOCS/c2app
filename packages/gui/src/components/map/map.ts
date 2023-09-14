@@ -23,7 +23,26 @@ export const Map: MeiosisComponent = () => {
         container: 'mapboxMap',
         style: token
           ? `mapbox://styles/${appState.app.mapStyle}`
-          : 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
+          : {
+            'version': 8,
+            'sources': {
+              'brt-achtergrondkaart': {
+                'type': 'raster',
+                'tiles': ['https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/standaard/EPSG:3857/{z}/{x}/{y}.png'],
+                'tileSize': 256,
+                'minzoom': 1,
+                'maxzoom': 19,
+                'attribution': 'Kaartgegevens: <a href="https://kadaster.nl">Kadaster</a>'
+              },
+            },
+            'layers': [
+              {
+                'id': 'rasterkaartje',
+                'type': 'raster',
+                'source': 'brt-achtergrondkaart',
+              },
+            ]
+          },
         center: [4.35, 51.911] as [number, number],
         zoom: 12,
       });
