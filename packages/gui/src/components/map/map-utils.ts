@@ -233,8 +233,8 @@ export const switchBasemap = async (map: mapboxgl.Map, styleID: string) => {
       source != 'composite';
   });
 
-  if(!newStyle || !newStyle.layers || !appLayers) return;
-  newStyle.layers = [  
+  if (!newStyle || !newStyle.layers || !appLayers) return;
+  newStyle.layers = [
     ...newStyle.layers.slice(0, labelIndex),
     ...appLayers,
     ...newStyle.layers.slice(labelIndex, -1),
@@ -312,12 +312,15 @@ export const updateSatellite = (appState: IAppModel, map: mapboxgl.Map) => {
         layout: {
           visibility: appState.app.showSatellite ? 'visible' : 'none',
         },
-      
         paint: {},
       },
-      'aeroway-line'
+      // Place the satellite layer under the aerial indicators (airports, helipads) but only if that layer exists (i.e. using mapbox token)
+      // Otherwise append it to the layers array and show above all layers
+      map.getLayer('aeroway-line') ? 'aeroway-line' : null as any
     );
   }
   map.setLayoutProperty(layerName, 'visibility', appState.app.showSatellite ? 'visible' : 'none');
-  map.setPaintProperty('building', 'fill-opacity', appState.app.showSatellite ? 0 : ["interpolate", ["linear"], ["zoom"], 15, 0, 16, 1]);
+  if (map.getLayer('building')) {
+    map.setPaintProperty('building', 'fill-opacity', appState.app.showSatellite ? 0 : ["interpolate", ["linear"], ["zoom"], 15, 0, 16, 1]);
+  }
 };

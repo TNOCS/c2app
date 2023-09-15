@@ -35,12 +35,13 @@ export const Map: MeiosisComponent = () => {
                 'attribution': 'Kaartgegevens: <a href="https://kadaster.nl">Kadaster</a>'
               },
             },
+            'glyphs': 'https://api.pdok.nl/lv/bgt/ogc/v1_0/resources/fonts/{fontstack}/{range}.pbf',
             'layers': [
               {
-                'id': 'rasterkaartje',
+                'id': 'standard-raster',
                 'type': 'raster',
                 'source': 'brt-achtergrondkaart',
-              },
+              }
             ]
           },
         center: [4.35, 51.911] as [number, number],
